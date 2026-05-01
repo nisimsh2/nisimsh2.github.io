@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚔ Farm Optimizer · Digital Odyssey</title>
+<!-- v4.2-sequential — force reload if cached -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -509,6 +513,7 @@
 <script>
 (function () {
   'use strict';
+  console.log('%c[FarmOpt v4.2-sequential] Loaded — sequential pricing, global rate gate', 'color:#00e5ff;font-weight:bold');
 
   /* ══ CONFIG (persisted in localStorage) ══ */
   const CFG_KEY = 'fo_v41_config';
@@ -696,21 +701,12 @@
    * because it's not market — but it still respects 429 with its own wait.
    ══════════════════════════════════════════════════════════════════════════ */
 
-  async function rateGate(label = '') {
-    const now = Date.now();
-    if (ratePausedUntil > now) {
-      const wait = ratePausedUntil - now;
-      // Update last log line with countdown
-      const tick = async () => {
-        const rem = Math.ceil((ratePausedUntil - Date.now()) / 1000);
-        if (rem <= 0) return;
-        const lines = logEl.querySelectorAll('.ll');
-        if (lines.length) lines[lines.length-1].textContent = `> ⏸ rate limit — resuming in ${rem}s…`;
-        await sleep(1000);
-        await tick();
-      };
-      await tick();
-      await sleep(Math.max(0, ratePausedUntil - Date.now()));
+  async function rateGate() {
+    while (ratePausedUntil > Date.now()) {
+      const rem = Math.ceil((ratePausedUntil - Date.now()) / 1000);
+      const lines = logEl.querySelectorAll('.ll');
+      if (lines.length) lines[lines.length-1].textContent = `> ⏸ rate limit — resuming in ${rem}s…`;
+      await sleep(1000);
     }
   }
 
@@ -721,23 +717,23 @@
   }
 
   // Single-flight market fetch: awaits the gate, fires ONE request, handles 429 globally
-  async function marketFetch(path, label = '') {
+  async function marketFetch(path) {
     const url = apiUrl(path);
     for (let attempt = 0; attempt < 8; attempt++) {
-      await rateGate(label);
+      await rateGate();
       const headers = { 'Content-Type': 'application/json' };
       if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
       let res;
       try { res = await fetch(url, { headers }); }
-      catch (e) { await sleep(2000); continue; }
+      catch (e) { await sleep(3000); continue; }
 
       if (res.status === 429) {
-        triggerRatePause(15);  // 15s cooldown on 429
+        triggerRatePause(20);
         continue;
       }
       return res;
     }
-    return null;  // gave up
+    return null;
   }
 
   /* ── fetchJson: for dungeon/wiki/rankings endpoints (not market) ── */
@@ -776,7 +772,7 @@
     if (cached) return cached;
     try {
       // sell side
-      const sellRes = await marketFetch(`/api/market/listings?item=${itemId}&side=sell&limit=1`, itemName);
+      const sellRes = await marketFetch(`/api/market/listings?item=${itemId}&side=sell&limit=1`);
       if (!sellRes) return null;
       if (sellRes.status === 400) return null;  // non-tradeable
       if (!sellRes.ok) return null;
@@ -802,7 +798,7 @@
     const existing = prices[itemId];
     if (!existing || !existing.listPrice) return;
     try {
-      const res = await marketFetch(`/api/market/trades?item=${itemId}&limit=20`, itemId);
+      const res = await marketFetch(`/api/market/trades?item=${itemId}&limit=20`);
       if (!res || !res.ok) return;
       const trades = await res.json();
       if (!Array.isArray(trades) || !trades.length) return;
@@ -911,7 +907,7 @@
       // ── Phase 1b: fetch prices strictly one at a time ─────────────────
       // One item = up to 2 requests (sell + buy), strictly sequential.
       // The global rateGate() ensures any 429 pauses ALL subsequent requests.
-      const ITEM_DELAY = 300;  // ms between items (keeps us well under rate limits)
+      const ITEM_DELAY = 500;  // ms between items — gentle on the API
       for (let i = 0; i < itemsToFetch.length; i++) {
         const id   = itemsToFetch[i];
         const name = itemNameMap.get(id) || id;
