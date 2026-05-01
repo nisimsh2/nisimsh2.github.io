@@ -695,42 +695,53 @@
 
   /* ══ FETCH PRIMITIVES ══ */
   async function apiFetch(path) {
-    // For dungeon/wiki/ranking endpoints — not market
-    const url = WORKER_URL + path;
-    for (let i = 0; i < 6; i++) {
-      const headers = { 'Content-Type': 'application/json' };
-      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-      let res;
-      try { res = await fetch(url, { headers }); }
-      catch(e) { await sleep(3000); continue; }
-      if (res.status === 429) { log(`429 on ${path} — waiting 20s…`, 'warn'); await sleep(20000); continue; }
-      if (!res.ok) {
-        const ct = res.headers.get('content-type') || '';
-        if (ct.includes('text/html')) throw new Error(`Got HTML (${res.status}) — is cookie set?`);
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('text/html')) throw new Error('Got HTML instead of JSON');
-      return res.json();
+  const url = WORKER_URL + path;
+  for (let i = 0; i < 6; i++) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
+    let res;
+    try { res = await fetch(url, { headers }); }
+    catch(e) { await sleep(3000); continue; }
+    if (res.status === 429) { await sleep(2000); continue; }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // Guard against HTML error pages (auth failures, Cloudflare errors, etc.)
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json') && !ct.includes('text/json')) {
+      const text = await res.text();
+      console.error('[FarmOpt] Expected JSON, got:', text.slice(0, 200));
+      throw new Error(`Got non-JSON response (${ct}) — is your cookie set correctly?`);
     }
-    throw new Error('Too many retries');
+    return res.json();
   }
+  throw new Error('Too many retries');
+}
 
   async function marketGet(path) {
-    // For market endpoints — uses global rate gate
-    const url = WORKER_URL + path;
-    for (let i = 0; i < 8; i++) {
-      await rateGate();
-      const headers = { 'Content-Type': 'application/json' };
-      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-      let res;
-      try { res = await fetch(url, { headers }); }
-      catch(e) { await sleep(3000); continue; }
-      if (res.status === 429) { triggerRatePause(20); continue; }
-      return res;  // return even non-ok so caller can handle 400
+  const url = WORKER_URL + path;
+  for (let i = 0; i < 10; i++) {
+    await rateGate();
+    const headers = { 'Content-Type': 'application/json' };
+    if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
+    let res;
+    try { res = await fetch(url, { headers }); }
+    catch(e) { await sleep(3000); continue; }
+
+    if (res.status === 429) {
+      // Read retry_after from the response body (game returns it as JSON)
+      let retryAfter = 1; // default 1s
+      try {
+        const body = await res.json();
+        if (body?.retry_after) retryAfter = Math.max(body.retry_after, 0.3);
+      } catch(e) {}
+      const waitMs = Math.ceil(retryAfter * 1000) + 200; // add 200ms buffer
+      log(`429 — retry_after ${retryAfter}s, waiting ${waitMs}ms…`, 'warn');
+      ratePausedUntil = Math.max(ratePausedUntil, Date.now() + waitMs);
+      continue;
     }
-    return null;
+    return res;
   }
+  return null;
+}
 
   /* ══ PRICE PHASES ══ */
   // Phase A: fetch cheapest sell listing for one item
@@ -898,7 +909,7 @@
         setBar(0, sellIds.length);
         for (let i = 0; i < sellIds.length; i++) {
           const id = sellIds[i];
-          await sleep(i === 0 ? 0 : 350);
+          await sleep(i === 0 ? 200 : 500);
           const listPrice = await fetchSellPrice(id);
           if (listPrice != null) {
             prices[id] = { ...prices[id], price: listPrice, listPrice, historyReady: false };
