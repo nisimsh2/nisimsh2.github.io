@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚔ Farm Optimizer · Digital Odyssey</title>
-<!-- v4.3 — blacklist, phased pricing, selective refresh -->
+<!-- v4.4 — dungeon blacklist, EV/hr persistence, session_id hint -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -47,7 +45,6 @@
   .btn.muted:hover { background:var(--dim); color:var(--bg0); }
   .btn.red { border-color:var(--red); color:var(--red); }
   .btn.red:hover { background:var(--red); color:var(--bg0); }
-  .btn.sm { padding:5px 9px; font-size:8px; }
 
   /* TOOLBAR */
   #toolbar { padding:7px 16px; border-bottom:1px solid var(--border); display:flex; gap:6px;
@@ -119,6 +116,11 @@
   .r1 { color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,.45); }
   .r2 { color:#bbb; } .r3 { color:#c47f32; } .rn { color:var(--dim3); }
   .dname { font-size:13px; font-weight:600; color:#e8f4ff; margin-bottom:3px; }
+  .dname-wrap { display:flex; align-items:center; gap:6px; }
+  .dname-bl-btn { font-size:9px; color:var(--dim3); background:none; border:1px solid var(--border2);
+    cursor:pointer; padding:1px 5px; opacity:0; transition:opacity .15s; white-space:nowrap; }
+  table.tbl tbody tr:hover .dname-bl-btn { opacity:1; }
+  .dname-bl-btn:hover { border-color:var(--red); color:var(--red); }
   .badge { display:inline-block; font-size:9px; font-weight:600; letter-spacing:.08em;
     padding:2px 6px; border-radius:2px; border:1px solid; text-transform:uppercase; }
   .badge-Normal  { border-color:#005a78; color:#009ec4; background:rgba(0,90,120,.15); }
@@ -207,16 +209,18 @@
 
   /* BLACKLIST TAB */
   #blacklist-view { display:none; }
-  .bl-section { margin-bottom:20px; }
+  .bl-section { margin-bottom:22px; }
   .bl-section-title { font-family:'Orbitron',sans-serif; font-size:10px; color:var(--cyan);
     letter-spacing:.12em; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+  .bl-hint { font-size:11px; color:var(--dim3); margin-bottom:10px; line-height:1.7; }
   .bl-add-row { display:flex; gap:8px; margin-bottom:14px; }
   .bl-add-input { flex:1; background:var(--bg2); border:1px solid var(--border); color:var(--text);
     font-family:'Inter',sans-serif; font-size:12px; padding:7px 11px; outline:none; }
   .bl-add-input:focus { border-color:#006888; }
-  .bl-grid { display:flex; flex-wrap:wrap; gap:6px; }
+  .bl-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
   .bl-chip { display:inline-flex; align-items:center; gap:7px; padding:5px 10px;
     background:#0c1e2e; border:1px solid var(--red); font-size:11px; color:var(--red); }
+  .bl-chip.dungeon-chip { border-color:var(--amber); color:var(--amber); background:rgba(122,80,0,.1); }
   .bl-chip-name { flex:1; }
   .bl-chip-id { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--dim3); }
   .bl-chip-rm { cursor:pointer; color:var(--dim3); font-size:12px; transition:color .12s; border:none; background:none; padding:0; }
@@ -226,7 +230,10 @@
     background:var(--bg2); border:1px solid var(--border); font-size:11px; color:var(--dim); cursor:pointer; transition:all .12s; }
   .bl-known-chip:hover { border-color:var(--red); color:var(--red); }
   .bl-known-chip.bld { border-color:var(--red); color:var(--red); opacity:.5; pointer-events:none; }
-  .bl-hint { font-size:11px; color:var(--dim3); margin-bottom:10px; line-height:1.7; }
+  .bl-dungeon-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px;
+    background:var(--bg2); border:1px solid var(--border); font-size:11px; color:var(--dim); cursor:pointer; transition:all .12s; }
+  .bl-dungeon-chip:hover { border-color:var(--amber); color:var(--amber); }
+  .bl-dungeon-chip.bld { border-color:var(--amber); color:var(--amber); opacity:.5; pointer-events:none; }
 
   /* NOTICE */
   #notice { background:rgba(255,180,0,.08); border:1px solid rgba(255,180,0,.25);
@@ -284,11 +291,12 @@
     </div>
     <div id="settings-body">
       <div class="sfield">
-        <label>Session Cookie (for My Times)</label>
-        <textarea id="cfg-cookie" placeholder="Paste your session cookie here…"></textarea>
+        <label>Session Cookie (for My Times + Market)</label>
+        <textarea id="cfg-cookie" placeholder="session_id=paste_your_cookie_value_here"></textarea>
         <div class="hint">
-          Only needed for <strong style="color:var(--green)">My Times</strong>.<br>
-          F12 → Application → Cookies → <code>thedigitalodyssey.com</code> → copy the full cookie string.
+          Format: <code>session_id=yourValue</code> — the <code>session_id=</code> prefix is required.<br>
+          F12 → Application → Cookies → <code>thedigitalodyssey.com</code> → find <code>session_id</code> → copy its Value, then paste as <code>session_id=thatValue</code>.<br>
+          Stored only in your browser's localStorage, forwarded through your Worker only.
         </div>
       </div>
     </div>
@@ -304,7 +312,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.3</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.4</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -353,7 +361,8 @@
 
     <div id="formula">
       <strong>EV / run</strong> = Σ ( drop_chance × avg_qty × cheapest_sell_price ) + rank rewards.<br>
-      Blacklisted items are excluded from EV. Dashed chip = rank reward. Hover any chip for details.
+      Blacklisted items and dungeons are excluded. Dashed chip = rank reward. Hover any chip for details.<br>
+      <strong>Right-click</strong> any item chip to blacklist it. Click <strong>🚫</strong> next to a dungeon name to hide it.
     </div>
 
     <div id="times-panel">
@@ -381,7 +390,7 @@
           <th id="th-evmedian"  style="display:none" data-col="evMedian">Trade Median ▼</th>
           <th>Clear Time</th>
           <th>Bar</th>
-          <th>Drops <span style="font-size:8px;color:var(--dim3);font-family:'Inter',sans-serif">(hover · 🚫=blacklisted)</span></th>
+          <th>Drops <span style="font-size:8px;color:var(--dim3);font-family:'Inter',sans-serif">(hover · right-click=blacklist item · 🚫=blacklist dungeon)</span></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -393,19 +402,34 @@
     </div>
 
     <div id="blacklist-view">
+      <!-- Dungeon blacklist section -->
+      <div class="bl-section">
+        <div class="bl-section-title">// BLACKLISTED DUNGEONS</div>
+        <div class="bl-hint">Hidden from the rankings table entirely. Click 🚫 next to any dungeon name in the table to add it here. You can also type a name below.</div>
+        <div class="bl-add-row">
+          <input class="bl-add-input" id="dbl-add-input" placeholder="Dungeon name to hide…">
+          <button class="btn amber" id="dbl-add-btn">+ Hide Dungeon</button>
+        </div>
+        <div class="bl-grid" id="dbl-active-grid"></div>
+        <div style="margin-top:14px">
+          <div style="font-size:10px;color:var(--dim3);margin-bottom:8px;letter-spacing:.05em">SEEN DUNGEONS — click to hide:</div>
+          <div class="bl-known-grid" id="dbl-known-grid"></div>
+        </div>
+      </div>
+
+      <!-- Item blacklist section -->
       <div class="bl-section">
         <div class="bl-section-title">// BLACKLISTED ITEMS</div>
-        <div class="bl-hint">Blacklisted items are skipped during price fetching and shown as 🚫 in the table. Their drops are excluded from EV calculations.</div>
+        <div class="bl-hint">Excluded from price fetching and EV calculations. Right-click any chip in the table to blacklist it.</div>
         <div class="bl-add-row">
           <input class="bl-add-input" id="bl-add-input" placeholder="Item name or ID to blacklist…">
-          <button class="btn red" id="bl-add-btn">+ Add</button>
+          <button class="btn red" id="bl-add-btn">+ Blacklist Item</button>
         </div>
         <div class="bl-grid" id="bl-active-grid"></div>
-      </div>
-      <div class="bl-section" id="bl-known-section">
-        <div class="bl-section-title">// SEEN ITEMS (click to blacklist)</div>
-        <div class="bl-hint">These are all items seen in drop tables from the last analysis. Click any to add to blacklist.</div>
-        <div class="bl-known-grid" id="bl-known-grid"></div>
+        <div style="margin-top:14px">
+          <div style="font-size:10px;color:var(--dim3);margin-bottom:8px;letter-spacing:.05em">SEEN ITEMS — click to blacklist:</div>
+          <div class="bl-known-grid" id="bl-known-grid"></div>
+        </div>
       </div>
     </div>
 
@@ -419,20 +443,18 @@
 <script>
 (function () {
   'use strict';
-  console.log('%c[FarmOpt v4.3] Loaded — phased pricing, blacklist, selective refresh', 'color:#00e5ff;font-weight:bold');
+  console.log('%c[FarmOpt v4.4] Loaded', 'color:#00e5ff;font-weight:bold');
 
   /* ══ CONFIG ══ */
-  const CFG_KEY    = 'fo_v43_config';
+  const CFG_KEY    = 'fo_v43_config';   // keep same key so settings persist from v4.3
   const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
   let cfg = { cookie: '' };
   try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r) }; } catch(e) {}
   function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e) {} }
 
-  /* ══ BLACKLIST ══ */
+  /* ══ ITEM BLACKLIST ══ */
   const BL_KEY = 'fo_v43_blacklist';
-  // { id: name } — if id is unknown, key = name.toLowerCase()
   let blacklist = {};
-  // Pre-populate known junk items (IDs filled in after first fetch)
   const BL_PRELOAD_NAMES = new Set([
     'seal opener','option change stone','amazing digitary power stone',
     'high rank digitary power stone','decreasing digitary power stone',
@@ -440,7 +462,6 @@
   ]);
   function loadBlacklist() {
     try { const r = localStorage.getItem(BL_KEY); if (r) blacklist = JSON.parse(r); } catch(e) {}
-    // Ensure preload names are present even without IDs
     for (const name of BL_PRELOAD_NAMES) {
       const key = 'name:' + name;
       if (!blacklist[key]) blacklist[key] = name;
@@ -455,20 +476,33 @@
   function addToBlacklist(itemId, itemName) {
     if (itemId) { blacklist[itemId] = itemName || itemId; }
     else { blacklist['name:' + (itemName || '').toLowerCase()] = itemName || '?'; }
-    // Also remove the name-key if we now have an id-key
-    if (itemId && itemName) {
-      const nk = 'name:' + itemName.toLowerCase();
-      if (blacklist[nk]) delete blacklist[nk];
-    }
+    if (itemId && itemName) { const nk = 'name:' + itemName.toLowerCase(); if (blacklist[nk]) delete blacklist[nk]; }
     saveBlacklist();
   }
   function removeFromBlacklist(key) { delete blacklist[key]; saveBlacklist(); }
   loadBlacklist();
 
+  /* ══ DUNGEON BLACKLIST ══ */
+  const DBL_KEY = 'fo_v44_dungeon_blacklist';
+  let dungeonBlacklist = new Set();
+  function loadDungeonBlacklist() {
+    try { const r = localStorage.getItem(DBL_KEY); if (r) dungeonBlacklist = new Set(JSON.parse(r)); } catch(e) {}
+  }
+  function saveDungeonBlacklist() {
+    try { localStorage.setItem(DBL_KEY, JSON.stringify([...dungeonBlacklist])); } catch(e) {}
+  }
+  // key = "DungeonName_Difficulty"  OR just "DungeonName" to hide all difficulties
+  function isDungeonBlacklisted(key, name) {
+    return dungeonBlacklist.has(key) || dungeonBlacklist.has(name);
+  }
+  function addDungeonToBlacklist(key) { dungeonBlacklist.add(key); saveDungeonBlacklist(); }
+  function removeDungeonFromBlacklist(key) { dungeonBlacklist.delete(key); saveDungeonBlacklist(); }
+  loadDungeonBlacklist();
+
   /* ══ CACHE ══ */
   const NS          = 'fo_v43_';
   const TTL_FOREVER = Infinity;
-  const TTL_PRICES  = 10 * 60 * 1000;  // 10 min
+  const TTL_PRICES  = 10 * 60 * 1000;
 
   let customTimes = {};
   function saveTimes() { try { localStorage.setItem(NS + 'times', JSON.stringify(customTimes)); } catch(e) {} }
@@ -486,8 +520,10 @@
     } catch(e) { return null; }
   }
   function cacheClearDungeons() {
-    try { Object.keys(localStorage).filter(k => k.startsWith(NS + 'dungeon_')).forEach(k => localStorage.removeItem(k));
-          localStorage.removeItem(NS + 'dungeon_list'); } catch(e) {}
+    try {
+      Object.keys(localStorage).filter(k => k.startsWith(NS + 'dungeon_')).forEach(k => localStorage.removeItem(k));
+      localStorage.removeItem(NS + 'dungeon_list');
+    } catch(e) {}
   }
   function cacheClearPrices(phase = 'all') {
     try {
@@ -513,8 +549,8 @@
   let diffFilter      = 'All';
   let sortMode        = 'ev';
   let ratePausedUntil = 0;
-  let prices          = {};       // itemId → price data
-  let allItemsSeen    = new Map();// itemId → name — built from dungeon details
+  let prices          = {};
+  let allItemsSeen    = new Map();
   let cachedDetails   = [];
   let itemIndex       = {};
   let currentView     = 'rankings';
@@ -539,17 +575,10 @@
   $('settings-save').addEventListener('click', () => { cfg.cookie = $('cfg-cookie').value.trim(); saveCfg(); closeSettings(); hideNotice(); });
 
   /* ══ REFRESH DROPDOWN ══ */
-  $('btn-refresh').addEventListener('click', e => {
-    e.stopPropagation();
-    $('ref-dropdown').classList.toggle('open');
-  });
+  $('btn-refresh').addEventListener('click', e => { e.stopPropagation(); $('ref-dropdown').classList.toggle('open'); });
   document.addEventListener('click', () => $('ref-dropdown').classList.remove('open'));
   document.querySelectorAll('.ref-opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-      $('ref-dropdown').classList.remove('open');
-      const phase = btn.dataset.phase;
-      runAnalysis(phase);
-    });
+    btn.addEventListener('click', () => { $('ref-dropdown').classList.remove('open'); runAnalysis(btn.dataset.phase); });
   });
 
   /* ══ TOOLBAR ══ */
@@ -579,44 +608,90 @@
   $('btn-clearcache').addEventListener('click', () => { cacheClearDungeons(); cacheClearPrices(); log('Cache cleared.', 'warn'); });
   ifInput.addEventListener('input', renderItemFinder);
 
-  /* ══ BLACKLIST UI ══ */
+  /* ══ DUNGEON BLACKLIST UI ══ */
+  $('dbl-add-btn').addEventListener('click', () => {
+    const val = $('dbl-add-input').value.trim();
+    if (!val) return;
+    addDungeonToBlacklist(val);
+    $('dbl-add-input').value = '';
+    renderBlacklistView();
+    applyFilters();
+  });
+
+  /* ══ ITEM BLACKLIST UI ══ */
   $('bl-add-btn').addEventListener('click', () => {
     const val = $('bl-add-input').value.trim();
     if (!val) return;
-    // If it looks like an ID (starts with 'i' + alphanumeric), treat as ID
     const looksLikeId = /^i[a-z0-9]{4,}$/i.test(val);
     if (looksLikeId) addToBlacklist(val, allItemsSeen.get(val) || val);
     else addToBlacklist(null, val);
     $('bl-add-input').value = '';
     renderBlacklistView();
-    // Re-render table to reflect new blacklist
     if (allResults.length) { allResults = buildResults(cachedDetails); applyFilters(); }
   });
 
   function renderBlacklistView() {
+    /* ── Dungeon blacklist ── */
+    const dblGrid = $('dbl-active-grid');
+    dblGrid.innerHTML = '';
+    if (!dungeonBlacklist.size) {
+      dblGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">No dungeons hidden yet.</div>';
+    } else {
+      for (const key of dungeonBlacklist) {
+        const chip = document.createElement('div');
+        chip.className = 'bl-chip dungeon-chip';
+        chip.innerHTML = `<span class="bl-chip-name">${key}</span>`;
+        const rm = document.createElement('button');
+        rm.className = 'bl-chip-rm'; rm.textContent = '✕';
+        rm.addEventListener('click', () => { removeDungeonFromBlacklist(key); renderBlacklistView(); applyFilters(); });
+        chip.appendChild(rm);
+        dblGrid.appendChild(chip);
+      }
+    }
+
+    // Known dungeons grid
+    const dblKnown = $('dbl-known-grid');
+    dblKnown.innerHTML = '';
+    const uniqueDungeons = [...new Set(allResults.map(r => r.key))].sort();
+    if (!uniqueDungeons.length) {
+      dblKnown.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>';
+    } else {
+      uniqueDungeons.forEach(key => {
+        const already = dungeonBlacklist.has(key);
+        const chip = document.createElement('div');
+        chip.className = 'bl-dungeon-chip' + (already ? ' bld' : '');
+        chip.textContent = key;
+        if (!already) {
+          chip.addEventListener('click', () => { addDungeonToBlacklist(key); renderBlacklistView(); applyFilters(); });
+        }
+        dblKnown.appendChild(chip);
+      });
+    }
+
+    /* ── Item blacklist ── */
     const grid = $('bl-active-grid');
     grid.innerHTML = '';
     const entries = Object.entries(blacklist);
     if (!entries.length) {
       grid.innerHTML = '<div style="color:var(--dim3);font-size:11px">No items blacklisted yet.</div>';
+    } else {
+      entries.forEach(([key, name]) => {
+        const chip = document.createElement('div');
+        chip.className = 'bl-chip';
+        chip.innerHTML = `<span class="bl-chip-name">${name}</span><span class="bl-chip-id">${key.startsWith('name:') ? '(name match)' : key}</span>`;
+        const rm = document.createElement('button');
+        rm.className = 'bl-chip-rm'; rm.textContent = '✕';
+        rm.addEventListener('click', () => { removeFromBlacklist(key); renderBlacklistView(); if (allResults.length) { allResults = buildResults(cachedDetails); applyFilters(); } });
+        chip.appendChild(rm);
+        grid.appendChild(chip);
+      });
     }
-    entries.forEach(([key, name]) => {
-      const chip = document.createElement('div');
-      chip.className = 'bl-chip';
-      const isNameKey = key.startsWith('name:');
-      chip.innerHTML = `<span class="bl-chip-name">${name}</span><span class="bl-chip-id">${isNameKey ? '(name match)' : key}</span>`;
-      const rm = document.createElement('button');
-      rm.className = 'bl-chip-rm'; rm.textContent = '✕';
-      rm.addEventListener('click', () => { removeFromBlacklist(key); renderBlacklistView(); if (allResults.length) { allResults = buildResults(cachedDetails); applyFilters(); } });
-      chip.appendChild(rm);
-      grid.appendChild(chip);
-    });
 
     // Known items grid
     const knownGrid = $('bl-known-grid');
     knownGrid.innerHTML = '';
     if (!allItemsSeen.size) {
-      knownGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first to see all drop items here.</div>';
+      knownGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>';
       return;
     }
     const sorted = [...allItemsSeen.entries()].sort((a,b) => a[1].localeCompare(b[1]));
@@ -635,13 +710,13 @@
   /* ══ VIEW SWITCHING ══ */
   function switchView(view) {
     currentView = view;
-    tableWrap.style.display  = view === 'rankings'   ? 'block' : 'none';
-    cardsEl.style.display    = view === 'rankings'   ? 'grid'  : 'none';
-    itemFinder.style.display = view === 'itemfinder' ? 'block' : 'none';
-    blacklistView.style.display = view === 'blacklist' ? 'block' : 'none';
-    sortTabs.style.display   = view === 'rankings'   ? 'flex'  : 'none';
+    tableWrap.style.display     = view === 'rankings'   ? 'block' : 'none';
+    cardsEl.style.display       = view === 'rankings'   ? 'grid'  : 'none';
+    itemFinder.style.display    = view === 'itemfinder' ? 'block' : 'none';
+    blacklistView.style.display = view === 'blacklist'  ? 'block' : 'none';
+    sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
-    searchEl.style.display   = view === 'rankings'   ? '' : 'none';
+    searchEl.style.display      = view === 'rankings'   ? '' : 'none';
     if (view === 'itemfinder') renderItemFinder();
     if (view === 'blacklist')  renderBlacklistView();
   }
@@ -688,63 +763,52 @@
       await sleep(1000);
     }
   }
-  function triggerRatePause(secs = 20) {
-    ratePausedUntil = Math.max(ratePausedUntil, Date.now() + secs * 1000);
-    log(`⚠ 429 — pausing ${secs}s`, 'warn');
-  }
 
   /* ══ FETCH PRIMITIVES ══ */
   async function apiFetch(path) {
-  const url = WORKER_URL + path;
-  for (let i = 0; i < 6; i++) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-    let res;
-    try { res = await fetch(url, { headers }); }
-    catch(e) { await sleep(3000); continue; }
-    if (res.status === 429) { await sleep(2000); continue; }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    // Guard against HTML error pages (auth failures, Cloudflare errors, etc.)
-    const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('application/json') && !ct.includes('text/json')) {
-      const text = await res.text();
-      console.error('[FarmOpt] Expected JSON, got:', text.slice(0, 200));
-      throw new Error(`Got non-JSON response (${ct}) — is your cookie set correctly?`);
+    const url = WORKER_URL + path;
+    for (let i = 0; i < 6; i++) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
+      let res;
+      try { res = await fetch(url, { headers }); }
+      catch(e) { await sleep(3000); continue; }
+      if (res.status === 429) { await sleep(2000); continue; }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('application/json') && !ct.includes('text/json')) {
+        const text = await res.text();
+        console.error('[FarmOpt] Expected JSON, got:', text.slice(0, 200));
+        throw new Error(`Got non-JSON (${ct}) — check your session_id cookie in Settings`);
+      }
+      return res.json();
     }
-    return res.json();
+    throw new Error('Too many retries');
   }
-  throw new Error('Too many retries');
-}
 
   async function marketGet(path) {
-  const url = WORKER_URL + path;
-  for (let i = 0; i < 10; i++) {
-    await rateGate();
-    const headers = { 'Content-Type': 'application/json' };
-    if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-    let res;
-    try { res = await fetch(url, { headers }); }
-    catch(e) { await sleep(3000); continue; }
-
-    if (res.status === 429) {
-      // Read retry_after from the response body (game returns it as JSON)
-      let retryAfter = 1; // default 1s
-      try {
-        const body = await res.json();
-        if (body?.retry_after) retryAfter = Math.max(body.retry_after, 0.3);
-      } catch(e) {}
-      const waitMs = Math.ceil(retryAfter * 1000) + 200; // add 200ms buffer
-      log(`429 — retry_after ${retryAfter}s, waiting ${waitMs}ms…`, 'warn');
-      ratePausedUntil = Math.max(ratePausedUntil, Date.now() + waitMs);
-      continue;
+    const url = WORKER_URL + path;
+    for (let i = 0; i < 10; i++) {
+      await rateGate();
+      const headers = { 'Content-Type': 'application/json' };
+      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
+      let res;
+      try { res = await fetch(url, { headers }); }
+      catch(e) { await sleep(3000); continue; }
+      if (res.status === 429) {
+        let retryAfter = 1;
+        try { const body = await res.json(); if (body?.retry_after) retryAfter = Math.max(body.retry_after, 0.3); } catch(e2) {}
+        const waitMs = Math.ceil(retryAfter * 1000) + 200;
+        log(`429 — retry_after ${retryAfter}s, waiting ${waitMs}ms…`, 'warn');
+        ratePausedUntil = Math.max(ratePausedUntil, Date.now() + waitMs);
+        continue;
+      }
+      return res;
     }
-    return res;
+    return null;
   }
-  return null;
-}
 
   /* ══ PRICE PHASES ══ */
-  // Phase A: fetch cheapest sell listing for one item
   async function fetchSellPrice(itemId) {
     const res = await marketGet(`/api/market/listings?item=${itemId}&side=sell&limit=1`);
     if (!res || res.status === 400) return null;
@@ -753,7 +817,6 @@
     return data?.listings?.length ? data.listings[0].price : null;
   }
 
-  // Phase B: fetch best buy order for one item
   async function fetchBuyPrice(itemId) {
     const res = await marketGet(`/api/market/listings?item=${itemId}&side=buy&limit=1`);
     if (!res || res.status === 400) return null;
@@ -762,7 +825,6 @@
     return data?.listings?.length ? data.listings[0].price : null;
   }
 
-  // Phase C: fetch trade history for one item
   async function fetchHistory(itemId) {
     const res = await marketGet(`/api/market/trades?item=${itemId}&limit=20`);
     if (!res || !res.ok) return null;
@@ -775,15 +837,12 @@
       for (const t of sorted) { cum += t.qty; if (cum >= half) { medianPrice = t.price; break; } }
       const spanH = (trades[0].at - trades[trades.length-1].at) / 3600000;
       const totalU = trades.reduce((s,t) => s + t.qty, 0);
-      return {
-        medianPrice, lastSalePrice: trades[0]?.price ?? null,
-        lastSaleAt: trades[0]?.at ?? null,
-        velocity: spanH > 0.01 ? Math.round(totalU / spanH) : null
-      };
+      return { medianPrice, lastSalePrice: trades[0]?.price ?? null, lastSaleAt: trades[0]?.at ?? null,
+        velocity: spanH > 0.01 ? Math.round(totalU / spanH) : null };
     } catch(e) { return null; }
   }
 
-  /* ══ EXTRACT ITEMS FROM DUNGEON ══ */
+  /* ══ EXTRACT ITEMS ══ */
   function extractItems(d) {
     const items = new Map();
     for (const diff of (d.difficulties || [])) {
@@ -795,19 +854,7 @@
     return items;
   }
 
-  /* ══ MAIN ANALYSIS ══
-   *
-   * phase: 'fresh' | 'all' | 'sell' | 'buy' | 'history'
-   *
-   * Pipeline:
-   *  Step 1 — Load all dungeon details (from cache if available, no delay)
-   *  Step 2 — Sell phase: fetch cheapest sell price for each non-blacklisted item
-   *           → show table immediately after
-   *  Step 3 — Buy phase: fetch buy order for each item that has a sell listing
-   *           → re-render silently
-   *  Step 4 — History phase: fetch trade history
-   *           → re-render, unlock median sort
-   */
+  /* ══ MAIN ANALYSIS ══ */
   async function runAnalysis(phase = 'fresh') {
     if (isRunning) return;
     hideNotice();
@@ -820,16 +867,12 @@
     ratePausedUntil = 0;
 
     try {
-      /* ── Step 1: Dungeons ── */
       log('Loading dungeon list…');
       let dungeons;
       const cachedList = cacheGet('dungeon_list', TTL_FOREVER);
-      if (cachedList && phase !== 'fresh') {
+      if (cachedList) {
         dungeons = cachedList;
-        log(`Cached: ${dungeons.length} dungeons.`, 'ok');
-      } else if (cachedList && phase === 'fresh') {
-        dungeons = cachedList;
-        log(`Cached: ${dungeons.length} dungeons (use ↺ Clear Cache to re-fetch drop tables).`, 'ok');
+        log(`Cached: ${dungeons.length} dungeons${phase==='fresh' ? ' (↺ Clear Cache to re-fetch)' : ''}.`, 'ok');
       } else {
         const listData = await apiFetch('/api/wiki/dungeons?page=1&per_page=500');
         dungeons = listData.data || [];
@@ -838,15 +881,8 @@
       }
 
       const details = [];
-      const itemNameMap = new Map();  // id → name
+      const itemNameMap = new Map();
       const total = dungeons.length;
-
-      // Load details — no delay if all cached
-      let anyUncached = false;
-      for (let i = 0; i < total; i++) {
-        const cached = cacheGet('dungeon_' + dungeons[i].id, TTL_FOREVER);
-        if (!cached) { anyUncached = true; break; }
-      }
 
       for (let i = 0; i < total; i++) {
         const cached = cacheGet('dungeon_' + dungeons[i].id, TTL_FOREVER);
@@ -865,20 +901,17 @@
         }
         details.push(detail);
         setBar(i + 1, total);
-        // Collect items
         for (const [id, name] of extractItems(detail)) {
           itemNameMap.set(id, name);
           allItemsSeen.set(id, name);
-          // Resolve name-based blacklist entries to IDs now that we know them
           const nk = 'name:' + name.toLowerCase();
-          if (blacklist[nk]) { addToBlacklist(id, name); }
+          if (blacklist[nk]) addToBlacklist(id, name);
         }
       }
 
-      if (!anyUncached) log(`All ${total} dungeons from cache — no API calls needed.`, 'ok');
+      log(`${details.length} dungeons loaded.`, 'ok');
       cachedDetails = details;
 
-      // Only load price cache into memory (don't clear yet)
       if (phase === 'fresh') {
         prices = {};
         for (const [id] of itemNameMap) {
@@ -886,107 +919,75 @@
           if (c) prices[id] = c;
         }
       } else {
-        // Refresh: clear the relevant phase from cache and memory
         cacheClearPrices(phase === 'all' ? 'all' : phase);
-        if (phase === 'all' || phase === 'sell') { prices = {}; }
-        else {
-          // Re-load sell data from cache for phases that build on top
-          prices = {};
-          for (const [id] of itemNameMap) {
-            const c = cacheGet('price_' + id, TTL_PRICES);
-            if (c) prices[id] = c;
-          }
+        prices = {};
+        for (const [id] of itemNameMap) {
+          const c = cacheGet('price_' + id, TTL_PRICES);
+          if (c) prices[id] = c;
         }
       }
 
-      // Items to fetch for each phase
       const allIds = [...itemNameMap.keys()].filter(id => !isBlacklisted(id, itemNameMap.get(id)));
 
-      /* ── Step 2: Sell phase ── */
+      /* ── Sell phase ── */
       if (phase === 'fresh' || phase === 'all' || phase === 'sell') {
         const sellIds = allIds.filter(id => !prices[id]?.listPrice);
-        log(`Sell phase: ${sellIds.length} items to fetch…`, 'ok');
+        log(`Sell phase: ${sellIds.length} items…`, 'ok');
         setBar(0, sellIds.length);
         for (let i = 0; i < sellIds.length; i++) {
-          const id = sellIds[i];
           await sleep(i === 0 ? 200 : 500);
-          const listPrice = await fetchSellPrice(id);
-          if (listPrice != null) {
-            prices[id] = { ...prices[id], price: listPrice, listPrice, historyReady: false };
-          } else {
-            prices[id] = { ...prices[id], listPrice: null, price: null, historyReady: false };
-          }
+          const listPrice = await fetchSellPrice(sellIds[i]);
+          prices[sellIds[i]] = { ...prices[sellIds[i]], price: listPrice ?? null, listPrice: listPrice ?? null, historyReady: false };
           setBar(i + 1, sellIds.length);
           if ((i + 1) % 25 === 0) log(`Sell: ${i+1}/${sellIds.length}…`);
         }
-        log(`Sell phase done — ${Object.values(prices).filter(p => p.listPrice).length} items listed.`, 'ok');
+        log(`Sell done — ${Object.values(prices).filter(p => p.listPrice).length} items listed.`, 'ok');
       }
 
-      // Show table after sell phase
       allResults = buildResults(details);
       buildItemIndex(allResults);
       setBar(1, 1);
       showResultsUI();
       renderCards(allResults);
       applyFilters();
-      log(`Table ready — ${allResults.length} dungeon combos. Fetching buy orders…`, 'ok');
+      log(`Table ready — ${allResults.length} combos. Fetching buy orders…`, 'ok');
 
-      /* ── Step 3: Buy phase ── */
+      /* ── Buy phase ── */
       if (phase === 'fresh' || phase === 'all' || phase === 'buy') {
         const buyIds = allIds.filter(id => prices[id]?.listPrice && !prices[id]?.buyPrice);
         for (let i = 0; i < buyIds.length; i++) {
-          const id = buyIds[i];
-          await sleep(i === 0 ? 0 : 350);
-          const buyPrice = await fetchBuyPrice(id);
-          if (prices[id]) prices[id] = { ...prices[id], buyPrice: buyPrice ?? null };
-          else prices[id] = { buyPrice: buyPrice ?? null };
-          if ((i + 1) % 25 === 0) {
-            allResults = buildResults(cachedDetails);
-            buildItemIndex(allResults);
-            renderCards(allResults);
-            applyFilters();
-          }
+          await sleep(i === 0 ? 0 : 500);
+          const buyPrice = await fetchBuyPrice(buyIds[i]);
+          if (prices[buyIds[i]]) prices[buyIds[i]] = { ...prices[buyIds[i]], buyPrice: buyPrice ?? null };
+          if ((i + 1) % 25 === 0) { allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters(); }
         }
-        // Save sell+buy to cache
         for (const [id, p] of Object.entries(prices)) { if (p) cacheSet('price_' + id, p); }
-        allResults = buildResults(cachedDetails);
-        buildItemIndex(allResults);
-        renderCards(allResults);
-        applyFilters();
-        const instantEl = $('tab-evinstant'), thInstEl = $('th-evinstant');
-        if (instantEl) instantEl.style.display = '';
-        if (thInstEl)  thInstEl.style.display  = '';
-        log(`Buy phase done. Fetching trade history…`, 'ok');
+        allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
+        const ti = $('tab-evinstant'), thi = $('th-evinstant');
+        if (ti) ti.style.display = ''; if (thi) thi.style.display = '';
+        log('Buy done. Fetching trade history…', 'ok');
       }
 
-      /* ── Step 4: History phase ── */
+      /* ── History phase ── */
       if (phase === 'fresh' || phase === 'all' || phase === 'history') {
         const histIds = allIds.filter(id => prices[id]?.listPrice && !prices[id]?.historyReady);
         for (let i = 0; i < histIds.length; i++) {
-          const id = histIds[i];
-          await sleep(i === 0 ? 0 : 400);
-          const hist = await fetchHistory(id);
-          if (hist && prices[id]) {
+          await sleep(i === 0 ? 0 : 500);
+          const hist = await fetchHistory(histIds[i]);
+          if (hist && prices[histIds[i]]) {
             const { medianPrice, lastSalePrice, lastSaleAt, velocity } = hist;
-            const isOutlier = !!(prices[id].listPrice && medianPrice && prices[id].listPrice > medianPrice * 2.5);
-            prices[id] = { ...prices[id], medianPrice, lastSalePrice, lastSaleAt, velocity, isOutlier,
-              price: isOutlier ? medianPrice : prices[id].listPrice, historyReady: true };
-            cacheSet('price_' + id, prices[id]);
+            const isOutlier = !!(prices[histIds[i]].listPrice && medianPrice && prices[histIds[i]].listPrice > medianPrice * 2.5);
+            prices[histIds[i]] = { ...prices[histIds[i]], medianPrice, lastSalePrice, lastSaleAt, velocity, isOutlier,
+              price: isOutlier ? medianPrice : prices[histIds[i]].listPrice, historyReady: true };
+            cacheSet('price_' + histIds[i], prices[histIds[i]]);
           }
           if ((i + 1) % 10 === 0 || i === histIds.length - 1) {
-            allResults = buildResults(cachedDetails);
-            buildItemIndex(allResults);
-            renderCards(allResults);
-            applyFilters();
+            allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
           }
         }
-        const tabMed = $('tab-evmedian'), thMed = $('th-evmedian');
-        if (tabMed) tabMed.style.display = '';
-        if (thMed)  thMed.style.display  = '';
-        allResults = buildResults(cachedDetails);
-        buildItemIndex(allResults);
-        renderCards(allResults);
-        applyFilters();
+        const tm = $('tab-evmedian'), thm = $('th-evmedian');
+        if (tm) tm.style.display = ''; if (thm) thm.style.display = '';
+        allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
         log('All done ✓', 'ok');
       }
 
@@ -1001,6 +1002,7 @@
     }
   }
 
+  /* ══ SHOW RESULTS UI ══ */
   function showResultsUI() {
     cardsEl.style.display   = 'grid';
     tableWrap.style.display = 'block';
@@ -1009,6 +1011,14 @@
     formulaEl.style.display = 'block';
     $('ref-group').style.display = 'inline-flex';
     $('btn-times').style.display = 'inline-block';
+
+    // Restore EV/hr column if we have any saved times
+    if (Object.keys(customTimes).length > 0) {
+      const thEv  = $('th-evhr');
+      const tabEv = $('tab-evhr');
+      if (thEv)  thEv.style.display  = '';
+      if (tabEv) tabEv.style.display = '';
+    }
   }
 
   /* ══ BUILD RESULTS ══ */
@@ -1020,14 +1030,18 @@
       const diffsToProcess = hasNonStory ? allDiffs.filter(diff => diff.difficulty !== 'Story') : allDiffs;
 
       for (const diff of diffsToProcess) {
+        const key = `${d.name}_${diff.difficulty}`;
+        // Skip dungeon-blacklisted entries entirely
+        if (isDungeonBlacklisted(key, d.name)) continue;
+
         let evRaid = 0;
         const drops = [];
 
         for (const obj of (diff.objectives || [])) {
           for (const rk of (obj.raid_rankings || [])) {
             for (const r of (rk.rewards || [])) {
-              const bl  = isBlacklisted(r.item_id, r.item_name);
-              const mkt = prices[r.item_id];
+              const bl   = isBlacklisted(r.item_id, r.item_name);
+              const mkt  = prices[r.item_id];
               const prob = r.rate_permil / 10000;
               const avg  = (r.min + r.max) / 2;
               const ev   = bl ? 0 : prob * avg * (mkt?.price || 0);
@@ -1051,7 +1065,7 @@
 
         let evComp = 0;
         for (const group of rewardGroups) {
-          const base = group[0];
+          const base  = group[0];
           const srank = group.find(r => r.rank === 7) || (group.length > 1 ? group[group.length-1] : null);
           const addDrop = (id, name, avg, src, bRank) => {
             const bl  = isBlacklisted(id, name);
@@ -1084,8 +1098,7 @@
 
         const raidDrops = drops.filter(d => d.type === 'raid').sort((a,b) => b.ev - a.ev);
         const rankDrops = drops.filter(d => d.type === 'rank');
-        const key = `${d.name}_${diff.difficulty}`;
-        const clearMs = customTimes[key] ?? null;
+        const clearMs   = customTimes[key] ?? null;
 
         let evInstant = 0, evMedian = 0;
         for (const drop of drops) {
@@ -1127,7 +1140,7 @@
   const DIFF_MAP = { 1:'Story', 2:'Normal', 3:'Hard', 4:'Extreme' };
 
   async function loadMyTimes() {
-    if (!cfg.cookie) { showNotice('Session cookie required for My Times. Open <a onclick="openSettings()">⚙ Settings</a>.'); return; }
+    if (!cfg.cookie) { showNotice('Session cookie required. Open ⚙ Settings and enter <code>session_id=yourValue</code>.'); return; }
     $('btn-times').disabled = true;
     progressEl.style.display = 'block';
     logEl.innerHTML = '';
@@ -1160,8 +1173,8 @@
       const rowsCon = $('tp-rows');
       let matched = 0;
       entries.forEach((e, i) => {
-        const dName = DIFF_MAP[e.difficulty] || `Mode ${e.difficulty}`;
-        const rName = rankMap[`${e.dungeon_id}_${e.difficulty}`] || null;
+        const dName  = DIFF_MAP[e.difficulty] || `Mode ${e.difficulty}`;
+        const rName  = rankMap[`${e.dungeon_id}_${e.difficulty}`] || null;
         const autoKey = rName ? autoMatch(rName, dName, wikiNames) : null;
         if (autoKey) { matched++; applyTimeSilently(autoKey, e.best_time_ms); }
         const row = document.createElement('div'); row.className = 'tp-row';
@@ -1201,8 +1214,10 @@
     customTimes[key] = ms; saveTimes();
     const r = allResults.find(x => x.key === key);
     if (r) { r.clearMs = ms; computeEvhr(r); }
+    // Always reveal EV/hr column when a time is set
     const thEv = $('th-evhr'), tabEv = $('tab-evhr');
-    if (thEv && thEv.style.display === 'none') { thEv.style.display = ''; tabEv.style.display = ''; }
+    if (thEv)  thEv.style.display  = '';
+    if (tabEv) tabEv.style.display = '';
   }
 
   function autoMatch(rankName, diffName, wikiNames) {
@@ -1243,9 +1258,9 @@
     if (d.type === 'rank') {
       return `${bkRow}
         <div class="trow"><span class="tlbl">Item</span><span class="tval">${d.name}</span></div>
-        <div class="trow"><span class="tlbl">Qty</span><span class="tval">×${d.avg} (${d.rewardSource === 'base' ? 'Base' : d.rewardSource === 's' ? rl+' reward' : 'Base+'+rl})</span></div>
-        <div class="trow"><span class="tlbl">Sell listing</span><span class="tval">${d.listPrice ? fmt(d.listPrice) : 'none'}</span></div>
-        ${d.buyPrice  ? `<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>` : ''}
+        <div class="trow"><span class="tlbl">Qty</span><span class="tval">×${d.avg} (${d.rewardSource==='base'?'Base':d.rewardSource==='s'?rl+' reward':'Base+'+rl})</span></div>
+        <div class="trow"><span class="tlbl">Sell listing</span><span class="tval">${d.listPrice?fmt(d.listPrice):'none'}</span></div>
+        ${d.buyPrice    ? `<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>` : ''}
         ${d.medianPrice ? `<div class="trow"><span class="tlbl">Trade median</span><span class="tval" style="color:var(--blue2)">${fmt(d.medianPrice)}</span></div>` : ''}
         <div class="trow"><span class="tlbl">EV / run</span><span class="tval">${fmt(d.ev)}</span></div>`;
     }
@@ -1253,8 +1268,8 @@
       <div class="trow"><span class="tlbl">Item</span><span class="tval">${d.name}</span></div>
       <div class="trow"><span class="tlbl">Drop chance</span><span class="tval">${(d.prob*100).toFixed(1)}%</span></div>
       <div class="trow"><span class="tlbl">Avg qty</span><span class="tval">${d.avg.toFixed(2)}</span></div>
-      ${d.isOutlier ? `<div class="trow"><span class="tlbl" style="color:var(--amber)">⚠ Outlier</span><span class="tval" style="color:var(--amber);font-size:10px">listing vs median — uses median</span></div>` : ''}
-      <div class="trow"><span class="tlbl">Sell listing</span><span class="tval">${d.listPrice ? fmt(d.listPrice) : 'no listing'}</span></div>
+      ${d.isOutlier   ? `<div class="trow"><span class="tlbl" style="color:var(--amber)">⚠ Outlier</span><span class="tval" style="color:var(--amber);font-size:10px">listing vs median — uses median</span></div>` : ''}
+      <div class="trow"><span class="tlbl">Sell listing</span><span class="tval">${d.listPrice?fmt(d.listPrice):'no listing'}</span></div>
       ${d.medianPrice ? `<div class="trow"><span class="tlbl">Trade median</span><span class="tval" style="color:var(--blue2)">${fmt(d.medianPrice)}</span></div>` : ''}
       ${d.velocity    ? `<div class="trow"><span class="tlbl">Velocity</span><span class="tval">${d.velocity}/hr sold</span></div>` : ''}
       ${d.buyPrice    ? `<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>` : ''}
@@ -1305,44 +1320,29 @@
     wrap.style.cssText = 'display:flex;flex-direction:column;gap:0';
     const span = document.createElement('span');
     span.className = 'chip' + (d.type==='rank'?' rank-reward':'') + (d.blacklisted?' blacklisted':'');
-
     const nameSpan = document.createElement('span');
     nameSpan.textContent = (d.blacklisted ? '🚫 ' : '') + d.name;
     span.appendChild(nameSpan);
-
     if (d.type === 'raid') {
-      const pct = document.createElement('span');
-      pct.className = 'chip-pct'; pct.textContent = Math.round(d.prob*100)+'%';
-      span.appendChild(pct);
+      const pct = document.createElement('span'); pct.className = 'chip-pct'; pct.textContent = Math.round(d.prob*100)+'%'; span.appendChild(pct);
     } else {
-      const qs = document.createElement('span');
-      qs.className = 'chip-rank';
+      const qs = document.createElement('span'); qs.className = 'chip-rank';
       const rl = RANK_LABEL[d.bestRank] ?? `R${d.bestRank}`;
-      qs.textContent = `×${d.avg} (${d.rewardSource==='base'?'Base':d.rewardSource==='s'?rl:'Base+'+rl})`;
-      span.appendChild(qs);
+      qs.textContent = `×${d.avg} (${d.rewardSource==='base'?'Base':d.rewardSource==='s'?rl:'Base+'+rl})`; span.appendChild(qs);
     }
-
     if (!d.blacklisted) {
-      const ps = document.createElement('span');
-      ps.className = d.price ? 'chip-price' : 'chip-na';
-      ps.innerHTML = d.price ? fmt(d.price) : '?';
-      span.appendChild(ps);
+      const ps = document.createElement('span'); ps.className = d.price ? 'chip-price' : 'chip-na';
+      ps.innerHTML = d.price ? fmt(d.price) : '?'; span.appendChild(ps);
     }
-
     span.addEventListener('mouseenter', () => showTooltip(makeTooltipHtml(d), span));
     span.addEventListener('mouseleave', hideTooltip);
-
-    // Right-click to blacklist
+    // Right-click to blacklist item
     span.addEventListener('contextmenu', e => {
       e.preventDefault();
       addToBlacklist(d.item_id, d.name);
-      allResults = buildResults(cachedDetails);
-      buildItemIndex(allResults);
-      applyFilters();
+      allResults = buildResults(cachedDetails); buildItemIndex(allResults); applyFilters();
     });
-
     wrap.appendChild(span);
-
     if (!d.blacklisted) {
       const mkt = prices[d.item_id];
       const meta = document.createElement('div'); meta.className = 'chip-meta'; meta.style.paddingLeft = '6px';
@@ -1358,8 +1358,7 @@
       } else {
         histRow.innerHTML = `<span class="chip-sub-ico">◷</span><span class="chip-sub-na">no history</span>`;
       }
-      meta.appendChild(buyRow); meta.appendChild(histRow);
-      wrap.appendChild(meta);
+      meta.appendChild(buyRow); meta.appendChild(histRow); wrap.appendChild(meta);
     }
     return wrap;
   }
@@ -1380,23 +1379,36 @@
       return sortAsc ? (va<vb?-1:va>vb?1:0) : (va>vb?-1:va<vb?1:0);
     });
 
-    const showEvhr    = $('th-evhr').style.display !== 'none';
+    const showEvhr    = $('th-evhr').style.display    !== 'none';
     const showInstant = $('th-evinstant')?.style.display !== 'none';
-    const showMedian  = $('th-evmedian')?.style.display !== 'none';
+    const showMedian  = $('th-evmedian')?.style.display  !== 'none';
     const barMetric   = sortMode === 'evhr' ? 'evhr' : 'ev';
     const maxBar      = Math.max(...data.map(r => r[barMetric]??0), 1);
     tbodyEl.innerHTML = '';
 
     data.forEach((row, i) => {
       const rankClass = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
-      const barPct = (((row[barMetric]??0)/maxBar)*100).toFixed(1);
+      const barPct  = (((row[barMetric]??0)/maxBar)*100).toFixed(1);
       const timeStr = fmtTime(row.clearMs);
       const tr = document.createElement('tr');
 
       const tdR = document.createElement('td'); tdR.className = 'fo-rank '+rankClass; tdR.textContent = i+1; tr.appendChild(tdR);
+
+      // Dungeon name + blacklist button
       const tdN = document.createElement('td');
-      tdN.innerHTML = `<div class="dname">${row.name}</div><span class="badge badge-${row.difficulty}">${row.difficulty||'?'}</span>`;
+      const nameWrap = document.createElement('div'); nameWrap.className = 'dname-wrap';
+      const nameSpan = document.createElement('span'); nameSpan.className = 'dname'; nameSpan.textContent = row.name;
+      const blBtn = document.createElement('button'); blBtn.className = 'dname-bl-btn'; blBtn.textContent = '🚫 hide';
+      blBtn.title = 'Hide this dungeon (add to blacklist)';
+      blBtn.addEventListener('click', () => {
+        addDungeonToBlacklist(row.key);
+        allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
+      });
+      nameWrap.appendChild(nameSpan); nameWrap.appendChild(blBtn);
+      tdN.appendChild(nameWrap);
+      tdN.insertAdjacentHTML('beforeend', `<span class="badge badge-${row.difficulty}">${row.difficulty||'?'}</span>`);
       tr.appendChild(tdN);
+
       const tdE = document.createElement('td'); tdE.className = 'ev';
       tdE.innerHTML = `<span class="ev-val">${fmt(row.ev)}</span><span class="ev-sub">/ run</span>`; tr.appendChild(tdE);
 
@@ -1416,7 +1428,6 @@
         tr.appendChild(tdM);
       }
 
-      // Clear time
       const tdT = document.createElement('td'); tdT.className = 'time-cell';
       const dispEl = document.createElement('div');
       dispEl.className = 'time-display'+(timeStr?'':' no-time');
@@ -1441,8 +1452,7 @@
       inp.addEventListener('keydown', e => { if (e.key==='Enter') savBtn.click(); });
 
       const tdB = document.createElement('td'); tdB.className='bar-cell';
-      tdB.innerHTML = `<div class="ev-bar"><div class="ev-bar-fill" style="width:${barPct}%"></div></div>`;
-      tr.appendChild(tdB);
+      tdB.innerHTML = `<div class="ev-bar"><div class="ev-bar-fill" style="width:${barPct}%"></div></div>`; tr.appendChild(tdB);
 
       const tdD = document.createElement('td');
       const dropsDiv = document.createElement('div'); dropsDiv.className='drops';
