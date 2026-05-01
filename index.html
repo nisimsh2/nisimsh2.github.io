@@ -388,11 +388,6 @@
     </div>
     <div id="settings-body">
       <div class="sfield">
-        <label>Worker URL</label>
-        <input type="text" id="cfg-worker" placeholder="https://twilight-truth-180c.nisimandroi.workers.dev">
-        <div class="hint">Your Cloudflare Worker proxy URL. All API calls route through this.</div>
-      </div>
-      <div class="sfield">
         <label>Session Cookie (for My Times)</label>
         <textarea id="cfg-cookie" placeholder="Paste your session cookie here (from browser DevTools → Application → Cookies → thedigitalodyssey.com)"></textarea>
         <div class="hint">
@@ -428,7 +423,7 @@
   </div>
 
   <div id="toolbar">
-    <div class="delay-wrap">Delay <input type="number" id="fo-delay" value="350" min="80" max="3000"> ms</div>
+    <div class="delay-wrap">Delay <input type="number" id="fo-delay" value="500" min="80" max="3000"> ms</div>
     <div class="sep"></div>
     <input class="srch" id="fo-search" placeholder="Search dungeon...">
     <button class="pill active" data-diff="All">All</button>
@@ -505,7 +500,7 @@
     <div id="empty">
       <div class="ico">⚔</div>
       <p>Hit <strong style="color:var(--cyan)">Run Analysis</strong> to fetch all dungeon drop tables<br>and calculate live expected value from market prices.<br><br>
-      <span style="font-size:11px;color:var(--dim3)">First run: open <strong style="color:var(--dim2)">⚙ Settings</strong> and enter your Worker URL.</span></p>
+      <span style="font-size:11px;color:var(--dim3)">For <strong style="color:var(--green)">My Times</strong>, open <strong style="color:var(--dim2)">⚙ Settings</strong> and paste your session cookie.</span></p>
     </div>
 
   </div><!-- #body -->
@@ -517,8 +512,9 @@
 
   /* ══ CONFIG (persisted in localStorage) ══ */
   const CFG_KEY = 'fo_v41_config';
-  let cfg = { workerUrl: '', cookie: '' };
-  try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r) }; } catch(e) {}
+  const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
+  let cfg = { workerUrl: WORKER_URL, cookie: '' };
+  try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r), workerUrl: WORKER_URL }; } catch(e) {}
   function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e) {} }
 
   /* ══ CACHE HELPERS ══ */
@@ -585,14 +581,8 @@
   const noticeEl   = $('notice');
 
   /* ══ WORKER URL ══ */
-  function workerUrl() {
-    const u = cfg.workerUrl.trim().replace(/\/$/, '');
-    if (!u) { showNotice('Worker URL not set. <a id="n-open-settings">Open Settings</a> to configure.'); return null; }
-    return u;
-  }
   function apiUrl(path) {
-    const w = workerUrl();
-    return w ? w + path : null;
+    return WORKER_URL + path;
   }
 
   /* ══ NOTICE ══ */
@@ -605,7 +595,6 @@
 
   /* ══ SETTINGS ══ */
   function openSettings() {
-    $('cfg-worker').value = cfg.workerUrl;
     $('cfg-cookie').value = cfg.cookie;
     $('settings-overlay').classList.add('open');
   }
@@ -615,7 +604,6 @@
   $('settings-cancel').addEventListener('click', closeSettings);
   $('settings-overlay').addEventListener('click', e => { if (e.target === $('settings-overlay')) closeSettings(); });
   $('settings-save').addEventListener('click', () => {
-    cfg.workerUrl = $('cfg-worker').value.trim().replace(/\/$/, '');
     cfg.cookie    = $('cfg-cookie').value.trim();
     saveCfg(); closeSettings(); hideNotice();
   });
@@ -699,9 +687,8 @@
   /* ══ FETCH HELPERS ══ */
   async function fetchJson(path) {
     const url = apiUrl(path);
-    if (!url) throw new Error('Worker URL not configured');
     for (let attempt = 0; attempt < 5; attempt++) {
-      const headers = {};
+      const headers = { 'Content-Type': 'application/json' };
       if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
       const res = await fetch(url, { headers });
       if (res.status === 429) {
@@ -749,9 +736,8 @@
 
   async function fetchMarketSide(itemId, itemName, side) {
     const url = apiUrl(`/api/market/listings?item=${itemId}&side=${side}&limit=1`);
-    if (!url) return null;
     for (let attempt = 0; attempt < 5; attempt++) {
-      const headers = {};
+      const headers = { 'Content-Type': 'application/json' };
       if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
       const res = await fetch(url, { headers });
       if (res.status === 429) {
@@ -775,8 +761,7 @@
   async function fetchTradeHistory(itemId) {
     try {
       const url = apiUrl(`/api/market/trades?item=${itemId}&limit=20`);
-      if (!url) return null;
-      const headers = {};
+      const headers = { 'Content-Type': 'application/json' };
       if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
       const res = await fetch(url, { headers });
       if (!res.ok) return null;
@@ -807,7 +792,6 @@
   /* ══ MAIN ANALYSIS ══ */
   async function runAnalysis(pricesOnly = false) {
     if (isRunning) return;
-    if (!workerUrl()) return;
     hideNotice();
     isRunning = true;
     $('btn-run').disabled = $('btn-refresh').disabled = $('btn-times').disabled = true;
@@ -836,7 +820,7 @@
       prices = {};
       allResults = [];
 
-      const PRICE_CONCURRENCY = 4;
+      const PRICE_CONCURRENCY = 2;
       let activePrice = 0;
       const priceQueue = [];
 
@@ -1068,7 +1052,9 @@
 
   async function loadMyTimes() {
     if (!cfg.cookie) {
-      showNotice('Session cookie required for My Times. <a id="n-open-settings">Open Settings</a> to add it.');
+      showNotice('Session cookie required for My Times. <a id="n-open-settings">Open Settings ⚙</a> to add it.');
+      const a = document.getElementById('n-open-settings');
+      if (a) a.addEventListener('click', openSettings);
       return;
     }
     $('btn-times').disabled = true;
@@ -1471,9 +1457,9 @@
     });
   }
 
-  /* ── Auto-open settings on first visit ── */
-  if (!cfg.workerUrl) {
-    setTimeout(openSettings, 600);
+  /* ── Auto-run if dungeon cache is warm ── */
+  if (cacheGet('dungeon_list', Infinity)) {
+    setTimeout(() => runAnalysis(false), 400);
   }
 
 })();
