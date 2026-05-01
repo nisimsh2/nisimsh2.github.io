@@ -555,6 +555,7 @@
   let diffFilter    = 'All';
   let sortMode      = 'ev';
   let historyReady  = false;
+  let ratePausedUntil = 0;
   let prices        = {};
   let cachedDetails = [];
   let itemIndex     = {};
@@ -684,37 +685,114 @@
     return `${Math.floor(diff/86400000)}d ago`;
   }
 
-  /* ══ FETCH HELPERS ══ */
-  async function fetchJson(path) {
-    const url = apiUrl(path);
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const headers = { 'Content-Type': 'application/json' };
-      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-      const res = await fetch(url, { headers });
-      if (res.status === 429) {
-        const wait = 35000;
-        log(`429 rate limit — cooling down ${wait/1000}s…`, 'warn');
-        for (let s = Math.floor(wait/1000); s > 0; s--) {
-          await sleep(1000);
-          const lines = logEl.querySelectorAll('.ll');
-          if (lines.length) lines[lines.length-1].textContent = `> 429 rate limit — resuming in ${s}s…`;
-        }
-        continue;
-      }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
+  /* ══ GLOBAL RATE-LIMITER ══
+   *
+   * Single shared gate for ALL market API calls.
+   * When a 429 is received, `ratePausedUntil` is set to now+cooldown.
+   * Every caller awaits `rateGate()` before firing — so the pause is truly global,
+   * not per-slot. No concurrent market requests; they queue behind each other.
+   *
+   * fetchJson (dungeon/rankings data) is separate and doesn't go through the gate
+   * because it's not market — but it still respects 429 with its own wait.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+  async function rateGate(label = '') {
+    const now = Date.now();
+    if (ratePausedUntil > now) {
+      const wait = ratePausedUntil - now;
+      // Update last log line with countdown
+      const tick = async () => {
+        const rem = Math.ceil((ratePausedUntil - Date.now()) / 1000);
+        if (rem <= 0) return;
+        const lines = logEl.querySelectorAll('.ll');
+        if (lines.length) lines[lines.length-1].textContent = `> ⏸ rate limit — resuming in ${rem}s…`;
+        await sleep(1000);
+        await tick();
+      };
+      await tick();
+      await sleep(Math.max(0, ratePausedUntil - Date.now()));
     }
-    throw new Error('Rate limit: gave up after 5 retries');
   }
 
+  function triggerRatePause(seconds = 12) {
+    // Only extend the pause, never shorten it
+    ratePausedUntil = Math.max(ratePausedUntil, Date.now() + seconds * 1000);
+    log(`⚠ 429 — pausing all market requests for ${seconds}s`, 'warn');
+  }
+
+  // Single-flight market fetch: awaits the gate, fires ONE request, handles 429 globally
+  async function marketFetch(path, label = '') {
+    const url = apiUrl(path);
+    for (let attempt = 0; attempt < 8; attempt++) {
+      await rateGate(label);
+      const headers = { 'Content-Type': 'application/json' };
+      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
+      let res;
+      try { res = await fetch(url, { headers }); }
+      catch (e) { await sleep(2000); continue; }
+
+      if (res.status === 429) {
+        triggerRatePause(15);  // 15s cooldown on 429
+        continue;
+      }
+      return res;
+    }
+    return null;  // gave up
+  }
+
+  /* ── fetchJson: for dungeon/wiki/rankings endpoints (not market) ── */
+  async function fetchJson(path) {
+    const url = apiUrl(path);
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
+      let res;
+      try { res = await fetch(url, { headers }); }
+      catch (e) { await sleep(2000); continue; }
+
+      if (res.status === 429) {
+        const secs = 20;
+        log(`429 — cooling down ${secs}s…`, 'warn');
+        await sleep(secs * 1000);
+        continue;
+      }
+      if (!res.ok) {
+        // Try to detect HTML error pages (worker returning game's error page)
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('text/html')) throw new Error(`Server returned HTML (status ${res.status}) — check your cookie`);
+        throw new Error(`HTTP ${res.status}`);
+      }
+      // Guard against HTML responses even on 200 (misconfigured worker)
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('text/html')) throw new Error('Got HTML instead of JSON — check Worker config');
+      return res.json();
+    }
+    throw new Error('Too many retries — gave up');
+  }
+
+  /* ── Price fetchers using the global rate gate ── */
   async function fetchPriceFast(itemId, itemName) {
     const cached = cacheGet('price_' + itemId, TTL_PRICES);
     if (cached) return cached;
     try {
-      const sellRes = await fetchMarketSide(itemId, itemName, 'sell');
-      const listPrice = sellRes?.price ?? null;
-      const buyRes = listPrice ? await fetchMarketSide(itemId, itemName, 'buy') : null;
-      const buyPrice = buyRes?.price ?? null;
+      // sell side
+      const sellRes = await marketFetch(`/api/market/listings?item=${itemId}&side=sell&limit=1`, itemName);
+      if (!sellRes) return null;
+      if (sellRes.status === 400) return null;  // non-tradeable
+      if (!sellRes.ok) return null;
+      const sellData = await sellRes.json();
+      const listPrice = sellData?.listings?.length ? sellData.listings[0].price : null;
+
+      // buy side (only if sell listing exists)
+      let buyPrice = null;
+      if (listPrice) {
+        const buyRes = await marketFetch(`/api/market/listings?item=${itemId}&side=buy&limit=1`, itemName);
+        if (buyRes && buyRes.ok) {
+          const buyData = await buyRes.json();
+          buyPrice = buyData?.listings?.length ? buyData.listings[0].price : null;
+        }
+      }
+
       if (!listPrice && !buyPrice) return null;
       return { price: listPrice ?? null, listPrice, buyPrice, medianPrice: null, lastSalePrice: null, lastSaleAt: null, velocity: null, isOutlier: false, historyReady: false, name: itemName };
     } catch(e) { return null; }
@@ -724,49 +802,10 @@
     const existing = prices[itemId];
     if (!existing || !existing.listPrice) return;
     try {
-      const history = await fetchTradeHistory(itemId);
-      if (!history) return;
-      const { medianPrice = null, lastSalePrice = null, lastSaleAt = null, velocity = null } = history;
-      const isOutlier = !!(existing.listPrice && medianPrice && existing.listPrice > medianPrice * 2.5);
-      const effectivePrice = isOutlier ? medianPrice : existing.listPrice ? existing.listPrice : medianPrice ?? null;
-      prices[itemId] = { ...existing, price: effectivePrice, medianPrice, lastSalePrice, lastSaleAt, velocity, isOutlier, historyReady: true };
-      cacheSet('price_' + itemId, prices[itemId]);
-    } catch(e) {}
-  }
-
-  async function fetchMarketSide(itemId, itemName, side) {
-    const url = apiUrl(`/api/market/listings?item=${itemId}&side=${side}&limit=1`);
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const headers = { 'Content-Type': 'application/json' };
-      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-      const res = await fetch(url, { headers });
-      if (res.status === 429) {
-        const wait = 35000;
-        log(`429 (market/${side}) — cooling down ${wait/1000}s…`, 'warn');
-        for (let s = Math.floor(wait/1000); s > 0; s--) {
-          await sleep(1000);
-          const lines = logEl.querySelectorAll('.ll');
-          if (lines.length) lines[lines.length-1].textContent = `> 429 (market/${side}) — resuming in ${s}s…`;
-        }
-        continue;
-      }
-      if (res.status === 400) return null;
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data?.listings?.length ? { price: data.listings[0].price } : null;
-    }
-    return null;
-  }
-
-  async function fetchTradeHistory(itemId) {
-    try {
-      const url = apiUrl(`/api/market/trades?item=${itemId}&limit=20`);
-      const headers = { 'Content-Type': 'application/json' };
-      if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
-      const res = await fetch(url, { headers });
-      if (!res.ok) return null;
+      const res = await marketFetch(`/api/market/trades?item=${itemId}&limit=20`, itemId);
+      if (!res || !res.ok) return;
       const trades = await res.json();
-      if (!Array.isArray(trades) || !trades.length) return null;
+      if (!Array.isArray(trades) || !trades.length) return;
       const sorted = [...trades].sort((a, b) => a.price - b.price);
       const half = sorted.reduce((s, t) => s + t.qty, 0) / 2;
       let cum = 0, medianPrice = sorted[0].price;
@@ -774,8 +813,13 @@
       const spanHours = (trades[0].at - trades[trades.length - 1].at) / 3600000;
       const totalUnits = trades.reduce((s, t) => s + t.qty, 0);
       const velocity = spanHours > 0.01 ? Math.round(totalUnits / spanHours) : null;
-      return { medianPrice, velocity, sampleSize: trades.length, lastSalePrice: trades[0]?.price ?? null, lastSaleAt: trades[0]?.at ?? null };
-    } catch(e) { return null; }
+      const lastSalePrice = trades[0]?.price ?? null;
+      const lastSaleAt    = trades[0]?.at    ?? null;
+      const isOutlier = !!(existing.listPrice && medianPrice && existing.listPrice > medianPrice * 2.5);
+      const effectivePrice = isOutlier ? medianPrice : existing.listPrice ?? medianPrice ?? null;
+      prices[itemId] = { ...existing, price: effectivePrice, medianPrice, lastSalePrice, lastSaleAt, velocity, isOutlier, historyReady: true };
+      cacheSet('price_' + itemId, prices[itemId]);
+    } catch(e) {}
   }
 
   function extractItems(dungeonDetail) {
@@ -819,31 +863,14 @@
       const details = [];
       prices = {};
       allResults = [];
+      ratePausedUntil = 0;  // reset rate gate for this run
 
-      const PRICE_CONCURRENCY = 2;
-      let activePrice = 0;
-      const priceQueue = [];
-
-      function runNextPrice() {
-        while (activePrice < PRICE_CONCURRENCY && priceQueue.length) {
-          const { itemId, itemName, resolve } = priceQueue.shift();
-          activePrice++;
-          fetchPriceFast(itemId, itemName).then(result => {
-            if (result) prices[itemId] = result;
-            activePrice--; resolve(); runNextPrice();
-          });
-        }
-      }
-
-      function queuePrice(itemId, itemName) {
-        if (prices[itemId] !== undefined) return Promise.resolve();
-        return new Promise(resolve => { priceQueue.push({ itemId, itemName, resolve }); runNextPrice(); });
-      }
-
-      const queuedItems = new Set();
+      const queuedItems = new Set();   // item IDs to price-fetch (in order encountered)
+      const itemNameMap  = new Map();  // id → name
       let dungeonsDone = 0;
       const total = dungeons.length;
 
+      // ── Phase 1a: fetch all dungeon details sequentially ──────────────
       for (let i = 0; i < total; i++) {
         if (i > 0) await sleep(delay);
         let detail;
@@ -865,27 +892,37 @@
         }
         dungeonsDone++; setBar(dungeonsDone, total);
 
+        // Collect item IDs (don't fetch prices yet — avoid interleaving with dungeon fetches)
         const itemMap = extractItems(detail);
         for (const [id, name] of itemMap) {
           if (!queuedItems.has(id)) {
             queuedItems.add(id);
+            itemNameMap.set(id, name);
             const cached = cacheGet('price_' + id, TTL_PRICES);
-            if (cached) { prices[id] = cached; }
-            else { queuePrice(id, name); }
+            if (cached) prices[id] = cached;
           }
         }
       }
 
       cachedDetails = details;
-      log(`All dungeon data fetched. Waiting for ${queuedItems.size} item prices…`, 'ok');
+      const itemsToFetch = [...queuedItems].filter(id => !prices[id]);
+      log(`Dungeons done. Fetching prices for ${itemsToFetch.length} items (1 at a time)…`, 'ok');
 
-      await new Promise(resolve => {
-        function check() {
-          if (activePrice === 0 && priceQueue.length === 0) resolve();
-          else setTimeout(check, 100);
-        }
-        check();
-      });
+      // ── Phase 1b: fetch prices strictly one at a time ─────────────────
+      // One item = up to 2 requests (sell + buy), strictly sequential.
+      // The global rateGate() ensures any 429 pauses ALL subsequent requests.
+      const ITEM_DELAY = 300;  // ms between items (keeps us well under rate limits)
+      for (let i = 0; i < itemsToFetch.length; i++) {
+        const id   = itemsToFetch[i];
+        const name = itemNameMap.get(id) || id;
+        if (i > 0) await sleep(ITEM_DELAY);
+        const result = await fetchPriceFast(id, name);
+        if (result) prices[id] = result;
+        // Update progress bar in price phase (second half)
+        setBar(total + i + 1, total + itemsToFetch.length);
+        // Log every 20 items so user sees progress
+        if ((i + 1) % 20 === 0) log(`Prices: ${i+1}/${itemsToFetch.length}…`);
+      }
 
       log(`Phase 1 done — ${Object.keys(prices).length} items priced.`, 'ok');
 
@@ -898,17 +935,16 @@
       renderCards(allResults);
       applyFilters();
 
-      // Phase 2: history in background
+      // Phase 2: history in background — sequential with delay
       historyReady = false;
       log('Fetching trade history in background…', 'ok');
       setTimeout(async () => {
         const uniqueIds = [...new Set(allResults.flatMap(r => r.drops.map(d => d.item_id)))];
-        let done = 0;
-        for (let i = 0; i < uniqueIds.length; i += 4) {
-          const batch = uniqueIds.slice(i, i + 4);
-          await Promise.all(batch.map(id => enrichPriceWithHistory(id)));
-          done += batch.length;
-          if (i % 20 === 0 || done >= uniqueIds.length) {
+        for (let i = 0; i < uniqueIds.length; i++) {
+          if (i > 0) await sleep(400);
+          await enrichPriceWithHistory(uniqueIds[i]);
+          // Re-render every 10 items
+          if ((i + 1) % 10 === 0 || i === uniqueIds.length - 1) {
             allResults = buildResults(cachedDetails);
             buildItemIndex(allResults);
             renderCards(allResults);
