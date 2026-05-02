@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚔ Farm Optimizer · Digital Odyssey</title>
-<!-- v4.4 — dungeon blacklist, EV/hr persistence, session_id hint -->
+<!-- v4.5 — DRP Rankings tab, My Listings tab -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -268,6 +268,79 @@
   #settings-footer { padding:12px 20px; border-top:1px solid var(--border);
     display:flex; justify-content:flex-end; gap:8px; background:var(--bg3); }
 
+  /* DRP RANKINGS VIEW */
+  #drp-view { display:none; }
+  .drp-banner { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .drp-card { background:var(--bg2); border:1px solid var(--border); padding:11px 16px; flex:1; min-width:140px; }
+  .drp-card-lbl { font-size:9px; font-weight:600; letter-spacing:.22em; color:#345a72; text-transform:uppercase; margin-bottom:4px; }
+  .drp-card-val { font-family:'Orbitron',sans-serif; font-size:18px; font-weight:700; color:var(--cyan); }
+  .drp-card-sub { font-size:11px; color:var(--dim); margin-top:3px; }
+  .drp-nearby { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--purple);
+    padding:10px 14px; margin-bottom:14px; font-size:12px; }
+  .drp-nearby-title { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--purple); letter-spacing:.12em; margin-bottom:8px; }
+  .drp-nearby-row { display:flex; gap:10px; align-items:center; padding:3px 0; border-bottom:1px solid var(--border2); }
+  .drp-nearby-row:last-child { border-bottom:none; }
+  .drp-nearby-pos { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; width:36px; color:var(--dim); }
+  .drp-nearby-me { color:var(--cyan) !important; }
+  .drp-nearby-name { flex:1; font-size:12px; }
+  .drp-nearby-drp { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--yellow); }
+  .drp-sort-bar { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+  .drp-sort-btn { font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; letter-spacing:.09em;
+    padding:5px 11px; border:1px solid var(--border); background:transparent; color:var(--dim2);
+    cursor:pointer; transition:all .12s; }
+  .drp-sort-btn.active { border-color:var(--yellow); color:var(--yellow); background:rgba(255,213,79,.06); }
+  .drp-load-btn { margin-left:auto; }
+  #drp-note { font-size:11px; color:var(--dim3); margin-bottom:10px; font-style:italic; }
+  table.drp-tbl { width:100%; border-collapse:collapse; }
+  table.drp-tbl thead th { padding:7px 12px; text-align:left; font-family:'Orbitron',sans-serif;
+    font-size:8px; letter-spacing:.15em; color:var(--dim2); border-bottom:1px solid var(--border);
+    white-space:nowrap; cursor:pointer; user-select:none; }
+  table.drp-tbl thead th:hover { color:var(--blue2); }
+  table.drp-tbl thead th.drp-sorted { color:var(--yellow); }
+  table.drp-tbl tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
+  table.drp-tbl tbody tr:hover { background:rgba(0,229,255,.03); }
+  table.drp-tbl td { padding:8px 12px; vertical-align:middle; font-size:12px; }
+  .drp-tbl-name { font-weight:600; color:#e8f4ff; }
+  .drp-tbl-calc { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--yellow); }
+  .drp-tbl-known { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--purple); }
+  .drp-tbl-time { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--blue); }
+  .drp-tbl-hr { font-family:'Orbitron',sans-serif; font-size:12px; color:var(--green); }
+  .drp-tbl-clears { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); }
+
+  /* MY LISTINGS VIEW */
+  #listings-view { display:none; }
+  .lst-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .lst-header-title { font-family:'Orbitron',sans-serif; font-size:10px; color:var(--cyan); letter-spacing:.12em; }
+  .lst-note { font-size:11px; color:var(--dim3); font-style:italic; flex:1; }
+  .lst-section-title { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--dim2); letter-spacing:.15em;
+    margin:16px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+  .lst-section-title span { color:var(--cyan); margin-left:8px; }
+  table.lst-tbl { width:100%; border-collapse:collapse; margin-bottom:6px; }
+  table.lst-tbl thead th { padding:7px 12px; text-align:left; font-family:'Orbitron',sans-serif;
+    font-size:8px; letter-spacing:.14em; color:var(--dim2); border-bottom:1px solid var(--border); white-space:nowrap; }
+  table.lst-tbl tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
+  table.lst-tbl tbody tr:hover { background:rgba(0,229,255,.03); }
+  table.lst-tbl td { padding:8px 12px; vertical-align:middle; font-size:12px; }
+  .lst-item-name { font-weight:600; color:#e8f4ff; font-size:12px; margin-bottom:2px; }
+  .lst-item-qty { font-size:10px; color:var(--dim); }
+  .lst-price { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; }
+  .lst-price.sell { color:var(--amber); }
+  .lst-price.buy  { color:var(--green); }
+  .lst-status { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600;
+    padding:3px 8px; border-radius:2px; border:1px solid; white-space:nowrap; }
+  .lst-status.best  { border-color:var(--green); color:var(--green); background:rgba(61,214,140,.07); }
+  .lst-status.warn  { border-color:var(--amber); color:var(--amber); background:rgba(255,179,71,.07); }
+  .lst-status.load  { border-color:var(--border); color:var(--dim3); }
+  .lst-market-price { font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .lst-market-price.cheaper { color:var(--red); }
+  .lst-market-price.same    { color:var(--green); }
+  .lst-trade-info { font-size:10px; font-family:'JetBrains Mono',monospace; }
+  .lst-trade-price { color:var(--blue2); }
+  .lst-trade-age   { color:var(--dim3); margin-left:4px; }
+  .lst-badge-partial { display:inline-block; font-size:9px; padding:1px 5px; border:1px solid var(--border); color:var(--dim2); }
+  .lst-badge-full   { display:inline-block; font-size:9px; padding:1px 5px; border:1px solid var(--border2); color:var(--dim3); }
+  .lst-badge-partial-fill { border-color:var(--amber); color:var(--amber); }
+
   /* REFRESH DROPDOWN */
   .ref-group { position:relative; display:inline-flex; }
   .ref-dropdown { display:none; position:absolute; top:100%; right:0; background:var(--bg1);
@@ -312,7 +385,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.4</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.5</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -343,6 +416,8 @@
     <button class="main-tab active" data-view="rankings">DUNGEON RANKINGS</button>
     <button class="main-tab" data-view="itemfinder">ITEM FINDER</button>
     <button class="main-tab" data-view="blacklist">BLACKLIST</button>
+    <button class="main-tab" data-view="drp">DRP RANKINGS</button>
+    <button class="main-tab" data-view="listings">MY LISTINGS</button>
   </div>
 
   <div id="sort-tabs">
@@ -429,6 +504,70 @@
         <div style="margin-top:14px">
           <div style="font-size:10px;color:var(--dim3);margin-bottom:8px;letter-spacing:.05em">SEEN ITEMS — click to blacklist:</div>
           <div class="bl-known-grid" id="bl-known-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRP RANKINGS VIEW -->
+    <div id="drp-view">
+      <div class="drp-sort-bar">
+        <button class="drp-sort-btn active" data-drpsort="drpPerRun">DRP / Run</button>
+        <button class="drp-sort-btn" data-drpsort="drpPerMin">DRP / Min</button>
+        <button class="drp-sort-btn" data-drpsort="drpPerHr">DRP / Hour</button>
+        <button class="drp-sort-btn" data-drpsort="totalDrp">Total DRP</button>
+        <button class="drp-sort-btn" data-drpsort="clears">Clears</button>
+        <button class="btn green drp-load-btn" id="btn-drp-load">↻ Refresh DRP</button>
+      </div>
+      <div id="drp-banner" class="drp-banner"></div>
+      <div id="drp-nearby" class="drp-nearby" style="display:none">
+        <div class="drp-nearby-title">// NEARBY RANKINGS</div>
+        <div id="drp-nearby-rows"></div>
+      </div>
+      <div id="drp-note">Open this tab and click Refresh DRP to load ranking data.</div>
+      <div style="overflow-x:auto">
+        <table class="drp-tbl">
+          <thead><tr>
+            <th data-drpcol="name">Dungeon</th>
+            <th data-drpcol="diff">Mode</th>
+            <th data-drpcol="clears">Clears</th>
+            <th data-drpcol="drpPerRun" class="drp-sorted">DRP / Run ▼</th>
+            <th data-drpcol="knownDrp">Known DRP</th>
+            <th data-drpcol="bestTime">Best Time</th>
+            <th data-drpcol="drpPerMin">DRP / Min</th>
+            <th data-drpcol="drpPerHr">DRP / Hr</th>
+          </tr></thead>
+          <tbody id="drp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MY LISTINGS VIEW -->
+    <div id="listings-view">
+      <div class="lst-header">
+        <div class="lst-header-title">// MY MARKET LISTINGS</div>
+        <div class="lst-note" id="lst-note">Switch to this tab after running analysis to auto-load, or click Refresh.</div>
+        <button class="btn green" id="btn-lst-load">↻ Refresh Listings</button>
+      </div>
+      <div id="lst-sell-section" style="display:none">
+        <div class="lst-section-title">SELL ORDERS <span id="lst-sell-count"></span></div>
+        <div style="overflow-x:auto">
+          <table class="lst-tbl">
+            <thead><tr>
+              <th>Item</th><th>My Price</th><th>Qty</th><th>Status</th><th>Market Cheapest</th><th>Last Trade</th><th>Expires</th>
+            </tr></thead>
+            <tbody id="lst-sell-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="lst-buy-section" style="display:none">
+        <div class="lst-section-title">BUY ORDERS <span id="lst-buy-count"></span></div>
+        <div style="overflow-x:auto">
+          <table class="lst-tbl">
+            <thead><tr>
+              <th>Item</th><th>My Price</th><th>Qty</th><th>Status</th><th>Market Highest</th><th>Last Trade</th><th>Expires</th>
+            </tr></thead>
+            <tbody id="lst-buy-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -555,6 +694,9 @@
   let itemIndex       = {};
   let currentView     = 'rankings';
   let isRunning       = false;
+  let drpLoaded       = false;
+  let listingsLoaded  = false;
+  let isListingsRunning = false;
 
   /* ══ DOM ══ */
   const $ = id => document.getElementById(id);
@@ -564,6 +706,7 @@
   const formulaEl = $('formula'), mainTabs = $('main-tabs'), timesPanel = $('times-panel');
   const itemFinder = $('item-finder'), ifInput = $('if-input'), tooltipEl = $('tooltip');
   const noticeEl = $('notice'), blacklistView = $('blacklist-view');
+  const drpView = $('drp-view'), listingsView = $('listings-view');
 
   /* ══ SETTINGS ══ */
   function openSettings() { $('cfg-cookie').value = cfg.cookie; $('settings-overlay').classList.add('open'); }
@@ -590,6 +733,15 @@
     document.querySelectorAll('.sort-tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active'); sortMode = t.dataset.sort; sortCol = t.dataset.sort; sortAsc = false; applyFilters();
   }));
+  document.querySelectorAll('[data-drpsort]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-drpsort]').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); renderDrpTable(b.dataset.drpsort);
+  }));
+  document.querySelectorAll('[data-drpcol]').forEach(th => th.addEventListener('click', () => {
+    const col = th.dataset.drpcol;
+    document.querySelectorAll('[data-drpcol]').forEach(t => t.classList.remove('drp-sorted'));
+    th.classList.add('drp-sorted'); renderDrpTable(col);
+  }));
   document.querySelectorAll('.main-tab').forEach(t => t.addEventListener('click', () => {
     document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active'); switchView(t.dataset.view);
@@ -607,6 +759,8 @@
   $('btn-times').addEventListener('click', loadMyTimes);
   $('btn-clearcache').addEventListener('click', () => { cacheClearDungeons(); cacheClearPrices(); log('Cache cleared.', 'warn'); });
   ifInput.addEventListener('input', renderItemFinder);
+  $('btn-drp-load').addEventListener('click', () => { drpLoaded = false; loadDrpRankings(); });
+  $('btn-lst-load').addEventListener('click', () => { listingsLoaded = false; loadMyListings(); });
 
   /* ══ DUNGEON BLACKLIST UI ══ */
   $('dbl-add-btn').addEventListener('click', () => {
@@ -714,11 +868,15 @@
     cardsEl.style.display       = view === 'rankings'   ? 'grid'  : 'none';
     itemFinder.style.display    = view === 'itemfinder' ? 'block' : 'none';
     blacklistView.style.display = view === 'blacklist'  ? 'block' : 'none';
+    drpView.style.display       = view === 'drp'        ? 'block' : 'none';
+    listingsView.style.display  = view === 'listings'   ? 'block' : 'none';
     sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
     searchEl.style.display      = view === 'rankings'   ? '' : 'none';
     if (view === 'itemfinder') renderItemFinder();
     if (view === 'blacklist')  renderBlacklistView();
+    if (view === 'drp' && !drpLoaded) loadDrpRankings();
+    if (view === 'listings' && !listingsLoaded && !isRunning) loadMyListings();
   }
 
   /* ══ HELPERS ══ */
@@ -951,6 +1109,8 @@
       renderCards(allResults);
       applyFilters();
       log(`Table ready — ${allResults.length} combos. Fetching buy orders…`, 'ok');
+      // Auto-load listings after sell phase if not already loaded
+      if (!listingsLoaded && cfg.cookie) setTimeout(() => loadMyListings(), 500);
 
       /* ── Buy phase ── */
       if (phase === 'fresh' || phase === 'all' || phase === 'buy') {
@@ -1462,6 +1622,289 @@
       tdD.appendChild(dropsDiv); tr.appendChild(tdD);
       tbodyEl.appendChild(tr);
     });
+  }
+
+  /* ══ DRP RANKINGS ══ */
+  const KNOWN_DRP_MAP = {
+    "Agumon's Madness":5,"Shellmon's Place":7,"Kuwagamon's Terror":10,
+    "Love Serenade":20,"Meramon Attacks":15,"Seadramon's Confusion":15,
+    "Ogremon's Rampage":15,"Bound Champion":15,"Guardian of the Ruins":15,
+    "The First Trial":20,"The Rise of the Fallen Angel":18,"Gazimon Panic":18,
+    "Server Continent Canyon":100,"Infernal Bone Demon":20,"Nanomon's Hideout":20,
+    "Dokugumon's Barricade":20,"Mammothmon's Stampede":20,"Hell in Tokyo Tower":20,
+    "Gesomon in Real World":20,"Raremon's Assault":20,"Night Raid":20,
+    "Night Raid in Minato":20,"Stage of Phantom":20,"The Dark Roar":20,
+    "The Undead King":30,"The Undying":30,"Tailmon's Choice":30,"The Golden Seadragon":600
+  };
+
+  let drpRows = [];
+  let drpSortCol = 'drpPerRun';
+
+  function renderDrpTable(col) {
+    if (col) drpSortCol = col;
+    const tbody = $('drp-tbody');
+    if (!tbody || !drpRows.length) return;
+    const sorted = [...drpRows].sort((a,b) => {
+      const va = a[drpSortCol] ?? -Infinity, vb = b[drpSortCol] ?? -Infinity;
+      return vb - va;
+    });
+    tbody.innerHTML = '';
+    sorted.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="drp-tbl-name">${row.name}</td>
+        <td><span class="badge badge-${row.diffName}">${row.diffName}</span></td>
+        <td class="drp-tbl-clears">${row.clears.toLocaleString()}</td>
+        <td class="drp-tbl-calc">${row.drpPerRun.toFixed(2)}</td>
+        <td class="drp-tbl-known">${row.knownDrp != null ? row.knownDrp : '<span style="color:var(--dim3)">—</span>'}</td>
+        <td class="drp-tbl-time">${fmtTime(row.bestTimeMs) || '<span style="color:var(--dim3)">—</span>'}</td>
+        <td class="drp-tbl-hr">${row.drpPerMin != null ? row.drpPerMin.toFixed(1) : '<span style="color:var(--dim3)">—</span>'}</td>
+        <td class="drp-tbl-hr">${row.drpPerHr != null ? row.drpPerHr.toFixed(0) : '<span style="color:var(--dim3)">—</span>'}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadDrpRankings() {
+    if (!cfg.cookie) {
+      $('drp-note').textContent = 'Session cookie required — open ⚙ Settings.';
+      return;
+    }
+    drpLoaded = true;
+    $('btn-drp-load').disabled = true;
+    $('drp-note').textContent = 'Fetching ranking data…';
+    drpRows = [];
+    $('drp-tbody').innerHTML = '';
+    $('drp-banner').innerHTML = '';
+    $('drp-nearby').style.display = 'none';
+    try {
+      const [rankDungeons, meData] = await Promise.all([
+        apiFetch('/api/rankings/dungeons'),
+        apiFetch('/api/rankings/me')
+      ]);
+
+      const rankMap = {};
+      for (const e of (rankDungeons || [])) {
+        rankMap[`${e.dungeon_id}_${e.difficulty}`] = e.dungeon_name || e.name || `Dungeon ${e.dungeon_id}`;
+      }
+
+      const tamers = meData?.tamers || [];
+      if (!tamers.length) { $('drp-note').textContent = 'No ranking data found.'; return; }
+      const me = tamers.reduce((a,b) => (a.total_drp||0) > (b.total_drp||0) ? a : b);
+
+      // Banner cards
+      const bannerEl = $('drp-banner');
+      bannerEl.innerHTML = `
+        <div class="drp-card"><div class="drp-card-lbl">Rank Position</div>
+          <div class="drp-card-val">#${me.position ?? '?'}</div>
+          <div class="drp-card-sub">Bracket ${me.bracket ?? '?'}</div></div>
+        <div class="drp-card"><div class="drp-card-lbl">Total DRP</div>
+          <div class="drp-card-val">${(me.total_drp||0).toLocaleString()}</div>
+          <div class="drp-card-sub">${(me.clear_count||0).toLocaleString()} total clears</div></div>
+        <div class="drp-card"><div class="drp-card-lbl">Tamer</div>
+          <div class="drp-card-val" style="font-size:14px">${me.tamer_name||'—'}</div>
+          <div class="drp-card-sub">${(me.dungeon_breakdown||[]).length} dungeon entries</div></div>`;
+
+      // Nearby rankings
+      if (me.nearby && me.nearby.length) {
+        const nearbyEl = $('drp-nearby-rows');
+        nearbyEl.innerHTML = '';
+        $('drp-nearby').style.display = 'block';
+        me.nearby.forEach(n => {
+          const row = document.createElement('div'); row.className = 'drp-nearby-row';
+          const isMe = n.is_me;
+          row.innerHTML = `
+            <div class="drp-nearby-pos ${isMe?'drp-nearby-me':''}">#${n.position}</div>
+            <div class="drp-nearby-name" style="${isMe?'color:var(--cyan);font-weight:600':''}">
+              ${isMe ? '▶ ' : ''}${n.tamer_name}</div>
+            <div class="drp-nearby-drp">${(n.total_drp||0).toLocaleString()} DRP</div>`;
+          nearbyEl.appendChild(row);
+        });
+      }
+
+      // Build DRP rows from dungeon_breakdown
+      // Deduplicate: same dungeon_id+difficulty can appear multiple times — keep best time, sum drp/clears
+      const dedupMap = {};
+      for (const e of (me.dungeon_breakdown || [])) {
+        const k = `${e.dungeon_id}_${e.difficulty}`;
+        if (!dedupMap[k]) {
+          dedupMap[k] = { ...e };
+        } else {
+          dedupMap[k].drp_earned  = (dedupMap[k].drp_earned  || 0) + (e.drp_earned  || 0);
+          dedupMap[k].clear_count = (dedupMap[k].clear_count || 0) + (e.clear_count || 0);
+          if (e.best_time_ms && (!dedupMap[k].best_time_ms || e.best_time_ms < dedupMap[k].best_time_ms))
+            dedupMap[k].best_time_ms = e.best_time_ms;
+        }
+      }
+
+      drpRows = Object.values(dedupMap).map(e => {
+        const dName  = DIFF_MAP[e.difficulty] || `Mode ${e.difficulty}`;
+        const rName  = rankMap[`${e.dungeon_id}_${e.difficulty}`] || `ID ${e.dungeon_id}`;
+        const drpPerRun = e.clear_count > 0 ? e.drp_earned / e.clear_count : 0;
+        const knownDrp  = KNOWN_DRP_MAP[rName] ?? null;
+        const drpPerMin = e.best_time_ms > 0 ? (drpPerRun / (e.best_time_ms / 60000)) : null;
+        const drpPerHr  = drpPerMin != null ? drpPerMin * 60 : null;
+        return { name:rName, diffName:dName, clears:e.clear_count||0, totalDrp:e.drp_earned||0,
+          drpPerRun, knownDrp, bestTimeMs:e.best_time_ms||null, drpPerMin, drpPerHr };
+      });
+
+      $('drp-note').textContent = `${drpRows.length} dungeon entries for "${me.tamer_name}". DRP/run is calculated from your totals. Known DRP is from the latest patch notes.`;
+      renderDrpTable(drpSortCol);
+    } catch(err) {
+      $('drp-note').textContent = 'Failed: ' + err.message;
+    } finally {
+      $('btn-drp-load').disabled = false;
+    }
+  }
+
+  /* ══ MY LISTINGS ══ */
+  async function loadMyListings() {
+    if (!cfg.cookie) {
+      $('lst-note').textContent = 'Session cookie required — open ⚙ Settings.';
+      return;
+    }
+    if (isListingsRunning) return;
+    isListingsRunning = true;
+    listingsLoaded = true;
+    $('btn-lst-load').disabled = true;
+    $('lst-note').textContent = 'Fetching your listings…';
+    $('lst-sell-section').style.display = 'none';
+    $('lst-buy-section').style.display  = 'none';
+    $('lst-sell-tbody').innerHTML = '';
+    $('lst-buy-tbody').innerHTML  = '';
+
+    try {
+      const listings = await apiFetch('/api/market/my-listings');
+      if (!Array.isArray(listings) || !listings.length) {
+        $('lst-note').textContent = 'No active listings found.';
+        return;
+      }
+
+      const sells = listings.filter(l => l.side === 'sell' && l.qty_open > 0);
+      const buys  = listings.filter(l => l.side === 'buy'  && l.qty_open > 0);
+
+      // Render placeholder rows first
+      if (sells.length) {
+        $('lst-sell-section').style.display = 'block';
+        $('lst-sell-count').textContent = `(${sells.length})`;
+        const tbody = $('lst-sell-tbody');
+        tbody.innerHTML = '';
+        sells.forEach(l => {
+          const tr = document.createElement('tr'); tr.id = `lst-row-${l.listing_id}`;
+          tr.innerHTML = `
+            <td><div class="lst-item-name">${l.name.replace('\n',' ')}</div>
+              <div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div></td>
+            <td><span class="lst-price sell">${l.price.toLocaleString()}</span></td>
+            <td>${l.qty_open === l.qty_total ? '<span class="lst-badge-full">untouched</span>' : `<span class="lst-badge-partial lst-badge-partial-fill">${l.qty_total - l.qty_open} sold</span>`}</td>
+            <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
+            <td id="lst-mkt-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
+            <td id="lst-trade-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
+            <td style="font-size:10px;color:var(--dim3)">${fmtAgo(l.expires)}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      if (buys.length) {
+        $('lst-buy-section').style.display = 'block';
+        $('lst-buy-count').textContent = `(${buys.length})`;
+        const tbody = $('lst-buy-tbody');
+        tbody.innerHTML = '';
+        buys.forEach(l => {
+          const tr = document.createElement('tr'); tr.id = `lst-row-${l.listing_id}`;
+          tr.innerHTML = `
+            <td><div class="lst-item-name">${l.name.replace('\n',' ')}</div>
+              <div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div></td>
+            <td><span class="lst-price buy">${l.price.toLocaleString()}</span></td>
+            <td>—</td>
+            <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
+            <td id="lst-mkt-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
+            <td id="lst-trade-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
+            <td style="font-size:10px;color:var(--dim3)">${fmtAgo(l.expires)}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      $('lst-note').textContent = `${listings.length} listings found. Checking market prices…`;
+
+      // Now fetch market data per item (rate-limited)
+      const allListings = [...sells, ...buys];
+      for (let i = 0; i < allListings.length; i++) {
+        const l = allListings[i];
+        if (i > 0) await sleep(600);
+        await rateGate();
+        try {
+          // Fetch opposing side (to check if we're best)
+          const checkSide = l.side === 'sell' ? 'sell' : 'buy';
+          const mktRes = await marketGet(`/api/market/listings?item=${l.item}&side=${checkSide}&limit=3`);
+          const tradeRes = await marketGet(`/api/market/trades?item=${l.item}&limit=5`);
+
+          let mktData = null, tradeData = null;
+          if (mktRes && mktRes.ok) {
+            try { mktData = await mktRes.json(); } catch(e) {}
+          }
+          if (tradeRes && tradeRes.ok) {
+            try { tradeData = await tradeRes.json(); } catch(e) {}
+          }
+
+          const statusEl = $(`lst-status-${l.listing_id}`);
+          const mktEl    = $(`lst-mkt-${l.listing_id}`);
+          const tradeEl  = $(`lst-trade-${l.listing_id}`);
+
+          // Status check
+          if (mktData?.listings?.length) {
+            const listings2 = mktData.listings;
+            // Sort: sell = ascending price (cheapest first), buy = descending (highest first)
+            const sorted = l.side === 'sell'
+              ? [...listings2].sort((a,b) => a.price - b.price)
+              : [...listings2].sort((a,b) => b.price - a.price);
+            const marketBest = sorted[0]?.price;
+            const myIsBest = l.side === 'sell'
+              ? l.price <= marketBest
+              : l.price >= marketBest;
+            if (statusEl) {
+              statusEl.className = 'lst-status ' + (myIsBest ? 'best' : 'warn');
+              statusEl.textContent = myIsBest
+                ? (l.side === 'sell' ? '✓ cheapest' : '✓ highest bid')
+                : (l.side === 'sell' ? `⚠ not cheapest` : '⚠ not highest bid');
+            }
+            if (mktEl) {
+              const diff = l.side === 'sell'
+                ? marketBest - l.price
+                : l.price - marketBest;
+              if (myIsBest || diff === 0) {
+                mktEl.innerHTML = `<span class="lst-market-price same">${marketBest.toLocaleString()}</span>`;
+              } else {
+                const betterBy = Math.abs(diff);
+                mktEl.innerHTML = `<span class="lst-market-price cheaper">${marketBest.toLocaleString()}</span>`
+                  + `<span style="font-size:9px;color:var(--dim3);margin-left:4px">(${betterBy.toLocaleString()} ${l.side==='sell'?'cheaper':'higher'})</span>`;
+              }
+            }
+          } else if (statusEl) {
+            statusEl.className = 'lst-status best';
+            statusEl.textContent = l.side === 'sell' ? '✓ only listing' : '✓ only bid';
+          }
+
+          // Trade history
+          if (tradeEl && Array.isArray(tradeData) && tradeData.length) {
+            const last = tradeData[0];
+            tradeEl.innerHTML = `<span class="lst-trade-price">${(last.price||0).toLocaleString()}</span>`
+              + `<span class="lst-trade-age">· ${fmtAgo(last.at)}</span>`
+              + (tradeData.length > 1 ? `<span style="color:var(--dim3);font-size:9px;margin-left:4px">(${tradeData.length} recent)</span>` : '');
+          } else if (tradeEl) {
+            tradeEl.innerHTML = `<span style="color:var(--dim3);font-style:italic">no history</span>`;
+          }
+        } catch(e) {
+          const statusEl = $(`lst-status-${l.listing_id}`);
+          if (statusEl) { statusEl.className = 'lst-status warn'; statusEl.textContent = '⚠ error'; }
+        }
+      }
+
+      $('lst-note').textContent = `${listings.length} listings — last refreshed ${fmtAgo(Date.now()-1000)}.`;
+    } catch(err) {
+      $('lst-note').textContent = 'Error: ' + err.message;
+    } finally {
+      isListingsRunning = false;
+      $('btn-lst-load').disabled = false;
+    }
   }
 
   /* ── Auto-run on warm cache ── */
