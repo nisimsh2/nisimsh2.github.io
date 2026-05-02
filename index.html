@@ -323,7 +323,11 @@
   table.lst-tbl td { padding:8px 12px; vertical-align:middle; font-size:12px; }
   .lst-item-name { font-weight:600; color:#e8f4ff; font-size:12px; margin-bottom:2px; }
   .lst-item-qty { font-size:10px; color:var(--dim); }
-  .lst-price { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; }
+  .lst-item-cell { display:flex; align-items:center; gap:9px; }
+  .lst-item-icon { width:32px; height:32px; object-fit:contain; image-rendering:pixelated;
+    border:1px solid var(--border); background:var(--bg3); flex-shrink:0; }
+  .lst-item-info { display:flex; flex-direction:column; }
+  .lst-price { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; white-space:nowrap; }
   .lst-price.sell { color:var(--amber); }
   .lst-price.buy  { color:var(--green); }
   .lst-status { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600;
@@ -331,11 +335,11 @@
   .lst-status.best  { border-color:var(--green); color:var(--green); background:rgba(61,214,140,.07); }
   .lst-status.warn  { border-color:var(--amber); color:var(--amber); background:rgba(255,179,71,.07); }
   .lst-status.load  { border-color:var(--border); color:var(--dim3); }
-  .lst-market-price { font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .lst-market-price { font-family:'JetBrains Mono',monospace; font-size:11px; white-space:nowrap; }
   .lst-market-price.cheaper { color:var(--red); }
   .lst-market-price.same    { color:var(--green); }
-  .lst-trade-info { font-size:10px; font-family:'JetBrains Mono',monospace; }
-  .lst-trade-price { color:var(--blue2); }
+  .lst-trade-info { font-size:10px; font-family:'JetBrains Mono',monospace; white-space:nowrap; }
+  .lst-trade-price { color:var(--blue2); white-space:nowrap; }
   .lst-trade-age   { color:var(--dim3); margin-left:4px; }
   .lst-badge-partial { display:inline-block; font-size:9px; padding:1px 5px; border:1px solid var(--border); color:var(--dim2); }
   .lst-badge-full   { display:inline-block; font-size:9px; padding:1px 5px; border:1px solid var(--border2); color:var(--dim3); }
@@ -896,6 +900,8 @@
     if (n >= 1000)    return (n/1000).toFixed(2)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
     return Math.round(n) + ' <span style="color:#888;font-weight:700">[B]</span>';
   }
+  // Same as fmt but for use inside innerHTML of listing price cells (same visual)
+  function fmtRaw(n) { return fmt(n); }
   function fmtTime(ms) {
     if (!ms || ms <= 0) return null;
     const s = Math.floor(ms / 1000);
@@ -910,6 +916,17 @@
     if (d < 3600000)  return `${Math.floor(d/60000)}m ago`;
     if (d < 86400000) return `${Math.floor(d/3600000)}h ago`;
     return `${Math.floor(d/86400000)}d ago`;
+  }
+  function fmtExpiry(ms) {
+    if (!ms) return '—';
+    const rem = ms - Date.now();
+    if (rem <= 0) return 'expired';
+    const days  = Math.floor(rem / 86400000);
+    const hours = Math.floor((rem % 86400000) / 3600000);
+    const mins  = Math.floor((rem % 3600000)  / 60000);
+    if (days  > 0) return `${days}d ${hours}h left`;
+    if (hours > 0) return `${hours}h ${mins}m left`;
+    return `${mins}m left`;
   }
 
   /* ══ RATE LIMITER ══ */
@@ -1757,6 +1774,20 @@
   }
 
   /* ══ MY LISTINGS ══ */
+  // Icon base URL — adjust if wrong (check Network tab for actual item image path)
+  const ICON_BASE = 'https://thedigitalodyssey.com/static/icons/';
+
+  function makeLstItemCell(l) {
+    const iconUrl = `${ICON_BASE}${l.icon}.png`;
+    return `<div class="lst-item-cell">
+      <img class="lst-item-icon" src="${iconUrl}" alt="" onerror="this.style.display='none'">
+      <div class="lst-item-info">
+        <div class="lst-item-name">${l.name.replace('\n',' ')}</div>
+        <div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div>
+      </div>
+    </div>`;
+  }
+
   async function loadMyListings() {
     if (!cfg.cookie) {
       $('lst-note').textContent = 'Session cookie required — open ⚙ Settings.';
@@ -1782,25 +1813,30 @@
       const sells = listings.filter(l => l.side === 'sell' && l.qty_open > 0);
       const buys  = listings.filter(l => l.side === 'buy'  && l.qty_open > 0);
 
-      // Render placeholder rows first
+      function makeRow(l) {
+        const tr = document.createElement('tr'); tr.id = `lst-row-${l.listing_id}`;
+        const soldQty = l.qty_total - l.qty_open;
+        const qtyBadge = soldQty === 0
+          ? '<span class="lst-badge-full">untouched</span>'
+          : `<span class="lst-badge-partial lst-badge-partial-fill">${soldQty} sold</span>`;
+        const expiryColor = (l.expires - Date.now()) < 86400000 ? 'var(--red)' : 'var(--dim)';
+        tr.innerHTML = `
+          <td>${makeLstItemCell(l)}</td>
+          <td><span class="lst-price ${l.side}">${fmtRaw(l.price)}</span></td>
+          <td>${l.side === 'sell' ? qtyBadge : '—'}</td>
+          <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
+          <td id="lst-mkt-${l.listing_id}" style="font-size:11px;color:var(--dim3)">—</td>
+          <td id="lst-trade-${l.listing_id}" style="font-size:11px;color:var(--dim3)">—</td>
+          <td style="font-size:10px;color:${expiryColor};white-space:nowrap">${fmtExpiry(l.expires)}</td>`;
+        return tr;
+      }
+
       if (sells.length) {
         $('lst-sell-section').style.display = 'block';
         $('lst-sell-count').textContent = `(${sells.length})`;
         const tbody = $('lst-sell-tbody');
         tbody.innerHTML = '';
-        sells.forEach(l => {
-          const tr = document.createElement('tr'); tr.id = `lst-row-${l.listing_id}`;
-          tr.innerHTML = `
-            <td><div class="lst-item-name">${l.name.replace('\n',' ')}</div>
-              <div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div></td>
-            <td><span class="lst-price sell">${l.price.toLocaleString()}</span></td>
-            <td>${l.qty_open === l.qty_total ? '<span class="lst-badge-full">untouched</span>' : `<span class="lst-badge-partial lst-badge-partial-fill">${l.qty_total - l.qty_open} sold</span>`}</td>
-            <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
-            <td id="lst-mkt-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
-            <td id="lst-trade-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
-            <td style="font-size:10px;color:var(--dim3)">${fmtAgo(l.expires)}</td>`;
-          tbody.appendChild(tr);
-        });
+        sells.forEach(l => tbody.appendChild(makeRow(l)));
       }
 
       if (buys.length) {
@@ -1808,86 +1844,83 @@
         $('lst-buy-count').textContent = `(${buys.length})`;
         const tbody = $('lst-buy-tbody');
         tbody.innerHTML = '';
-        buys.forEach(l => {
-          const tr = document.createElement('tr'); tr.id = `lst-row-${l.listing_id}`;
-          tr.innerHTML = `
-            <td><div class="lst-item-name">${l.name.replace('\n',' ')}</div>
-              <div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div></td>
-            <td><span class="lst-price buy">${l.price.toLocaleString()}</span></td>
-            <td>—</td>
-            <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
-            <td id="lst-mkt-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
-            <td id="lst-trade-${l.listing_id}" style="color:var(--dim3);font-size:11px">—</td>
-            <td style="font-size:10px;color:var(--dim3)">${fmtAgo(l.expires)}</td>`;
-          tbody.appendChild(tr);
-        });
+        buys.forEach(l => tbody.appendChild(makeRow(l)));
       }
 
       $('lst-note').textContent = `${listings.length} listings found. Checking market prices…`;
 
-      // Now fetch market data per item (rate-limited)
       const allListings = [...sells, ...buys];
       for (let i = 0; i < allListings.length; i++) {
         const l = allListings[i];
         if (i > 0) await sleep(600);
         await rateGate();
         try {
-          // Fetch opposing side (to check if we're best)
-          const checkSide = l.side === 'sell' ? 'sell' : 'buy';
-          const mktRes = await marketGet(`/api/market/listings?item=${l.item}&side=${checkSide}&limit=3`);
+          // Fetch enough listings to count how many beat mine (up to 20)
+          const mktRes   = await marketGet(`/api/market/listings?item=${l.item}&side=${l.side}&limit=20`);
           const tradeRes = await marketGet(`/api/market/trades?item=${l.item}&limit=5`);
 
           let mktData = null, tradeData = null;
-          if (mktRes && mktRes.ok) {
-            try { mktData = await mktRes.json(); } catch(e) {}
-          }
-          if (tradeRes && tradeRes.ok) {
-            try { tradeData = await tradeRes.json(); } catch(e) {}
-          }
+          if (mktRes   && mktRes.ok)   { try { mktData   = await mktRes.json();   } catch(e) {} }
+          if (tradeRes && tradeRes.ok) { try { tradeData = await tradeRes.json(); } catch(e) {} }
 
           const statusEl = $(`lst-status-${l.listing_id}`);
           const mktEl    = $(`lst-mkt-${l.listing_id}`);
           const tradeEl  = $(`lst-trade-${l.listing_id}`);
 
-          // Status check
           if (mktData?.listings?.length) {
-            const listings2 = mktData.listings;
-            // Sort: sell = ascending price (cheapest first), buy = descending (highest first)
-            const sorted = l.side === 'sell'
-              ? [...listings2].sort((a,b) => a.price - b.price)
-              : [...listings2].sort((a,b) => b.price - a.price);
-            const marketBest = sorted[0]?.price;
-            const myIsBest = l.side === 'sell'
-              ? l.price <= marketBest
-              : l.price >= marketBest;
-            if (statusEl) {
-              statusEl.className = 'lst-status ' + (myIsBest ? 'best' : 'warn');
-              statusEl.textContent = myIsBest
-                ? (l.side === 'sell' ? '✓ cheapest' : '✓ highest bid')
-                : (l.side === 'sell' ? `⚠ not cheapest` : '⚠ not highest bid');
-            }
-            if (mktEl) {
-              const diff = l.side === 'sell'
-                ? marketBest - l.price
-                : l.price - marketBest;
-              if (myIsBest || diff === 0) {
-                mktEl.innerHTML = `<span class="lst-market-price same">${marketBest.toLocaleString()}</span>`;
-              } else {
-                const betterBy = Math.abs(diff);
-                mktEl.innerHTML = `<span class="lst-market-price cheaper">${marketBest.toLocaleString()}</span>`
-                  + `<span style="font-size:9px;color:var(--dim3);margin-left:4px">(${betterBy.toLocaleString()} ${l.side==='sell'?'cheaper':'higher'})</span>`;
+            const all2 = mktData.listings;
+
+            if (l.side === 'sell') {
+              // For sell: cheapest = lowest price
+              const sorted     = [...all2].sort((a,b) => a.price - b.price);
+              const cheapest   = sorted[0].price;
+              // Count listings STRICTLY cheaper than mine (excluding my own)
+              const cheaper    = sorted.filter(x => x.price < l.price);
+              const myIsBest   = l.price <= cheapest;
+
+              if (statusEl) {
+                statusEl.className = 'lst-status ' + (myIsBest ? 'best' : 'warn');
+                statusEl.textContent = myIsBest ? '✓ cheapest' : '⚠ not cheapest';
+              }
+              if (mktEl) {
+                if (myIsBest) {
+                  mktEl.innerHTML = `<span class="lst-market-price same">${fmtRaw(cheapest)}</span>`;
+                } else {
+                  mktEl.innerHTML = `<span class="lst-market-price cheaper">${fmtRaw(cheapest)}</span>`
+                    + `<span style="font-size:9px;color:var(--dim3);margin-left:5px">${cheaper.length} cheaper</span>`;
+                }
+              }
+            } else {
+              // For buy: highest bid = highest price
+              const sorted   = [...all2].sort((a,b) => b.price - a.price);
+              const highest  = sorted[0].price;
+              const higher   = sorted.filter(x => x.price > l.price);
+              const myIsBest = l.price >= highest;
+
+              if (statusEl) {
+                statusEl.className = 'lst-status ' + (myIsBest ? 'best' : 'warn');
+                statusEl.textContent = myIsBest ? '✓ highest bid' : '⚠ not highest bid';
+              }
+              if (mktEl) {
+                if (myIsBest) {
+                  mktEl.innerHTML = `<span class="lst-market-price same">${fmtRaw(highest)}</span>`;
+                } else {
+                  mktEl.innerHTML = `<span class="lst-market-price cheaper">${fmtRaw(highest)}</span>`
+                    + `<span style="font-size:9px;color:var(--dim3);margin-left:5px">${higher.length} higher</span>`;
+                }
               }
             }
           } else if (statusEl) {
             statusEl.className = 'lst-status best';
             statusEl.textContent = l.side === 'sell' ? '✓ only listing' : '✓ only bid';
+            if (mktEl) mktEl.innerHTML = `<span style="color:var(--dim3);font-style:italic">no others</span>`;
           }
 
           // Trade history
           if (tradeEl && Array.isArray(tradeData) && tradeData.length) {
             const last = tradeData[0];
-            tradeEl.innerHTML = `<span class="lst-trade-price">${(last.price||0).toLocaleString()}</span>`
-              + `<span class="lst-trade-age">· ${fmtAgo(last.at)}</span>`
+            tradeEl.innerHTML = `<span class="lst-trade-price">${fmtRaw(last.price||0)}</span>`
+              + `<span class="lst-trade-age"> · ${fmtAgo(last.at)}</span>`
               + (tradeData.length > 1 ? `<span style="color:var(--dim3);font-size:9px;margin-left:4px">(${tradeData.length} recent)</span>` : '');
           } else if (tradeEl) {
             tradeEl.innerHTML = `<span style="color:var(--dim3);font-style:italic">no history</span>`;
@@ -1898,7 +1931,7 @@
         }
       }
 
-      $('lst-note').textContent = `${listings.length} listings — last refreshed ${fmtAgo(Date.now()-1000)}.`;
+      $('lst-note').textContent = `${listings.length} listings — last refreshed just now.`;
     } catch(err) {
       $('lst-note').textContent = 'Error: ' + err.message;
     } finally {
@@ -1906,6 +1939,26 @@
       $('btn-lst-load').disabled = false;
     }
   }
+    if (!cfg.cookie) {
+      $('lst-note').textContent = 'Session cookie required — open ⚙ Settings.';
+      return;
+    }
+    if (isListingsRunning) return;
+    isListingsRunning = true;
+    listingsLoaded = true;
+    $('btn-lst-load').disabled = true;
+    $('lst-note').textContent = 'Fetching your listings…';
+    $('lst-sell-section').style.display = 'none';
+    $('lst-buy-section').style.display  = 'none';
+    $('lst-sell-tbody').innerHTML = '';
+    $('lst-buy-tbody').innerHTML  = '';
+
+    try {
+      const listings = await apiFetch('/api/market/my-listings');
+      if (!Array.isArray(listings) || !listings.length) {
+        $('lst-note').textContent = 'No active listings found.';
+        return;
+      }
 
   /* ── Auto-run on warm cache ── */
   if (cacheGet('dungeon_list', Infinity)) {
