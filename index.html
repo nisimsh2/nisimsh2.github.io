@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚔ Farm Optimizer · Digital Odyssey</title>
-<!-- v4.5 — DRP Rankings tab, My Listings tab -->
+<!-- v4.6 — DRP Rankings tab, My Listings tab, icon/price/expiry fixes -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -389,7 +389,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.5</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.6</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -1939,27 +1939,6 @@
       $('btn-lst-load').disabled = false;
     }
   }
-    if (!cfg.cookie) {
-      $('lst-note').textContent = 'Session cookie required — open ⚙ Settings.';
-      return;
-    }
-    if (isListingsRunning) return;
-    isListingsRunning = true;
-    listingsLoaded = true;
-    $('btn-lst-load').disabled = true;
-    $('lst-note').textContent = 'Fetching your listings…';
-    $('lst-sell-section').style.display = 'none';
-    $('lst-buy-section').style.display  = 'none';
-    $('lst-sell-tbody').innerHTML = '';
-    $('lst-buy-tbody').innerHTML  = '';
-
-    try {
-      const listings = await apiFetch('/api/market/my-listings');
-      if (!Array.isArray(listings) || !listings.length) {
-        $('lst-note').textContent = 'No active listings found.';
-        return;
-      }
-
   /* ── Auto-run on warm cache ── */
   if (cacheGet('dungeon_list', Infinity)) {
     setTimeout(() => runAnalysis('fresh'), 300);
