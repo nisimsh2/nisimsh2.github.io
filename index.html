@@ -1327,6 +1327,7 @@ if ('serviceWorker' in navigator) {
         if (tm) tm.style.display = ''; if (thm) thm.style.display = '';
         allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
         log('All done ✓', 'ok');
+       if (cfg.cookie) loadMyTimes();
       }
 
       setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
