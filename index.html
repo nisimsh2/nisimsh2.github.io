@@ -706,6 +706,21 @@
 </div>
 
 <script>
+ // Register service worker so users always get fresh HTML automatically
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.update(); // Check for SW updates immediately on page load
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      sw.addEventListener('statechange', () => {
+        // New SW activated while page is open → reload silently
+        if (sw.state === 'activated' && navigator.serviceWorker.controller) {
+          window.location.reload();
+        }
+      });
+    });
+  });
+}
 (function () {
   'use strict';
   console.log('%c[FarmOpt v4.7] Loaded', 'color:#00e5ff;font-weight:bold');
