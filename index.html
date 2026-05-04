@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚔ Farm Optimizer · Digital Odyssey</title>
-<!-- v4.6 — DRP Rankings tab, My Listings tab, icon/price/expiry fixes -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -45,6 +44,8 @@
   .btn.muted:hover { background:var(--dim); color:var(--bg0); }
   .btn.red { border-color:var(--red); color:var(--red); }
   .btn.red:hover { background:var(--red); color:var(--bg0); }
+  .btn.purple { border-color:var(--purple); color:var(--purple); }
+  .btn.purple:hover { background:var(--purple); color:var(--bg0); }
 
   /* TOOLBAR */
   #toolbar { padding:7px 16px; border-bottom:1px solid var(--border); display:flex; gap:6px;
@@ -65,6 +66,8 @@
     color:var(--dim2); cursor:pointer; transition:all .15s; }
   .main-tab:hover { color:var(--blue2); }
   .main-tab.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+  .main-tab.admin-tab { color:var(--purple); }
+  .main-tab.admin-tab.active { color:var(--purple); border-bottom-color:var(--purple); }
   #sort-tabs { display:none; padding:0 16px; border-bottom:1px solid var(--border);
     background:var(--bg3); flex-shrink:0; }
   .sort-tab { font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; letter-spacing:.1em;
@@ -354,6 +357,58 @@
     font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; letter-spacing:.08em;
     border:none; background:transparent; color:var(--amber); cursor:pointer; }
   .ref-opt:hover { background:rgba(255,179,71,.1); }
+
+  /* ══ ADMIN PANEL ══ */
+  #admin-view { display:none; }
+  .adm-banner { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:18px; }
+  .adm-card { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--purple); padding:12px 16px; }
+  .adm-card-lbl { font-size:9px; font-weight:600; letter-spacing:.2em; color:#4a3a7a; text-transform:uppercase; margin-bottom:4px; }
+  .adm-card-val { font-family:'Orbitron',sans-serif; font-size:22px; font-weight:700; color:var(--purple); }
+  .adm-card-sub { font-size:10px; color:var(--dim3); margin-top:3px; }
+  .adm-section { background:var(--bg2); border:1px solid var(--border); margin-bottom:16px; }
+  .adm-section-head { padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg3);
+    display:flex; align-items:center; gap:10px; }
+  .adm-section-title { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; color:var(--purple); letter-spacing:.14em; }
+  .adm-section-body { padding:16px; }
+  .adm-add-row { display:flex; gap:8px; margin-bottom:14px; }
+  .adm-inp { flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:'Inter',sans-serif; font-size:12px; padding:7px 12px; outline:none; }
+  .adm-inp:focus { border-color:var(--purple); }
+  .adm-chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .adm-chip { display:inline-flex; align-items:center; gap:8px; padding:5px 12px;
+    background:#0c0e1e; border:1px solid var(--purple); font-size:12px; color:var(--purple); }
+  .adm-chip-rm { border:none; background:none; color:var(--dim3); cursor:pointer; font-size:13px;
+    padding:0; transition:color .12s; }
+  .adm-chip-rm:hover { color:var(--red); }
+  /* usage table */
+  table.adm-tbl { width:100%; border-collapse:collapse; }
+  table.adm-tbl thead th { padding:7px 12px; text-align:left; font-family:'Orbitron',sans-serif;
+    font-size:8px; letter-spacing:.14em; color:var(--dim2); border-bottom:1px solid var(--border); white-space:nowrap; }
+  table.adm-tbl tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
+  table.adm-tbl tbody tr:hover { background:rgba(136,136,204,.03); }
+  table.adm-tbl td { padding:9px 12px; vertical-align:middle; font-size:12px; }
+  .adm-tamer-name { font-weight:700; color:#e8f4ff; }
+  .adm-tamer-name.blocked-row { color:var(--red); opacity:.7; }
+  .adm-count { font-family:'Orbitron',sans-serif; font-size:14px; font-weight:700; color:var(--yellow); }
+  .adm-ago { font-size:11px; color:var(--blue); }
+  .adm-ago-date { font-size:9px; color:var(--dim3); margin-top:2px; }
+  .adm-spark { display:flex; align-items:flex-end; gap:2px; height:22px; }
+  .adm-spark-bar { width:5px; border-radius:1px; flex-shrink:0; }
+  .adm-status-ok { color:var(--green); font-size:11px; font-weight:600; }
+  .adm-status-blocked { color:var(--red); font-size:11px; font-weight:600; }
+  .adm-log-ep { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--dim3); line-height:1.7; }
+  .adm-log-ep .ep-blocked { color:#7a2030; }
+  .adm-token-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+  .adm-token-inp { flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:7px 10px; outline:none; }
+  .adm-token-inp:focus { border-color:var(--purple); }
+  .adm-hint { font-size:10px; color:var(--dim3); line-height:1.7; margin-top:6px; }
+  .adm-hint code { background:var(--bg3); padding:1px 5px; font-family:'JetBrains Mono',monospace; }
+  .adm-refresh-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .adm-last-refresh { font-size:10px; color:var(--dim3); }
+  .adm-danger { border-color:#3a1010; }
+  .adm-danger .adm-section-head { background:#0c0808; }
+  .adm-danger .adm-section-title { color:var(--red); }
 </style>
 </head>
 <body>
@@ -389,7 +444,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.6</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.7</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -422,6 +477,7 @@
     <button class="main-tab" data-view="blacklist">BLACKLIST</button>
     <button class="main-tab" data-view="drp">DRP RANKINGS</button>
     <button class="main-tab" data-view="listings">MY LISTINGS</button>
+    <!-- Admin tab — injected by JS only for Odyssey -->
   </div>
 
   <div id="sort-tabs">
@@ -481,10 +537,9 @@
     </div>
 
     <div id="blacklist-view">
-      <!-- Dungeon blacklist section -->
       <div class="bl-section">
         <div class="bl-section-title">// BLACKLISTED DUNGEONS</div>
-        <div class="bl-hint">Hidden from the rankings table entirely. Click 🚫 next to any dungeon name in the table to add it here. You can also type a name below.</div>
+        <div class="bl-hint">Hidden from the rankings table entirely. Click 🚫 next to any dungeon name in the table to add it here.</div>
         <div class="bl-add-row">
           <input class="bl-add-input" id="dbl-add-input" placeholder="Dungeon name to hide…">
           <button class="btn amber" id="dbl-add-btn">+ Hide Dungeon</button>
@@ -495,8 +550,6 @@
           <div class="bl-known-grid" id="dbl-known-grid"></div>
         </div>
       </div>
-
-      <!-- Item blacklist section -->
       <div class="bl-section">
         <div class="bl-section-title">// BLACKLISTED ITEMS</div>
         <div class="bl-hint">Excluded from price fetching and EV calculations. Right-click any chip in the table to blacklist it.</div>
@@ -556,9 +609,7 @@
         <div class="lst-section-title">SELL ORDERS <span id="lst-sell-count"></span></div>
         <div style="overflow-x:auto">
           <table class="lst-tbl">
-            <thead><tr>
-              <th>Item</th><th>My Price</th><th>Qty</th><th>Status</th><th>Market Cheapest</th><th>Last Trade</th><th>Expires</th>
-            </tr></thead>
+            <thead><tr><th>Item</th><th>My Price</th><th>Qty</th><th>Status</th><th>Market Cheapest</th><th>Last Trade</th><th>Expires</th></tr></thead>
             <tbody id="lst-sell-tbody"></tbody>
           </table>
         </div>
@@ -567,11 +618,82 @@
         <div class="lst-section-title">BUY ORDERS <span id="lst-buy-count"></span></div>
         <div style="overflow-x:auto">
           <table class="lst-tbl">
-            <thead><tr>
-              <th>Item</th><th>My Price</th><th>Qty</th><th>Status</th><th>Market Highest</th><th>Last Trade</th><th>Expires</th>
-            </tr></thead>
+            <thead><tr><th>Item</th><th>My Price</th><th>Qty</th><th>Status</th><th>Market Highest</th><th>Last Trade</th><th>Expires</th></tr></thead>
             <tbody id="lst-buy-tbody"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW — only rendered for Odyssey -->
+    <div id="admin-view">
+      <!-- Token config -->
+      <div class="adm-section" style="margin-bottom:16px">
+        <div class="adm-section-head">
+          <div class="adm-section-title">// ADMIN TOKEN</div>
+          <div style="font-size:10px;color:var(--dim3);margin-left:auto">stored in localStorage, never sent to game</div>
+        </div>
+        <div class="adm-section-body">
+          <div class="adm-token-row">
+            <input class="adm-token-inp" id="adm-token-inp" type="password" placeholder="Paste ADMIN_TOKEN from Cloudflare here…">
+            <button class="btn purple" id="adm-token-save">Save Token</button>
+            <button class="btn muted" id="adm-load-btn">↻ Load Data</button>
+          </div>
+          <div class="adm-hint">
+            This is the <code>ADMIN_TOKEN</code> secret you set in your Cloudflare Worker → Settings → Variables.<br>
+            It's stored only in your browser's localStorage and never sent to the game server.
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats banner -->
+      <div class="adm-banner" id="adm-banner">
+        <div class="adm-card"><div class="adm-card-lbl">Loading…</div><div class="adm-card-val">—</div></div>
+      </div>
+
+      <!-- Allowlist -->
+      <div class="adm-section">
+        <div class="adm-section-head">
+          <div class="adm-section-title">// ALLOWLIST</div>
+          <div style="font-size:10px;color:var(--dim3);margin-left:auto">case-insensitive · add tamer names here</div>
+        </div>
+        <div class="adm-section-body">
+          <div class="adm-add-row">
+            <input class="adm-inp" id="adm-add-inp" placeholder="Tamer name to allow (e.g. Papaoofty)">
+            <button class="btn purple" id="adm-add-btn">+ Allow</button>
+          </div>
+          <div class="adm-chips" id="adm-chips">
+            <span style="color:var(--dim3);font-size:11px">Load data to see allowlist…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage table -->
+      <div class="adm-section">
+        <div class="adm-section-head">
+          <div class="adm-section-title">// USAGE LOG</div>
+          <div style="font-size:10px;color:var(--dim3);margin-left:auto" id="adm-last-refresh">not loaded yet</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="adm-tbl">
+            <thead><tr>
+              <th>Tamer</th><th>Status</th><th>Requests</th><th>Last Seen</th>
+              <th>24h Activity</th><th>Recent Endpoints</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="adm-tbody">
+              <tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim3);font-size:11px">Click "Load Data" to fetch usage stats</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="adm-section adm-danger">
+        <div class="adm-section-head">
+          <div class="adm-section-title">// DANGER ZONE</div>
+        </div>
+        <div class="adm-section-body" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn red" id="adm-clear-usage">✕ Clear All Usage Data</button>
         </div>
       </div>
     </div>
@@ -586,14 +708,20 @@
 <script>
 (function () {
   'use strict';
-  console.log('%c[FarmOpt v4.4] Loaded', 'color:#00e5ff;font-weight:bold');
+  console.log('%c[FarmOpt v4.7] Loaded', 'color:#00e5ff;font-weight:bold');
 
   /* ══ CONFIG ══ */
-  const CFG_KEY    = 'fo_v43_config';   // keep same key so settings persist from v4.3
+  const CFG_KEY    = 'fo_v43_config';
   const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
+  const ADMIN_NS   = 'fo_admin_token';
+  const MY_NAME    = 'odyssey'; // lowercase — admin panel only shows for this tamer
+
   let cfg = { cookie: '' };
   try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r) }; } catch(e) {}
   function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e) {} }
+
+  let adminToken = '';
+  try { adminToken = localStorage.getItem(ADMIN_NS) || ''; } catch(e) {}
 
   /* ══ ITEM BLACKLIST ══ */
   const BL_KEY = 'fo_v43_blacklist';
@@ -634,10 +762,7 @@
   function saveDungeonBlacklist() {
     try { localStorage.setItem(DBL_KEY, JSON.stringify([...dungeonBlacklist])); } catch(e) {}
   }
-  // key = "DungeonName_Difficulty"  OR just "DungeonName" to hide all difficulties
-  function isDungeonBlacklisted(key, name) {
-    return dungeonBlacklist.has(key) || dungeonBlacklist.has(name);
-  }
+  function isDungeonBlacklisted(key, name) { return dungeonBlacklist.has(key) || dungeonBlacklist.has(name); }
   function addDungeonToBlacklist(key) { dungeonBlacklist.add(key); saveDungeonBlacklist(); }
   function removeDungeonFromBlacklist(key) { dungeonBlacklist.delete(key); saveDungeonBlacklist(); }
   loadDungeonBlacklist();
@@ -701,6 +826,8 @@
   let drpLoaded       = false;
   let listingsLoaded  = false;
   let isListingsRunning = false;
+  let resolvedTamerName = null; // set after /me is fetched
+  let isAdmin         = false;
 
   /* ══ DOM ══ */
   const $ = id => document.getElementById(id);
@@ -711,6 +838,26 @@
   const itemFinder = $('item-finder'), ifInput = $('if-input'), tooltipEl = $('tooltip');
   const noticeEl = $('notice'), blacklistView = $('blacklist-view');
   const drpView = $('drp-view'), listingsView = $('listings-view');
+  const adminView = $('admin-view');
+
+  /* ══ ADMIN: detect and show panel ══ */
+  function maybeMakeAdmin(tamerName) {
+    if (!tamerName || tamerName.toLowerCase() !== MY_NAME) return;
+    if (isAdmin) return;
+    isAdmin = true;
+    // Inject admin tab
+    const tab = document.createElement('button');
+    tab.className = 'main-tab admin-tab';
+    tab.dataset.view = 'admin';
+    tab.textContent = '⚙ ADMIN';
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
+      tab.classList.add('active');
+      switchView('admin');
+    });
+    mainTabs.appendChild(tab);
+    console.log('%c[FarmOpt] Admin mode enabled', 'color:#8888cc;font-weight:bold');
+  }
 
   /* ══ SETTINGS ══ */
   function openSettings() { $('cfg-cookie').value = cfg.cookie; $('settings-overlay').classList.add('open'); }
@@ -746,7 +893,7 @@
     document.querySelectorAll('[data-drpcol]').forEach(t => t.classList.remove('drp-sorted'));
     th.classList.add('drp-sorted'); renderDrpTable(col);
   }));
-  document.querySelectorAll('.main-tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.main-tab:not(.admin-tab)').forEach(t => t.addEventListener('click', () => {
     document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active'); switchView(t.dataset.view);
   }));
@@ -789,7 +936,6 @@
   });
 
   function renderBlacklistView() {
-    /* ── Dungeon blacklist ── */
     const dblGrid = $('dbl-active-grid');
     dblGrid.innerHTML = '';
     if (!dungeonBlacklist.size) {
@@ -806,8 +952,6 @@
         dblGrid.appendChild(chip);
       }
     }
-
-    // Known dungeons grid
     const dblKnown = $('dbl-known-grid');
     dblKnown.innerHTML = '';
     const uniqueDungeons = [...new Set(allResults.map(r => r.key))].sort();
@@ -819,14 +963,10 @@
         const chip = document.createElement('div');
         chip.className = 'bl-dungeon-chip' + (already ? ' bld' : '');
         chip.textContent = key;
-        if (!already) {
-          chip.addEventListener('click', () => { addDungeonToBlacklist(key); renderBlacklistView(); applyFilters(); });
-        }
+        if (!already) chip.addEventListener('click', () => { addDungeonToBlacklist(key); renderBlacklistView(); applyFilters(); });
         dblKnown.appendChild(chip);
       });
     }
-
-    /* ── Item blacklist ── */
     const grid = $('bl-active-grid');
     grid.innerHTML = '';
     const entries = Object.entries(blacklist);
@@ -844,23 +984,16 @@
         grid.appendChild(chip);
       });
     }
-
-    // Known items grid
     const knownGrid = $('bl-known-grid');
     knownGrid.innerHTML = '';
-    if (!allItemsSeen.size) {
-      knownGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>';
-      return;
-    }
+    if (!allItemsSeen.size) { knownGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>'; return; }
     const sorted = [...allItemsSeen.entries()].sort((a,b) => a[1].localeCompare(b[1]));
     sorted.forEach(([id, name]) => {
       const already = isBlacklisted(id, name);
       const chip = document.createElement('div');
       chip.className = 'bl-known-chip' + (already ? ' bld' : '');
       chip.innerHTML = `<span>${name}</span><span style="font-size:9px;color:var(--dim3);font-family:'JetBrains Mono',monospace">${id}</span>`;
-      if (!already) {
-        chip.addEventListener('click', () => { addToBlacklist(id, name); renderBlacklistView(); if (allResults.length) { allResults = buildResults(cachedDetails); applyFilters(); } });
-      }
+      if (!already) chip.addEventListener('click', () => { addToBlacklist(id, name); renderBlacklistView(); if (allResults.length) { allResults = buildResults(cachedDetails); applyFilters(); } });
       knownGrid.appendChild(chip);
     });
   }
@@ -874,6 +1007,7 @@
     blacklistView.style.display = view === 'blacklist'  ? 'block' : 'none';
     drpView.style.display       = view === 'drp'        ? 'block' : 'none';
     listingsView.style.display  = view === 'listings'   ? 'block' : 'none';
+    adminView.style.display     = view === 'admin'      ? 'block' : 'none';
     sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
     searchEl.style.display      = view === 'rankings'   ? '' : 'none';
@@ -900,7 +1034,6 @@
     if (n >= 1000)    return (n/1000).toFixed(2)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
     return Math.round(n) + ' <span style="color:#888;font-weight:700">[B]</span>';
   }
-  // Same as fmt but for use inside innerHTML of listing price cells (same visual)
   function fmtRaw(n) { return fmt(n); }
   function fmtTime(ms) {
     if (!ms || ms <= 0) return null;
@@ -917,15 +1050,18 @@
     if (d < 86400000) return `${Math.floor(d/3600000)}h ago`;
     return `${Math.floor(d/86400000)}d ago`;
   }
+  function fmtDate(ms) {
+    if (!ms) return '—';
+    return new Date(ms).toLocaleString('en-GB', { timeZone:'Asia/Jerusalem',
+      day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit' });
+  }
   function fmtExpiry(ms) {
     if (!ms) return '—';
     const rem = ms - Date.now();
     if (rem <= 0) return 'expired';
-    const days  = Math.floor(rem / 86400000);
-    const hours = Math.floor((rem % 86400000) / 3600000);
-    const mins  = Math.floor((rem % 3600000)  / 60000);
-    if (days  > 0) return `${days}d ${hours}h left`;
-    if (hours > 0) return `${hours}h ${mins}m left`;
+    const days=Math.floor(rem/86400000), hours=Math.floor((rem%86400000)/3600000), mins=Math.floor((rem%3600000)/60000);
+    if (days>0) return `${days}d ${hours}h left`;
+    if (hours>0) return `${hours}h ${mins}m left`;
     return `${mins}m left`;
   }
 
@@ -953,7 +1089,6 @@
       const ct = res.headers.get('content-type') || '';
       if (!ct.includes('application/json') && !ct.includes('text/json')) {
         const text = await res.text();
-        console.error('[FarmOpt] Expected JSON, got:', text.slice(0, 200));
         throw new Error(`Got non-JSON (${ct}) — check your session_id cookie in Settings`);
       }
       return res.json();
@@ -991,7 +1126,6 @@
     const data = await res.json();
     return data?.listings?.length ? data.listings[0].price : null;
   }
-
   async function fetchBuyPrice(itemId) {
     const res = await marketGet(`/api/market/listings?item=${itemId}&side=buy&limit=1`);
     if (!res || res.status === 400) return null;
@@ -999,7 +1133,6 @@
     const data = await res.json();
     return data?.listings?.length ? data.listings[0].price : null;
   }
-
   async function fetchHistory(itemId) {
     const res = await marketGet(`/api/market/trades?item=${itemId}&limit=20`);
     if (!res || !res.ok) return null;
@@ -1047,7 +1180,7 @@
       const cachedList = cacheGet('dungeon_list', TTL_FOREVER);
       if (cachedList) {
         dungeons = cachedList;
-        log(`Cached: ${dungeons.length} dungeons${phase==='fresh' ? ' (↺ Clear Cache to re-fetch)' : ''}.`, 'ok');
+        log(`Cached: ${dungeons.length} dungeons.`, 'ok');
       } else {
         const listData = await apiFetch('/api/wiki/dungeons?page=1&per_page=500');
         dungeons = listData.data || [];
@@ -1087,6 +1220,20 @@
       log(`${details.length} dungeons loaded.`, 'ok');
       cachedDetails = details;
 
+      // Try to detect tamer name from /me if cookie is set
+      if (cfg.cookie && !resolvedTamerName) {
+        try {
+          const meRaw = await apiFetch('/api/rankings/me');
+          const tamers = meRaw?.tamers || [];
+          if (tamers.length) {
+            const main = tamers.reduce((a,b) => (a.clear_count||0) >= (b.clear_count||0) ? a : b);
+            resolvedTamerName = (main.tamer_name || '').trim().toLowerCase();
+            maybeMakeAdmin(resolvedTamerName);
+            log(`Logged in as: ${resolvedTamerName}`, 'ok');
+          }
+        } catch(e) { /* not critical */ }
+      }
+
       if (phase === 'fresh') {
         prices = {};
         for (const [id] of itemNameMap) {
@@ -1104,7 +1251,7 @@
 
       const allIds = [...itemNameMap.keys()].filter(id => !isBlacklisted(id, itemNameMap.get(id)));
 
-      /* ── Sell phase ── */
+      /* Sell phase */
       if (phase === 'fresh' || phase === 'all' || phase === 'sell') {
         const sellIds = allIds.filter(id => !prices[id]?.listPrice);
         log(`Sell phase: ${sellIds.length} items…`, 'ok');
@@ -1126,10 +1273,9 @@
       renderCards(allResults);
       applyFilters();
       log(`Table ready — ${allResults.length} combos. Fetching buy orders…`, 'ok');
-      // Auto-load listings after sell phase if not already loaded
       if (!listingsLoaded && cfg.cookie) setTimeout(() => loadMyListings(), 500);
 
-      /* ── Buy phase ── */
+      /* Buy phase */
       if (phase === 'fresh' || phase === 'all' || phase === 'buy') {
         const buyIds = allIds.filter(id => prices[id]?.listPrice && !prices[id]?.buyPrice);
         for (let i = 0; i < buyIds.length; i++) {
@@ -1145,7 +1291,7 @@
         log('Buy done. Fetching trade history…', 'ok');
       }
 
-      /* ── History phase ── */
+      /* History phase */
       if (phase === 'fresh' || phase === 'all' || phase === 'history') {
         const histIds = allIds.filter(id => prices[id]?.listPrice && !prices[id]?.historyReady);
         for (let i = 0; i < histIds.length; i++) {
@@ -1188,13 +1334,9 @@
     formulaEl.style.display = 'block';
     $('ref-group').style.display = 'inline-flex';
     $('btn-times').style.display = 'inline-block';
-
-    // Restore EV/hr column if we have any saved times
     if (Object.keys(customTimes).length > 0) {
-      const thEv  = $('th-evhr');
-      const tabEv = $('tab-evhr');
-      if (thEv)  thEv.style.display  = '';
-      if (tabEv) tabEv.style.display = '';
+      const thEv = $('th-evhr'), tabEv = $('tab-evhr');
+      if (thEv) thEv.style.display = ''; if (tabEv) tabEv.style.display = '';
     }
   }
 
@@ -1208,7 +1350,6 @@
 
       for (const diff of diffsToProcess) {
         const key = `${d.name}_${diff.difficulty}`;
-        // Skip dungeon-blacklisted entries entirely
         if (isDungeonBlacklisted(key, d.name)) continue;
 
         let evRaid = 0;
@@ -1223,11 +1364,11 @@
               const avg  = (r.min + r.max) / 2;
               const ev   = bl ? 0 : prob * avg * (mkt?.price || 0);
               if (!bl) evRaid += ev;
-              drops.push({ item_id: r.item_id, name: r.item_name, prob, avg,
-                price: mkt?.price ?? null, listPrice: mkt?.listPrice ?? null,
-                buyPrice: mkt?.buyPrice ?? null, medianPrice: mkt?.medianPrice ?? null,
-                velocity: mkt?.velocity ?? null, isOutlier: mkt?.isOutlier ?? false,
-                ev, type: 'raid', blacklisted: bl });
+              drops.push({ item_id:r.item_id, name:r.item_name, prob, avg,
+                price:mkt?.price??null, listPrice:mkt?.listPrice??null,
+                buyPrice:mkt?.buyPrice??null, medianPrice:mkt?.medianPrice??null,
+                velocity:mkt?.velocity??null, isOutlier:mkt?.isOutlier??false,
+                ev, type:'raid', blacklisted:bl });
             }
           }
         }
@@ -1249,10 +1390,10 @@
             const mkt = prices[id];
             const ev  = bl ? 0 : avg * (mkt?.price || 0);
             if (!bl) evComp += ev;
-            drops.push({ item_id: id, name, prob: null, avg, baseQty: 0, bestQty: avg,
-              bestRank: bRank, price: mkt?.price ?? null, listPrice: mkt?.listPrice ?? null,
-              buyPrice: mkt?.buyPrice ?? null, medianPrice: mkt?.medianPrice ?? null,
-              isOutlier: mkt?.isOutlier ?? false, ev, type: 'rank', rewardSource: src, rankNum: 0, blacklisted: bl });
+            drops.push({ item_id:id, name, prob:null, avg, baseQty:0, bestQty:avg,
+              bestRank:bRank, price:mkt?.price??null, listPrice:mkt?.listPrice??null,
+              buyPrice:mkt?.buyPrice??null, medianPrice:mkt?.medianPrice??null,
+              isOutlier:mkt?.isOutlier??false, ev, type:'rank', rewardSource:src, rankNum:0, blacklisted:bl });
           };
           if (srank && srank.rank > 0 && srank.item_id !== base.item_id) {
             addDrop(base.item_id, base.item_name, base.item_count, 'base', 0);
@@ -1264,17 +1405,17 @@
             const mkt     = prices[base.item_id];
             const ev      = bl ? 0 : total * (mkt?.price || 0);
             if (!bl) evComp += ev;
-            drops.push({ item_id: base.item_id, name: base.item_name, prob: null, avg: total,
-              baseQty: base.item_count, bestQty, bestRank: srank?.rank ?? 0,
-              price: mkt?.price ?? null, listPrice: mkt?.listPrice ?? null,
-              buyPrice: mkt?.buyPrice ?? null, medianPrice: mkt?.medianPrice ?? null,
-              isOutlier: mkt?.isOutlier ?? false, ev, type: 'rank',
-              rewardSource: bestQty > 0 ? 'base+s' : 'base', rankNum: 0, blacklisted: bl });
+            drops.push({ item_id:base.item_id, name:base.item_name, prob:null, avg:total,
+              baseQty:base.item_count, bestQty, bestRank:srank?.rank??0,
+              price:mkt?.price??null, listPrice:mkt?.listPrice??null,
+              buyPrice:mkt?.buyPrice??null, medianPrice:mkt?.medianPrice??null,
+              isOutlier:mkt?.isOutlier??false, ev, type:'rank',
+              rewardSource:bestQty>0?'base+s':'base', rankNum:0, blacklisted:bl });
           }
         }
 
-        const raidDrops = drops.filter(d => d.type === 'raid').sort((a,b) => b.ev - a.ev);
-        const rankDrops = drops.filter(d => d.type === 'rank');
+        const raidDrops = drops.filter(d => d.type==='raid').sort((a,b)=>b.ev-a.ev);
+        const rankDrops = drops.filter(d => d.type==='rank');
         const clearMs   = customTimes[key] ?? null;
 
         let evInstant = 0, evMedian = 0;
@@ -1287,13 +1428,13 @@
         }
 
         const ev = evRaid + evComp;
-        results.push({ key, name: d.name, difficulty: diff.difficulty,
-          ev, evRaid, evComp, evInstant: evInstant || null, evMedian: evMedian || null,
-          drops: [...raidDrops, ...rankDrops], clearMs,
-          evhr: clearMs ? (ev / clearMs) * 3600000 : null });
+        results.push({ key, name:d.name, difficulty:diff.difficulty,
+          ev, evRaid, evComp, evInstant:evInstant||null, evMedian:evMedian||null,
+          drops:[...raidDrops,...rankDrops], clearMs,
+          evhr:clearMs?(ev/clearMs)*3600000:null });
       }
     }
-    results.sort((a,b) => b.ev - a.ev);
+    results.sort((a,b)=>b.ev-a.ev);
     return results;
   }
 
@@ -1305,10 +1446,10 @@
     for (const r of results) {
       for (const d of r.drops) {
         const key = d.name.toLowerCase();
-        if (!itemIndex[key]) itemIndex[key] = { name: d.name, price: d.price, entries: [] };
+        if (!itemIndex[key]) itemIndex[key] = { name:d.name, price:d.price, entries:[] };
         else if (d.price && !itemIndex[key].price) itemIndex[key].price = d.price;
-        itemIndex[key].entries.push({ dungeon: r.name, difficulty: r.difficulty,
-          type: d.type, prob: d.prob, avg: d.avg, price: d.price, ev: d.ev });
+        itemIndex[key].entries.push({ dungeon:r.name, difficulty:r.difficulty,
+          type:d.type, prob:d.prob, avg:d.avg, price:d.price, ev:d.ev });
       }
     }
   }
@@ -1339,17 +1480,24 @@
       const tamers = meData.tamers || [];
       if (!tamers.length) { log('No ranking data found.', 'warn'); $('tp-note').textContent = 'No ranking data found.'; return; }
       const main = tamers.reduce((a,b) => (a.clear_count||0) > (b.clear_count||0) ? a : b);
+
+      // Check admin status from my times too
+      if (main.tamer_name) {
+        resolvedTamerName = main.tamer_name.trim().toLowerCase();
+        maybeMakeAdmin(resolvedTamerName);
+      }
+
       const bestTimes = {};
       for (const e of (main.dungeon_breakdown || [])) {
         const k = `${e.dungeon_id}_${e.difficulty}`;
         if (!bestTimes[k] || e.best_time_ms < bestTimes[k].best_time_ms) bestTimes[k] = e;
       }
-      const entries = Object.values(bestTimes).sort((a,b) => b.clear_count - a.clear_count);
-      const wikiNames = [...new Set(allResults.map(r => r.name))].sort();
+      const entries = Object.values(bestTimes).sort((a,b)=>b.clear_count-a.clear_count);
+      const wikiNames = [...new Set(allResults.map(r=>r.name))].sort();
       log(`${entries.length} dungeons for ${main.tamer_name}.`, 'ok');
       const rowsCon = $('tp-rows');
       let matched = 0;
-      entries.forEach((e, i) => {
+      entries.forEach((e) => {
         const dName  = DIFF_MAP[e.difficulty] || `Mode ${e.difficulty}`;
         const rName  = rankMap[`${e.dungeon_id}_${e.difficulty}`] || null;
         const autoKey = rName ? autoMatch(rName, dName, wikiNames) : null;
@@ -1366,7 +1514,7 @@
             return `<option value="${k}" ${k===autoKey?'selected':''}>${n} · ${d2}</option>`;
           })).join('');
         const st = document.createElement('div');
-        st.className = 'tp-status ' + (autoKey ? 'matched' : 'unmatched');
+        st.className = 'tp-status '+(autoKey?'matched':'unmatched');
         st.textContent = autoKey ? '✓ auto' : '○ unmatched';
         sel.addEventListener('change', () => {
           if (!sel.value) return;
@@ -1378,7 +1526,7 @@
       });
       renderCards(allResults); applyFilters();
       const unmatched = entries.length - matched;
-      $('tp-note').textContent = `${entries.length} dungeons for "${main.tamer_name}" — ${matched} auto-matched${unmatched > 0 ? `, ${unmatched} need selection.` : '. All done!'}`;
+      $('tp-note').textContent = `${entries.length} dungeons for "${main.tamer_name}" — ${matched} auto-matched${unmatched>0?`, ${unmatched} need selection.`:'. All done!'}`;
       $('tp-header-summary').textContent = `${matched}/${entries.length} · click to expand`;
       if (unmatched === 0) timesPanel.classList.add('collapsed');
       setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
@@ -1391,10 +1539,8 @@
     customTimes[key] = ms; saveTimes();
     const r = allResults.find(x => x.key === key);
     if (r) { r.clearMs = ms; computeEvhr(r); }
-    // Always reveal EV/hr column when a time is set
     const thEv = $('th-evhr'), tabEv = $('tab-evhr');
-    if (thEv)  thEv.style.display  = '';
-    if (tabEv) tabEv.style.display = '';
+    if (thEv) thEv.style.display = ''; if (tabEv) tabEv.style.display = '';
   }
 
   function autoMatch(rankName, diffName, wikiNames) {
@@ -1435,28 +1581,28 @@
     if (d.type === 'rank') {
       return `${bkRow}
         <div class="trow"><span class="tlbl">Item</span><span class="tval">${d.name}</span></div>
-        <div class="trow"><span class="tlbl">Qty</span><span class="tval">×${d.avg} (${d.rewardSource==='base'?'Base':d.rewardSource==='s'?rl+' reward':'Base+'+rl})</span></div>
+        <div class="trow"><span class="tlbl">Qty</span><span class="tval">×${d.avg}</span></div>
         <div class="trow"><span class="tlbl">Sell listing</span><span class="tval">${d.listPrice?fmt(d.listPrice):'none'}</span></div>
-        ${d.buyPrice    ? `<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>` : ''}
-        ${d.medianPrice ? `<div class="trow"><span class="tlbl">Trade median</span><span class="tval" style="color:var(--blue2)">${fmt(d.medianPrice)}</span></div>` : ''}
+        ${d.buyPrice?`<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>`:''}
+        ${d.medianPrice?`<div class="trow"><span class="tlbl">Trade median</span><span class="tval" style="color:var(--blue2)">${fmt(d.medianPrice)}</span></div>`:''}
         <div class="trow"><span class="tlbl">EV / run</span><span class="tval">${fmt(d.ev)}</span></div>`;
     }
     return `${bkRow}
       <div class="trow"><span class="tlbl">Item</span><span class="tval">${d.name}</span></div>
       <div class="trow"><span class="tlbl">Drop chance</span><span class="tval">${(d.prob*100).toFixed(1)}%</span></div>
       <div class="trow"><span class="tlbl">Avg qty</span><span class="tval">${d.avg.toFixed(2)}</span></div>
-      ${d.isOutlier   ? `<div class="trow"><span class="tlbl" style="color:var(--amber)">⚠ Outlier</span><span class="tval" style="color:var(--amber);font-size:10px">listing vs median — uses median</span></div>` : ''}
+      ${d.isOutlier?`<div class="trow"><span class="tlbl" style="color:var(--amber)">⚠ Outlier</span><span class="tval" style="color:var(--amber);font-size:10px">uses median</span></div>`:''}
       <div class="trow"><span class="tlbl">Sell listing</span><span class="tval">${d.listPrice?fmt(d.listPrice):'no listing'}</span></div>
-      ${d.medianPrice ? `<div class="trow"><span class="tlbl">Trade median</span><span class="tval" style="color:var(--blue2)">${fmt(d.medianPrice)}</span></div>` : ''}
-      ${d.velocity    ? `<div class="trow"><span class="tlbl">Velocity</span><span class="tval">${d.velocity}/hr sold</span></div>` : ''}
-      ${d.buyPrice    ? `<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>` : ''}
+      ${d.medianPrice?`<div class="trow"><span class="tlbl">Trade median</span><span class="tval" style="color:var(--blue2)">${fmt(d.medianPrice)}</span></div>`:''}
+      ${d.velocity?`<div class="trow"><span class="tlbl">Velocity</span><span class="tval">${d.velocity}/hr</span></div>`:''}
+      ${d.buyPrice?`<div class="trow"><span class="tlbl">Buy order ⚡</span><span class="tval" style="color:var(--green)">${fmt(d.buyPrice)}</span></div>`:''}
       <div class="trow"><span class="tlbl">EV contrib</span><span class="tval">${fmt(d.ev)}</span></div>`;
   }
 
   /* ══ CARDS ══ */
   function renderCards(data) {
-    const top = data[0], topDrop = top?.drops.find(d => d.type==='raid' && d.price && !d.blacklisted);
-    const topHr = [...data].filter(r => r.evhr).sort((a,b) => b.evhr - a.evhr)[0];
+    const top = data[0], topDrop = top?.drops.find(d=>d.type==='raid'&&d.price&&!d.blacklisted);
+    const topHr = [...data].filter(r=>r.evhr).sort((a,b)=>b.evhr-a.evhr)[0];
     cardsEl.innerHTML = `
       <div class="card"><div class="card-lbl">Best EV / Run</div><div class="card-val">${fmt(top?.ev)}</div><div class="card-sub">${top?.name||'—'} · ${top?.difficulty||''}</div></div>
       <div class="card"><div class="card-lbl">Analyzed</div><div class="card-val">${data.length}</div><div class="card-sub">${data.filter(r=>r.ev>0).length} with priced drops</div></div>
@@ -1473,7 +1619,7 @@
     const matches = Object.entries(itemIndex).filter(([k]) => k.includes(q));
     if (!matches.length) { con.innerHTML = `<div style="color:var(--dim3);font-size:12px;padding:10px 0">No match for "${q}".</div>`; return; }
     con.innerHTML = matches.map(([,item]) => {
-      const rows = [...item.entries].sort((a,b) => (b.prob??-1)-(a.prob??-1)).map(e => `
+      const rows = [...item.entries].sort((a,b)=>(b.prob??-1)-(a.prob??-1)).map(e => `
         <tr>
           <td style="padding:7px 11px;font-size:13px;font-weight:600;color:#e8f4ff">${e.dungeon}</td>
           <td style="padding:7px 11px"><span class="badge badge-${e.difficulty}">${e.difficulty}</span></td>
@@ -1486,8 +1632,7 @@
         <div class="if-item-name">${item.name}${item.price?`<span class="if-item-price">${fmt(item.price)} cheapest</span>`:''}</div>
         <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead><tr>${['DUNGEON','MODE','DROP %','AVG QTY','PRICE','EV/RUN'].map(h=>`<th style="padding:5px 11px;text-align:left;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.15em;color:var(--dim2);border-bottom:1px solid var(--border)">${h}</th>`).join('')}</tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div></div>`;
+          <tbody>${rows}</tbody></table></div></div>`;
     }).join('');
   }
 
@@ -1496,24 +1641,23 @@
     const wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;flex-direction:column;gap:0';
     const span = document.createElement('span');
-    span.className = 'chip' + (d.type==='rank'?' rank-reward':'') + (d.blacklisted?' blacklisted':'');
+    span.className = 'chip'+(d.type==='rank'?' rank-reward':'')+(d.blacklisted?' blacklisted':'');
     const nameSpan = document.createElement('span');
-    nameSpan.textContent = (d.blacklisted ? '🚫 ' : '') + d.name;
+    nameSpan.textContent = (d.blacklisted?'🚫 ':'')+d.name;
     span.appendChild(nameSpan);
     if (d.type === 'raid') {
       const pct = document.createElement('span'); pct.className = 'chip-pct'; pct.textContent = Math.round(d.prob*100)+'%'; span.appendChild(pct);
     } else {
       const qs = document.createElement('span'); qs.className = 'chip-rank';
-      const rl = RANK_LABEL[d.bestRank] ?? `R${d.bestRank}`;
+      const rl = RANK_LABEL[d.bestRank]??`R${d.bestRank}`;
       qs.textContent = `×${d.avg} (${d.rewardSource==='base'?'Base':d.rewardSource==='s'?rl:'Base+'+rl})`; span.appendChild(qs);
     }
     if (!d.blacklisted) {
-      const ps = document.createElement('span'); ps.className = d.price ? 'chip-price' : 'chip-na';
-      ps.innerHTML = d.price ? fmt(d.price) : '?'; span.appendChild(ps);
+      const ps = document.createElement('span'); ps.className = d.price?'chip-price':'chip-na';
+      ps.innerHTML = d.price?fmt(d.price):'?'; span.appendChild(ps);
     }
-    span.addEventListener('mouseenter', () => showTooltip(makeTooltipHtml(d), span));
+    span.addEventListener('mouseenter', ()=>showTooltip(makeTooltipHtml(d),span));
     span.addEventListener('mouseleave', hideTooltip);
-    // Right-click to blacklist item
     span.addEventListener('contextmenu', e => {
       e.preventDefault();
       addToBlacklist(d.item_id, d.name);
@@ -1544,98 +1688,93 @@
   function applyFilters() {
     const q = searchEl.value.toLowerCase();
     let data = allResults.filter(r => {
-      const md = diffFilter === 'All' || r.difficulty === diffFilter;
-      const mn = !q || r.name.toLowerCase().includes(q);
-      return md && mn;
+      const md = diffFilter==='All'||r.difficulty===diffFilter;
+      const mn = !q||r.name.toLowerCase().includes(q);
+      return md&&mn;
     });
     data = [...data].sort((a,b) => {
-      let va = a[sortCol] ?? (sortAsc ? Infinity : -Infinity);
-      let vb = b[sortCol] ?? (sortAsc ? Infinity : -Infinity);
-      if (typeof va === 'string') va = va.toLowerCase();
-      if (typeof vb === 'string') vb = vb.toLowerCase();
-      return sortAsc ? (va<vb?-1:va>vb?1:0) : (va>vb?-1:va<vb?1:0);
+      let va = a[sortCol]??(sortAsc?Infinity:-Infinity);
+      let vb = b[sortCol]??(sortAsc?Infinity:-Infinity);
+      if (typeof va==='string') va=va.toLowerCase();
+      if (typeof vb==='string') vb=vb.toLowerCase();
+      return sortAsc?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
     });
 
     const showEvhr    = $('th-evhr').style.display    !== 'none';
     const showInstant = $('th-evinstant')?.style.display !== 'none';
     const showMedian  = $('th-evmedian')?.style.display  !== 'none';
-    const barMetric   = sortMode === 'evhr' ? 'evhr' : 'ev';
-    const maxBar      = Math.max(...data.map(r => r[barMetric]??0), 1);
+    const barMetric   = sortMode==='evhr'?'evhr':'ev';
+    const maxBar      = Math.max(...data.map(r=>r[barMetric]??0),1);
     tbodyEl.innerHTML = '';
 
-    data.forEach((row, i) => {
+    data.forEach((row,i) => {
       const rankClass = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
-      const barPct  = (((row[barMetric]??0)/maxBar)*100).toFixed(1);
-      const timeStr = fmtTime(row.clearMs);
+      const barPct    = (((row[barMetric]??0)/maxBar)*100).toFixed(1);
+      const timeStr   = fmtTime(row.clearMs);
       const tr = document.createElement('tr');
 
-      const tdR = document.createElement('td'); tdR.className = 'fo-rank '+rankClass; tdR.textContent = i+1; tr.appendChild(tdR);
+      const tdR = document.createElement('td'); tdR.className='fo-rank '+rankClass; tdR.textContent=i+1; tr.appendChild(tdR);
 
-      // Dungeon name + blacklist button
       const tdN = document.createElement('td');
-      const nameWrap = document.createElement('div'); nameWrap.className = 'dname-wrap';
-      const nameSpan = document.createElement('span'); nameSpan.className = 'dname'; nameSpan.textContent = row.name;
-      const blBtn = document.createElement('button'); blBtn.className = 'dname-bl-btn'; blBtn.textContent = '🚫 hide';
-      blBtn.title = 'Hide this dungeon (add to blacklist)';
-      blBtn.addEventListener('click', () => {
-        addDungeonToBlacklist(row.key);
-        allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
-      });
+      const nameWrap = document.createElement('div'); nameWrap.className='dname-wrap';
+      const nameSpan = document.createElement('span'); nameSpan.className='dname'; nameSpan.textContent=row.name;
+      const blBtn = document.createElement('button'); blBtn.className='dname-bl-btn'; blBtn.textContent='🚫 hide';
+      blBtn.addEventListener('click',()=>{ addDungeonToBlacklist(row.key); allResults=buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters(); });
       nameWrap.appendChild(nameSpan); nameWrap.appendChild(blBtn);
       tdN.appendChild(nameWrap);
-      tdN.insertAdjacentHTML('beforeend', `<span class="badge badge-${row.difficulty}">${row.difficulty||'?'}</span>`);
+      tdN.insertAdjacentHTML('beforeend',`<span class="badge badge-${row.difficulty}">${row.difficulty||'?'}</span>`);
       tr.appendChild(tdN);
 
-      const tdE = document.createElement('td'); tdE.className = 'ev';
-      tdE.innerHTML = `<span class="ev-val">${fmt(row.ev)}</span><span class="ev-sub">/ run</span>`; tr.appendChild(tdE);
+      const tdE = document.createElement('td'); tdE.className='ev';
+      tdE.innerHTML=`<span class="ev-val">${fmt(row.ev)}</span><span class="ev-sub">/ run</span>`; tr.appendChild(tdE);
 
       if (showEvhr) {
         const tdH = document.createElement('td'); tdH.style.textAlign='right';
-        tdH.innerHTML = row.evhr ? `<span class="evhr-val">${fmt(row.evhr)}</span><span class="ev-sub" style="color:#2a8060">/ hr</span>` : `<span class="evhr-na">no time</span>`;
+        tdH.innerHTML=row.evhr?`<span class="evhr-val">${fmt(row.evhr)}</span><span class="ev-sub" style="color:#2a8060">/ hr</span>`:`<span class="evhr-na">no time</span>`;
         tr.appendChild(tdH);
       }
       if (showInstant) {
         const tdI = document.createElement('td'); tdI.style.textAlign='right';
-        tdI.innerHTML = row.evInstant ? `<span class="evhr-val" style="color:var(--green)">${fmt(row.evInstant)}</span><span class="ev-sub">⚡ sell</span>` : `<span class="evhr-na">—</span>`;
+        tdI.innerHTML=row.evInstant?`<span class="evhr-val" style="color:var(--green)">${fmt(row.evInstant)}</span><span class="ev-sub">⚡ sell</span>`:`<span class="evhr-na">—</span>`;
         tr.appendChild(tdI);
       }
       if (showMedian) {
         const tdM = document.createElement('td'); tdM.style.textAlign='right';
-        tdM.innerHTML = row.evMedian ? `<span class="evhr-val" style="color:var(--blue2)">${fmt(row.evMedian)}</span><span class="ev-sub">median</span>` : `<span class="evhr-na">loading…</span>`;
+        tdM.innerHTML=row.evMedian?`<span class="evhr-val" style="color:var(--blue2)">${fmt(row.evMedian)}</span><span class="ev-sub">median</span>`:`<span class="evhr-na">loading…</span>`;
         tr.appendChild(tdM);
       }
 
-      const tdT = document.createElement('td'); tdT.className = 'time-cell';
+      const tdT = document.createElement('td'); tdT.className='time-cell';
       const dispEl = document.createElement('div');
-      dispEl.className = 'time-display'+(timeStr?'':' no-time');
-      dispEl.innerHTML = `<span>${timeStr||'not set'}</span><span class="time-edit-ico">✏</span>`;
-      const wrapEl = document.createElement('div'); wrapEl.className = 'time-input-wrap'; wrapEl.style.display='none';
+      dispEl.className='time-display'+(timeStr?'':' no-time');
+      dispEl.innerHTML=`<span>${timeStr||'not set'}</span><span class="time-edit-ico">✏</span>`;
+      const wrapEl = document.createElement('div'); wrapEl.className='time-input-wrap'; wrapEl.style.display='none';
       const inp = document.createElement('input'); inp.className='time-input'; inp.type='number'; inp.min='1'; inp.placeholder='secs';
-      if (row.clearMs) inp.value = Math.round(row.clearMs/1000);
+      if (row.clearMs) inp.value=Math.round(row.clearMs/1000);
       const savBtn = document.createElement('button'); savBtn.className='time-save'; savBtn.textContent='✓';
       wrapEl.appendChild(inp); wrapEl.appendChild(savBtn); tdT.appendChild(dispEl); tdT.appendChild(wrapEl); tr.appendChild(tdT);
       const kStr = row.key;
-      dispEl.addEventListener('click', () => { dispEl.style.display='none'; wrapEl.style.display='flex'; inp.focus(); });
-      savBtn.addEventListener('click', () => {
-        const secs = parseFloat(inp.value);
-        if (!isNaN(secs) && secs > 0) {
-          customTimes[kStr] = Math.round(secs*1000); saveTimes();
-          const r = allResults.find(x => x.key===kStr);
-          if (r) { r.clearMs = customTimes[kStr]; computeEvhr(r); }
+      dispEl.addEventListener('click',()=>{ dispEl.style.display='none'; wrapEl.style.display='flex'; inp.focus(); });
+      savBtn.addEventListener('click',()=>{
+        const secs=parseFloat(inp.value);
+        if (!isNaN(secs)&&secs>0) {
+          customTimes[kStr]=Math.round(secs*1000); saveTimes();
+          const r=allResults.find(x=>x.key===kStr);
+          if (r){r.clearMs=customTimes[kStr];computeEvhr(r);}
           renderCards(allResults);
         }
         dispEl.style.display=''; wrapEl.style.display='none'; applyFilters();
       });
-      inp.addEventListener('keydown', e => { if (e.key==='Enter') savBtn.click(); });
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter')savBtn.click();});
 
       const tdB = document.createElement('td'); tdB.className='bar-cell';
-      tdB.innerHTML = `<div class="ev-bar"><div class="ev-bar-fill" style="width:${barPct}%"></div></div>`; tr.appendChild(tdB);
+      tdB.innerHTML=`<div class="ev-bar"><div class="ev-bar-fill" style="width:${barPct}%"></div></div>`; tr.appendChild(tdB);
 
       const tdD = document.createElement('td');
       const dropsDiv = document.createElement('div'); dropsDiv.className='drops';
-      const chips = [...row.drops.filter(d=>d.type==='raid').slice(0,5), ...row.drops.filter(d=>d.type==='rank').slice(0,8)];
-      if (!chips.length) dropsDiv.innerHTML = '<span style="color:var(--dim3);font-size:10px">no drop data</span>';
-      else chips.forEach(d => dropsDiv.appendChild(makeChip(d)));
+      const chips=[...row.drops.filter(d=>d.type==='raid').slice(0,5),...row.drops.filter(d=>d.type==='rank').slice(0,8)];
+      if (!chips.length) dropsDiv.innerHTML='<span style="color:var(--dim3);font-size:10px">no drop data</span>';
+      else chips.forEach(d=>dropsDiv.appendChild(makeChip(d)));
       tdD.appendChild(dropsDiv); tr.appendChild(tdD);
       tbodyEl.appendChild(tr);
     });
@@ -1660,285 +1799,335 @@
   function renderDrpTable(col) {
     if (col) drpSortCol = col;
     const tbody = $('drp-tbody');
-    if (!tbody || !drpRows.length) return;
-    const sorted = [...drpRows].sort((a,b) => {
-      const va = a[drpSortCol] ?? -Infinity, vb = b[drpSortCol] ?? -Infinity;
-      return vb - va;
+    if (!tbody||!drpRows.length) return;
+    const sorted = [...drpRows].sort((a,b)=>{
+      const va=a[drpSortCol]??-Infinity, vb=b[drpSortCol]??-Infinity;
+      return vb-va;
     });
     tbody.innerHTML = '';
-    sorted.forEach(row => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
+    sorted.forEach(row=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
         <td class="drp-tbl-name">${row.name}</td>
         <td><span class="badge badge-${row.diffName}">${row.diffName}</span></td>
         <td class="drp-tbl-clears">${row.clears.toLocaleString()}</td>
         <td class="drp-tbl-calc">${row.drpPerRun.toFixed(2)}</td>
-        <td class="drp-tbl-known">${row.knownDrp != null ? row.knownDrp : '<span style="color:var(--dim3)">—</span>'}</td>
-        <td class="drp-tbl-time">${fmtTime(row.bestTimeMs) || '<span style="color:var(--dim3)">—</span>'}</td>
-        <td class="drp-tbl-hr">${row.drpPerMin != null ? row.drpPerMin.toFixed(1) : '<span style="color:var(--dim3)">—</span>'}</td>
-        <td class="drp-tbl-hr">${row.drpPerHr != null ? row.drpPerHr.toFixed(0) : '<span style="color:var(--dim3)">—</span>'}</td>`;
+        <td class="drp-tbl-known">${row.knownDrp!=null?row.knownDrp:'<span style="color:var(--dim3)">—</span>'}</td>
+        <td class="drp-tbl-time">${fmtTime(row.bestTimeMs)||'<span style="color:var(--dim3)">—</span>'}</td>
+        <td class="drp-tbl-hr">${row.drpPerMin!=null?row.drpPerMin.toFixed(1):'<span style="color:var(--dim3)">—</span>'}</td>
+        <td class="drp-tbl-hr">${row.drpPerHr!=null?row.drpPerHr.toFixed(0):'<span style="color:var(--dim3)">—</span>'}</td>`;
       tbody.appendChild(tr);
     });
   }
 
   async function loadDrpRankings() {
-    if (!cfg.cookie) {
-      $('drp-note').textContent = 'Session cookie required — open ⚙ Settings.';
-      return;
-    }
+    if (!cfg.cookie) { $('drp-note').textContent='Session cookie required — open ⚙ Settings.'; return; }
     drpLoaded = true;
     $('btn-drp-load').disabled = true;
     $('drp-note').textContent = 'Fetching ranking data…';
-    drpRows = [];
-    $('drp-tbody').innerHTML = '';
-    $('drp-banner').innerHTML = '';
-    $('drp-nearby').style.display = 'none';
+    drpRows = []; $('drp-tbody').innerHTML=''; $('drp-banner').innerHTML=''; $('drp-nearby').style.display='none';
     try {
-      const [rankDungeons, meData] = await Promise.all([
-        apiFetch('/api/rankings/dungeons'),
-        apiFetch('/api/rankings/me')
-      ]);
-
+      const [rankDungeons,meData] = await Promise.all([apiFetch('/api/rankings/dungeons'),apiFetch('/api/rankings/me')]);
       const rankMap = {};
-      for (const e of (rankDungeons || [])) {
-        rankMap[`${e.dungeon_id}_${e.difficulty}`] = e.dungeon_name || e.name || `Dungeon ${e.dungeon_id}`;
-      }
-
-      const tamers = meData?.tamers || [];
-      if (!tamers.length) { $('drp-note').textContent = 'No ranking data found.'; return; }
-      const me = tamers.reduce((a,b) => (a.total_drp||0) > (b.total_drp||0) ? a : b);
-
-      // Banner cards
-      const bannerEl = $('drp-banner');
-      bannerEl.innerHTML = `
-        <div class="drp-card"><div class="drp-card-lbl">Rank Position</div>
-          <div class="drp-card-val">#${me.position ?? '?'}</div>
-          <div class="drp-card-sub">Bracket ${me.bracket ?? '?'}</div></div>
-        <div class="drp-card"><div class="drp-card-lbl">Total DRP</div>
-          <div class="drp-card-val">${(me.total_drp||0).toLocaleString()}</div>
-          <div class="drp-card-sub">${(me.clear_count||0).toLocaleString()} total clears</div></div>
-        <div class="drp-card"><div class="drp-card-lbl">Tamer</div>
-          <div class="drp-card-val" style="font-size:14px">${me.tamer_name||'—'}</div>
-          <div class="drp-card-sub">${(me.dungeon_breakdown||[]).length} dungeon entries</div></div>`;
-
-      // Nearby rankings
-      if (me.nearby && me.nearby.length) {
-        const nearbyEl = $('drp-nearby-rows');
-        nearbyEl.innerHTML = '';
-        $('drp-nearby').style.display = 'block';
-        me.nearby.forEach(n => {
-          const row = document.createElement('div'); row.className = 'drp-nearby-row';
-          const isMe = n.is_me;
-          row.innerHTML = `
-            <div class="drp-nearby-pos ${isMe?'drp-nearby-me':''}">#${n.position}</div>
-            <div class="drp-nearby-name" style="${isMe?'color:var(--cyan);font-weight:600':''}">
-              ${isMe ? '▶ ' : ''}${n.tamer_name}</div>
+      for (const e of (rankDungeons||[])) rankMap[`${e.dungeon_id}_${e.difficulty}`]=e.dungeon_name||e.name||`Dungeon ${e.dungeon_id}`;
+      const tamers = meData?.tamers||[];
+      if (!tamers.length) { $('drp-note').textContent='No ranking data found.'; return; }
+      const me = tamers.reduce((a,b)=>(a.total_drp||0)>(b.total_drp||0)?a:b);
+      $('drp-banner').innerHTML=`
+        <div class="drp-card"><div class="drp-card-lbl">Rank Position</div><div class="drp-card-val">#${me.position??'?'}</div><div class="drp-card-sub">Bracket ${me.bracket??'?'}</div></div>
+        <div class="drp-card"><div class="drp-card-lbl">Total DRP</div><div class="drp-card-val">${(me.total_drp||0).toLocaleString()}</div><div class="drp-card-sub">${(me.clear_count||0).toLocaleString()} total clears</div></div>
+        <div class="drp-card"><div class="drp-card-lbl">Tamer</div><div class="drp-card-val" style="font-size:14px">${me.tamer_name||'—'}</div><div class="drp-card-sub">${(me.dungeon_breakdown||[]).length} dungeon entries</div></div>`;
+      if (me.nearby&&me.nearby.length) {
+        const nearbyEl=$('drp-nearby-rows'); nearbyEl.innerHTML=''; $('drp-nearby').style.display='block';
+        me.nearby.forEach(n=>{
+          const row=document.createElement('div'); row.className='drp-nearby-row';
+          const isMe=n.is_me;
+          row.innerHTML=`<div class="drp-nearby-pos ${isMe?'drp-nearby-me':''}">#${n.position}</div>
+            <div class="drp-nearby-name" style="${isMe?'color:var(--cyan);font-weight:600':''}">${isMe?'▶ ':''}${n.tamer_name}</div>
             <div class="drp-nearby-drp">${(n.total_drp||0).toLocaleString()} DRP</div>`;
           nearbyEl.appendChild(row);
         });
       }
-
-      // Build DRP rows from dungeon_breakdown
-      // Deduplicate: same dungeon_id+difficulty can appear multiple times — keep best time, sum drp/clears
-      const dedupMap = {};
-      for (const e of (me.dungeon_breakdown || [])) {
-        const k = `${e.dungeon_id}_${e.difficulty}`;
-        if (!dedupMap[k]) {
-          dedupMap[k] = { ...e };
-        } else {
-          dedupMap[k].drp_earned  = (dedupMap[k].drp_earned  || 0) + (e.drp_earned  || 0);
-          dedupMap[k].clear_count = (dedupMap[k].clear_count || 0) + (e.clear_count || 0);
-          if (e.best_time_ms && (!dedupMap[k].best_time_ms || e.best_time_ms < dedupMap[k].best_time_ms))
-            dedupMap[k].best_time_ms = e.best_time_ms;
+      const dedupMap={};
+      for (const e of (me.dungeon_breakdown||[])) {
+        const k=`${e.dungeon_id}_${e.difficulty}`;
+        if (!dedupMap[k]) { dedupMap[k]={...e}; }
+        else {
+          dedupMap[k].drp_earned=(dedupMap[k].drp_earned||0)+(e.drp_earned||0);
+          dedupMap[k].clear_count=(dedupMap[k].clear_count||0)+(e.clear_count||0);
+          if (e.best_time_ms&&(!dedupMap[k].best_time_ms||e.best_time_ms<dedupMap[k].best_time_ms)) dedupMap[k].best_time_ms=e.best_time_ms;
         }
       }
-
-      drpRows = Object.values(dedupMap).map(e => {
-        const dName  = DIFF_MAP[e.difficulty] || `Mode ${e.difficulty}`;
-        const rName  = rankMap[`${e.dungeon_id}_${e.difficulty}`] || `ID ${e.dungeon_id}`;
-        const drpPerRun = e.clear_count > 0 ? e.drp_earned / e.clear_count : 0;
-        const knownDrp  = KNOWN_DRP_MAP[rName] ?? null;
-        const drpPerMin = e.best_time_ms > 0 ? (drpPerRun / (e.best_time_ms / 60000)) : null;
-        const drpPerHr  = drpPerMin != null ? drpPerMin * 60 : null;
-        return { name:rName, diffName:dName, clears:e.clear_count||0, totalDrp:e.drp_earned||0,
-          drpPerRun, knownDrp, bestTimeMs:e.best_time_ms||null, drpPerMin, drpPerHr };
+      drpRows=Object.values(dedupMap).map(e=>{
+        const dName=DIFF_MAP[e.difficulty]||`Mode ${e.difficulty}`;
+        const rName=rankMap[`${e.dungeon_id}_${e.difficulty}`]||`ID ${e.dungeon_id}`;
+        const drpPerRun=e.clear_count>0?e.drp_earned/e.clear_count:0;
+        const knownDrp=KNOWN_DRP_MAP[rName]??null;
+        const drpPerMin=e.best_time_ms>0?(drpPerRun/(e.best_time_ms/60000)):null;
+        const drpPerHr=drpPerMin!=null?drpPerMin*60:null;
+        return {name:rName,diffName:dName,clears:e.clear_count||0,totalDrp:e.drp_earned||0,drpPerRun,knownDrp,bestTimeMs:e.best_time_ms||null,drpPerMin,drpPerHr};
       });
-
-      $('drp-note').textContent = `${drpRows.length} dungeon entries for "${me.tamer_name}". DRP/run is calculated from your totals. Known DRP is from the latest patch notes.`;
+      $('drp-note').textContent=`${drpRows.length} dungeon entries for "${me.tamer_name}".`;
       renderDrpTable(drpSortCol);
-    } catch(err) {
-      $('drp-note').textContent = 'Failed: ' + err.message;
-    } finally {
-      $('btn-drp-load').disabled = false;
-    }
+    } catch(err) { $('drp-note').textContent='Failed: '+err.message; }
+    finally { $('btn-drp-load').disabled=false; }
   }
 
   /* ══ MY LISTINGS ══ */
-  // Icon base URL — adjust if wrong (check Network tab for actual item image path)
   const ICON_BASE = 'https://thedigitalodyssey.com/static/icons/';
 
   function makeLstItemCell(l) {
-    const iconUrl = `${ICON_BASE}${l.icon}.png`;
+    const iconUrl=`${ICON_BASE}${l.icon}.png`;
     return `<div class="lst-item-cell">
       <img class="lst-item-icon" src="${iconUrl}" alt="" onerror="this.style.display='none'">
-      <div class="lst-item-info">
-        <div class="lst-item-name">${l.name.replace('\n',' ')}</div>
-        <div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div>
-      </div>
-    </div>`;
+      <div class="lst-item-info"><div class="lst-item-name">${l.name.replace('\n',' ')}</div><div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div></div></div>`;
   }
 
   async function loadMyListings() {
-    if (!cfg.cookie) {
-      $('lst-note').textContent = 'Session cookie required — open ⚙ Settings.';
-      return;
-    }
+    if (!cfg.cookie) { $('lst-note').textContent='Session cookie required — open ⚙ Settings.'; return; }
     if (isListingsRunning) return;
-    isListingsRunning = true;
-    listingsLoaded = true;
-    $('btn-lst-load').disabled = true;
-    $('lst-note').textContent = 'Fetching your listings…';
-    $('lst-sell-section').style.display = 'none';
-    $('lst-buy-section').style.display  = 'none';
-    $('lst-sell-tbody').innerHTML = '';
-    $('lst-buy-tbody').innerHTML  = '';
-
+    isListingsRunning=true; listingsLoaded=true;
+    $('btn-lst-load').disabled=true; $('lst-note').textContent='Fetching your listings…';
+    $('lst-sell-section').style.display='none'; $('lst-buy-section').style.display='none';
+    $('lst-sell-tbody').innerHTML=''; $('lst-buy-tbody').innerHTML='';
     try {
-      const listings = await apiFetch('/api/market/my-listings');
-      if (!Array.isArray(listings) || !listings.length) {
-        $('lst-note').textContent = 'No active listings found.';
-        return;
-      }
-
-      const sells = listings.filter(l => l.side === 'sell' && l.qty_open > 0);
-      const buys  = listings.filter(l => l.side === 'buy'  && l.qty_open > 0);
-
-      function makeRow(l) {
-        const tr = document.createElement('tr'); tr.id = `lst-row-${l.listing_id}`;
-        const soldQty = l.qty_total - l.qty_open;
-        const qtyBadge = soldQty === 0
-          ? '<span class="lst-badge-full">untouched</span>'
-          : `<span class="lst-badge-partial lst-badge-partial-fill">${soldQty} sold</span>`;
-        const expiryColor = (l.expires - Date.now()) < 86400000 ? 'var(--red)' : 'var(--dim)';
-        tr.innerHTML = `
-          <td>${makeLstItemCell(l)}</td>
-          <td><span class="lst-price ${l.side}">${fmtRaw(l.price)}</span></td>
-          <td>${l.side === 'sell' ? qtyBadge : '—'}</td>
+      const listings=await apiFetch('/api/market/my-listings');
+      if (!Array.isArray(listings)||!listings.length) { $('lst-note').textContent='No active listings found.'; return; }
+      const sells=listings.filter(l=>l.side==='sell'&&l.qty_open>0);
+      const buys=listings.filter(l=>l.side==='buy'&&l.qty_open>0);
+      function makeRow(l){
+        const tr=document.createElement('tr'); tr.id=`lst-row-${l.listing_id}`;
+        const soldQty=l.qty_total-l.qty_open;
+        const qtyBadge=soldQty===0?'<span class="lst-badge-full">untouched</span>':`<span class="lst-badge-partial lst-badge-partial-fill">${soldQty} sold</span>`;
+        const expiryColor=(l.expires-Date.now())<86400000?'var(--red)':'var(--dim)';
+        tr.innerHTML=`<td>${makeLstItemCell(l)}</td><td><span class="lst-price ${l.side}">${fmtRaw(l.price)}</span></td>
+          <td>${l.side==='sell'?qtyBadge:'—'}</td>
           <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
           <td id="lst-mkt-${l.listing_id}" style="font-size:11px;color:var(--dim3)">—</td>
           <td id="lst-trade-${l.listing_id}" style="font-size:11px;color:var(--dim3)">—</td>
           <td style="font-size:10px;color:${expiryColor};white-space:nowrap">${fmtExpiry(l.expires)}</td>`;
         return tr;
       }
-
-      if (sells.length) {
-        $('lst-sell-section').style.display = 'block';
-        $('lst-sell-count').textContent = `(${sells.length})`;
-        const tbody = $('lst-sell-tbody');
-        tbody.innerHTML = '';
-        sells.forEach(l => tbody.appendChild(makeRow(l)));
-      }
-
-      if (buys.length) {
-        $('lst-buy-section').style.display = 'block';
-        $('lst-buy-count').textContent = `(${buys.length})`;
-        const tbody = $('lst-buy-tbody');
-        tbody.innerHTML = '';
-        buys.forEach(l => tbody.appendChild(makeRow(l)));
-      }
-
-      $('lst-note').textContent = `${listings.length} listings found. Checking market prices…`;
-
-      const allListings = [...sells, ...buys];
-      for (let i = 0; i < allListings.length; i++) {
-        const l = allListings[i];
-        if (i > 0) await sleep(600);
+      if (sells.length) { $('lst-sell-section').style.display='block'; $('lst-sell-count').textContent=`(${sells.length})`; const tb=$('lst-sell-tbody'); tb.innerHTML=''; sells.forEach(l=>tb.appendChild(makeRow(l))); }
+      if (buys.length)  { $('lst-buy-section').style.display='block';  $('lst-buy-count').textContent=`(${buys.length})`;  const tb=$('lst-buy-tbody');  tb.innerHTML=''; buys.forEach(l=>tb.appendChild(makeRow(l))); }
+      $('lst-note').textContent=`${listings.length} listings found. Checking market prices…`;
+      const allListings=[...sells,...buys];
+      for (let i=0;i<allListings.length;i++) {
+        const l=allListings[i];
+        if (i>0) await sleep(600);
         await rateGate();
         try {
-          // Fetch enough listings to count how many beat mine (up to 20)
-          const mktRes   = await marketGet(`/api/market/listings?item=${l.item}&side=${l.side}&limit=20`);
-          const tradeRes = await marketGet(`/api/market/trades?item=${l.item}&limit=5`);
-
-          let mktData = null, tradeData = null;
-          if (mktRes   && mktRes.ok)   { try { mktData   = await mktRes.json();   } catch(e) {} }
-          if (tradeRes && tradeRes.ok) { try { tradeData = await tradeRes.json(); } catch(e) {} }
-
-          const statusEl = $(`lst-status-${l.listing_id}`);
-          const mktEl    = $(`lst-mkt-${l.listing_id}`);
-          const tradeEl  = $(`lst-trade-${l.listing_id}`);
-
+          const mktRes=await marketGet(`/api/market/listings?item=${l.item}&side=${l.side}&limit=20`);
+          const tradeRes=await marketGet(`/api/market/trades?item=${l.item}&limit=5`);
+          let mktData=null,tradeData=null;
+          if (mktRes&&mktRes.ok) { try{mktData=await mktRes.json();}catch(e){} }
+          if (tradeRes&&tradeRes.ok) { try{tradeData=await tradeRes.json();}catch(e){} }
+          const statusEl=$(`lst-status-${l.listing_id}`);
+          const mktEl=$(`lst-mkt-${l.listing_id}`);
+          const tradeEl=$(`lst-trade-${l.listing_id}`);
           if (mktData?.listings?.length) {
-            const all2 = mktData.listings;
-
-            if (l.side === 'sell') {
-              // For sell: cheapest = lowest price
-              const sorted     = [...all2].sort((a,b) => a.price - b.price);
-              const cheapest   = sorted[0].price;
-              // Count listings STRICTLY cheaper than mine (excluding my own)
-              const cheaper    = sorted.filter(x => x.price < l.price);
-              const myIsBest   = l.price <= cheapest;
-
-              if (statusEl) {
-                statusEl.className = 'lst-status ' + (myIsBest ? 'best' : 'warn');
-                statusEl.textContent = myIsBest ? '✓ cheapest' : '⚠ not cheapest';
-              }
-              if (mktEl) {
-                if (myIsBest) {
-                  mktEl.innerHTML = `<span class="lst-market-price same">${fmtRaw(cheapest)}</span>`;
-                } else {
-                  mktEl.innerHTML = `<span class="lst-market-price cheaper">${fmtRaw(cheapest)}</span>`
-                    + `<span style="font-size:9px;color:var(--dim3);margin-left:5px">${cheaper.length} cheaper</span>`;
-                }
-              }
+            const all2=mktData.listings;
+            if (l.side==='sell') {
+              const sorted=[...all2].sort((a,b)=>a.price-b.price);
+              const cheapest=sorted[0].price;
+              const cheaper=sorted.filter(x=>x.price<l.price);
+              const myIsBest=l.price<=cheapest;
+              if (statusEl){statusEl.className='lst-status '+(myIsBest?'best':'warn');statusEl.textContent=myIsBest?'✓ cheapest':'⚠ not cheapest';}
+              if (mktEl){mktEl.innerHTML=myIsBest?`<span class="lst-market-price same">${fmtRaw(cheapest)}</span>`:`<span class="lst-market-price cheaper">${fmtRaw(cheapest)}</span><span style="font-size:9px;color:var(--dim3);margin-left:5px">${cheaper.length} cheaper</span>`;}
             } else {
-              // For buy: highest bid = highest price
-              const sorted   = [...all2].sort((a,b) => b.price - a.price);
-              const highest  = sorted[0].price;
-              const higher   = sorted.filter(x => x.price > l.price);
-              const myIsBest = l.price >= highest;
-
-              if (statusEl) {
-                statusEl.className = 'lst-status ' + (myIsBest ? 'best' : 'warn');
-                statusEl.textContent = myIsBest ? '✓ highest bid' : '⚠ not highest bid';
-              }
-              if (mktEl) {
-                if (myIsBest) {
-                  mktEl.innerHTML = `<span class="lst-market-price same">${fmtRaw(highest)}</span>`;
-                } else {
-                  mktEl.innerHTML = `<span class="lst-market-price cheaper">${fmtRaw(highest)}</span>`
-                    + `<span style="font-size:9px;color:var(--dim3);margin-left:5px">${higher.length} higher</span>`;
-                }
-              }
+              const sorted=[...all2].sort((a,b)=>b.price-a.price);
+              const highest=sorted[0].price;
+              const higher=sorted.filter(x=>x.price>l.price);
+              const myIsBest=l.price>=highest;
+              if (statusEl){statusEl.className='lst-status '+(myIsBest?'best':'warn');statusEl.textContent=myIsBest?'✓ highest bid':'⚠ not highest bid';}
+              if (mktEl){mktEl.innerHTML=myIsBest?`<span class="lst-market-price same">${fmtRaw(highest)}</span>`:`<span class="lst-market-price cheaper">${fmtRaw(highest)}</span><span style="font-size:9px;color:var(--dim3);margin-left:5px">${higher.length} higher</span>`;}
             }
           } else if (statusEl) {
-            statusEl.className = 'lst-status best';
-            statusEl.textContent = l.side === 'sell' ? '✓ only listing' : '✓ only bid';
-            if (mktEl) mktEl.innerHTML = `<span style="color:var(--dim3);font-style:italic">no others</span>`;
+            statusEl.className='lst-status best'; statusEl.textContent=l.side==='sell'?'✓ only listing':'✓ only bid';
+            if (mktEl) mktEl.innerHTML=`<span style="color:var(--dim3);font-style:italic">no others</span>`;
           }
-
-          // Trade history
-          if (tradeEl && Array.isArray(tradeData) && tradeData.length) {
-            const last = tradeData[0];
-            tradeEl.innerHTML = `<span class="lst-trade-price">${fmtRaw(last.price||0)}</span>`
-              + `<span class="lst-trade-age"> · ${fmtAgo(last.at)}</span>`
-              + (tradeData.length > 1 ? `<span style="color:var(--dim3);font-size:9px;margin-left:4px">(${tradeData.length} recent)</span>` : '');
+          if (tradeEl&&Array.isArray(tradeData)&&tradeData.length) {
+            const last=tradeData[0];
+            tradeEl.innerHTML=`<span class="lst-trade-price">${fmtRaw(last.price||0)}</span><span class="lst-trade-age"> · ${fmtAgo(last.at)}</span>${tradeData.length>1?`<span style="color:var(--dim3);font-size:9px;margin-left:4px">(${tradeData.length} recent)</span>`:''}`;
           } else if (tradeEl) {
-            tradeEl.innerHTML = `<span style="color:var(--dim3);font-style:italic">no history</span>`;
+            tradeEl.innerHTML=`<span style="color:var(--dim3);font-style:italic">no history</span>`;
           }
         } catch(e) {
-          const statusEl = $(`lst-status-${l.listing_id}`);
-          if (statusEl) { statusEl.className = 'lst-status warn'; statusEl.textContent = '⚠ error'; }
+          const statusEl=$(`lst-status-${l.listing_id}`);
+          if (statusEl){statusEl.className='lst-status warn';statusEl.textContent='⚠ error';}
         }
       }
-
-      $('lst-note').textContent = `${listings.length} listings — last refreshed just now.`;
-    } catch(err) {
-      $('lst-note').textContent = 'Error: ' + err.message;
-    } finally {
-      isListingsRunning = false;
-      $('btn-lst-load').disabled = false;
-    }
+      $('lst-note').textContent=`${listings.length} listings — last refreshed just now.`;
+    } catch(err) { $('lst-note').textContent='Error: '+err.message; }
+    finally { isListingsRunning=false; $('btn-lst-load').disabled=false; }
   }
+
+  /* ══ ADMIN PANEL ══ */
+  // Token save
+  $('adm-token-save').addEventListener('click', () => {
+    adminToken = $('adm-token-inp').value.trim();
+    try { localStorage.setItem(ADMIN_NS, adminToken); } catch(e) {}
+    $('adm-token-inp').value = adminToken ? '••••••••' : '';
+    showAdminToast('Token saved');
+  });
+
+  // Pre-fill token field indicator
+  if (adminToken) $('adm-token-inp').placeholder = '(token saved — click to change)';
+
+  $('adm-load-btn').addEventListener('click', loadAdminData);
+
+  $('adm-add-btn').addEventListener('click', async () => {
+    const name = $('adm-add-inp').value.trim();
+    if (!name) return;
+    await adminApi('POST', '/fo-admin/allowlist', { name });
+    $('adm-add-inp').value = '';
+    await loadAdminData();
+  });
+  $('adm-add-inp').addEventListener('keydown', e => { if (e.key==='Enter') $('adm-add-btn').click(); });
+
+  $('adm-clear-usage').addEventListener('click', async () => {
+    if (!confirm('Clear ALL usage data? Cannot be undone.')) return;
+    await adminApi('DELETE', '/fo-admin/usage');
+    await loadAdminData();
+  });
+
+  async function adminApi(method, path, body) {
+    const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+    if (!token) { showAdminToast('No admin token set', true); return null; }
+    try {
+      const res = await fetch(WORKER_URL + path, {
+        method,
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      if (!res.ok) { showAdminToast(`Error ${res.status}`, true); return null; }
+      return res;
+    } catch(e) { showAdminToast('Network error', true); return null; }
+  }
+
+  function showAdminToast(msg, err=false) {
+    // Use the notice bar as a toast for admin actions
+    noticeEl.style.borderLeftColor = err ? 'var(--red)' : 'var(--green)';
+    noticeEl.style.color = err ? 'var(--red)' : 'var(--green)';
+    noticeEl.style.background = err ? 'rgba(255,77,106,.07)' : 'rgba(61,214,140,.07)';
+    showNotice(msg);
+    setTimeout(hideNotice, 2500);
+    noticeEl.style.borderLeftColor = '';
+    noticeEl.style.color = '';
+    noticeEl.style.background = '';
+  }
+
+  async function loadAdminData() {
+    $('adm-last-refresh').textContent = 'loading…';
+    $('adm-tbody').innerHTML = '<tr><td colspan="7" style="padding:16px;text-align:center;color:var(--dim3);font-size:11px">Loading…</td></tr>';
+    $('adm-banner').innerHTML = '<div class="adm-card"><div class="adm-card-lbl">Loading</div><div class="adm-card-val">—</div></div>';
+
+    const res = await adminApi('GET', '/fo-admin/data');
+    if (!res) return;
+
+    let data;
+    try { data = await res.json(); } catch(e) { showAdminToast('Bad response', true); return; }
+
+    const { allowlist, usages } = data;
+    const now = Date.now();
+
+    // Banner
+    const totalReqs   = usages.reduce((s,u)=>s+(u.count||0), 0);
+    const blockedReqs = usages.filter(u=>!allowlist.some(n=>n.toLowerCase()===u.name)).reduce((s,u)=>s+(u.count||0),0);
+    $('adm-banner').innerHTML = `
+      <div class="adm-card"><div class="adm-card-lbl">Allowed</div><div class="adm-card-val">${allowlist.length}</div><div class="adm-card-sub">on allowlist</div></div>
+      <div class="adm-card"><div class="adm-card-lbl">Seen Tamers</div><div class="adm-card-val">${usages.length}</div><div class="adm-card-sub">ever accessed</div></div>
+      <div class="adm-card"><div class="adm-card-lbl">Total Requests</div><div class="adm-card-val">${totalReqs.toLocaleString()}</div><div class="adm-card-sub">all time</div></div>
+      <div class="adm-card" style="border-left-color:var(--red)"><div class="adm-card-lbl">Blocked</div><div class="adm-card-val" style="color:var(--red)">${blockedReqs.toLocaleString()}</div><div class="adm-card-sub">from non-allowed</div></div>`;
+
+    // Allowlist chips
+    const chips = $('adm-chips');
+    chips.innerHTML = allowlist.length
+      ? allowlist.map(n => `
+          <span class="adm-chip">
+            ${n}
+            <button class="adm-chip-rm" data-name="${n}" title="Remove from allowlist">✕</button>
+          </span>`).join('')
+      : '<span style="color:var(--dim3);font-size:11px">Empty — add names above</span>';
+
+    chips.querySelectorAll('.adm-chip-rm').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(`Remove ${btn.dataset.name} from allowlist?`)) return;
+        await adminApi('DELETE', '/fo-admin/allowlist', { name: btn.dataset.name });
+        await loadAdminData();
+      });
+    });
+
+    // Usage table
+    const tbody = $('adm-tbody');
+    tbody.innerHTML = '';
+    if (!usages.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim3);font-size:11px">No usage data yet</td></tr>';
+    } else {
+      usages.forEach(u => {
+        const allowed = allowlist.some(n => n.toLowerCase() === u.name);
+
+        // 24h sparkline
+        const hours = Array(24).fill(0);
+        (u.history||[]).forEach(h => {
+          const hoursAgo = Math.floor((now - h.ts) / 3600000);
+          if (hoursAgo < 24) hours[hoursAgo]++;
+        });
+        const maxH = Math.max(...hours, 1);
+        const spark = hours.reverse().map(v => {
+          const ht = Math.max(Math.round((v/maxH)*20), 1);
+          const color = v > 0 ? (allowed ? '#00e5ff' : '#ff4d6a') : '#1a3a55';
+          return `<div class="adm-spark-bar" style="height:${ht}px;background:${color}"></div>`;
+        }).join('');
+
+        // Recent endpoints (last 5)
+        const recentEps = (u.history||[]).slice(0,5).map(h => {
+          const t = new Date(h.ts).toLocaleTimeString('en-GB', { timeZone:'Asia/Jerusalem' });
+          return `<div class="${h.blocked?'ep-blocked':''}">${t} ${h.ep}${h.blocked?' [blocked]':''}</div>`;
+        }).join('');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="adm-tamer-name ${allowed?'':'blocked-row'}">${u.name}</div>
+            <div style="font-size:9px;color:var(--dim3);margin-top:2px">first: ${fmtDate(u.firstSeen)}</div>
+          </td>
+          <td>${allowed
+            ? '<span class="adm-status-ok">✓ allowed</span>'
+            : '<span class="adm-status-blocked">✗ blocked</span>'}</td>
+          <td><span class="adm-count">${(u.count||0).toLocaleString()}</span></td>
+          <td>
+            <div class="adm-ago">${fmtAgo(u.lastSeen)||'—'}</div>
+            <div class="adm-ago-date">${fmtDate(u.lastSeen)}</div>
+          </td>
+          <td><div class="adm-spark">${spark}</div><div style="font-size:9px;color:var(--dim3);margin-top:2px">last 24h</div></td>
+          <td><div class="adm-log-ep">${recentEps||'<span style="color:var(--dim4)">—</span>'}</div></td>
+          <td style="white-space:nowrap">
+            ${allowed
+              ? `<button class="btn red" style="font-size:8px;padding:4px 8px" data-action="remove" data-name="${u.name}">✕ Remove</button>`
+              : `<button class="btn green" style="font-size:8px;padding:4px 8px" data-action="add" data-name="${u.name}">+ Allow</button>`}
+          </td>`;
+
+        tr.querySelectorAll('[data-action]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const name = btn.dataset.name;
+            if (btn.dataset.action === 'remove') {
+              if (!confirm(`Remove ${name}?`)) return;
+              await adminApi('DELETE', '/fo-admin/allowlist', { name });
+            } else {
+              await adminApi('POST', '/fo-admin/allowlist', { name });
+            }
+            await loadAdminData();
+          });
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    $('adm-last-refresh').textContent = 'refreshed ' + fmtAgo(now);
+  }
+
   /* ── Auto-run on warm cache ── */
   if (cacheGet('dungeon_list', Infinity)) {
     setTimeout(() => runAnalysis('fresh'), 300);
