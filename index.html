@@ -20,16 +20,12 @@
   body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
     background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px); }
   #app { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-
-  /* HEADER */
   #hdr { padding:10px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px;
     background:var(--bg2); flex-shrink:0; box-shadow:0 2px 20px rgba(0,0,0,.4); }
   #hdr-title { font-family:'Orbitron',sans-serif; font-size:14px; font-weight:900; color:var(--cyan);
     letter-spacing:.12em; text-shadow:0 0 18px rgba(0,229,255,.45); }
   #hdr-sub { font-size:11px; color:var(--dim); margin-top:2px; }
   #hdr-right { margin-left:auto; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-
-  /* BUTTONS */
   .btn { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; letter-spacing:.09em;
     padding:7px 13px; border:1px solid var(--cyan); background:transparent; color:var(--cyan);
     cursor:pointer; transition:all .15s; text-transform:uppercase; white-space:nowrap; }
@@ -46,8 +42,6 @@
   .btn.red:hover { background:var(--red); color:var(--bg0); }
   .btn.purple { border-color:var(--purple); color:var(--purple); }
   .btn.purple:hover { background:var(--purple); color:var(--bg0); }
-
-  /* TOOLBAR */
   #toolbar { padding:7px 16px; border-bottom:1px solid var(--border); display:flex; gap:6px;
     flex-wrap:wrap; align-items:center; background:var(--bg3); flex-shrink:0; }
   .sep { width:1px; height:20px; background:var(--border); margin:0 2px; flex-shrink:0; }
@@ -57,8 +51,6 @@
   .srch { flex:1; min-width:130px; background:var(--bg2); border:1px solid var(--border);
     color:var(--text); font-family:'Inter',sans-serif; font-size:12px; padding:5px 11px; outline:none; }
   .srch:focus { border-color:#006888; }
-
-  /* TABS */
   #main-tabs { display:none; padding:0 16px; border-bottom:1px solid var(--border);
     background:var(--bg3); flex-shrink:0; }
   .main-tab { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em;
@@ -75,36 +67,26 @@
     color:var(--dim2); cursor:pointer; transition:all .15s; }
   .sort-tab:hover { color:var(--blue2); }
   .sort-tab.active { color:var(--yellow); border-bottom-color:var(--yellow); }
-
-  /* BODY */
   #body { flex:1; overflow-y:auto; padding:16px; }
   #body::-webkit-scrollbar { width:5px; }
   #body::-webkit-scrollbar-track { background:var(--bg2); }
   #body::-webkit-scrollbar-thumb { background:var(--border); }
   #body::-webkit-scrollbar-thumb:hover { background:#006888; }
-
-  /* PROGRESS */
   #progress { margin-bottom:12px; display:none; }
   .pbar-wrap { height:3px; background:var(--bg2); margin-bottom:6px; border-radius:2px; overflow:hidden; }
   .pbar { height:100%; background:linear-gradient(90deg,#005a7a,var(--cyan)); width:0%; transition:width .3s; box-shadow:0 0 8px var(--cyan); }
   .log { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--dim); height:55px; overflow-y:auto; line-height:1.6; }
   .log .ll { margin-bottom:1px; }
   .log .ok { color:var(--green); } .log .warn { color:var(--amber); } .log .err { color:var(--red); }
-
-  /* FORMULA */
   #formula { display:none; background:var(--bg2); border:1px solid var(--border); border-left:3px solid #005a7a;
     padding:10px 14px; font-size:11px; color:var(--blue); line-height:1.8; margin-bottom:12px; }
   #formula strong { color:var(--cyan); }
   #formula code { color:var(--green); font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg3); padding:1px 4px; }
-
-  /* CARDS */
   #cards { display:none; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; margin-bottom:14px; }
   .card { background:var(--bg2); border:1px solid var(--border); padding:12px 14px; }
   .card-lbl { font-size:9px; font-weight:600; letter-spacing:.22em; color:#345a72; text-transform:uppercase; margin-bottom:4px; }
   .card-val { font-family:'Orbitron',sans-serif; font-size:19px; font-weight:700; color:var(--cyan); line-height:1.1; }
   .card-sub { font-size:11px; color:var(--dim); margin-top:3px; }
-
-  /* TABLE */
   #table-wrap { display:none; overflow-x:auto; }
   table.tbl { width:100%; border-collapse:collapse; }
   table.tbl thead th { padding:8px 12px; text-align:left; font-family:'Orbitron',sans-serif;
@@ -141,6 +123,10 @@
   .time-display:hover { border-color:var(--border); color:var(--text); }
   .time-display.no-time { color:var(--dim3); font-style:italic; }
   .time-edit-ico { font-size:10px; color:var(--dim3); }
+  .tsrc { font-size:8px; font-family:'JetBrains Mono',monospace; padding:1px 4px; border-radius:2px; border:1px solid; letter-spacing:.04em; }
+  .tsrc-mine     { border-color:#1a5a3a; color:#2a9a6a; background:rgba(61,214,140,.07); }
+  .tsrc-speed50  { border-color:#3a3a1a; color:#aaaa50; background:rgba(200,200,60,.06); }
+  .tsrc-speedAvg { border-color:#2a3a5a; color:#5a8aaa; background:rgba(90,138,170,.06); }
   .time-input-wrap { display:none; align-items:center; gap:4px; }
   .time-input { width:65px; background:var(--bg2); border:1px solid #006888; color:var(--text);
     font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 6px; outline:none; }
@@ -168,8 +154,6 @@
   .chip-sub-na { color:var(--dim4); font-style:italic; }
   @keyframes shimmer { 0%{border-color:var(--border)} 50%{border-color:#006888} 100%{border-color:var(--border)} }
   .chip.loading { animation:shimmer 1.5s ease-in-out infinite; }
-
-  /* TOOLTIP */
   #tooltip { display:none; position:fixed; z-index:99999; background:var(--bg1); border:1px solid #006888;
     padding:10px 13px; font-size:11px; font-family:'Inter',sans-serif; pointer-events:none;
     box-shadow:0 4px 20px rgba(0,0,0,.6); min-width:180px; }
@@ -177,8 +161,6 @@
   .trow { display:flex; justify-content:space-between; gap:20px; margin-bottom:4px; line-height:1.4; }
   .trow:last-child { margin-bottom:0; }
   .tlbl { color:var(--dim); } .tval { color:var(--text); font-family:'JetBrains Mono',monospace; font-weight:600; }
-
-  /* MY TIMES PANEL */
   #times-panel { display:none; background:var(--bg2); border:1px solid var(--border);
     border-left:3px solid var(--green); margin-bottom:12px; overflow:hidden; }
   #times-panel.collapsed #tp-body { display:none; }
@@ -199,8 +181,6 @@
     font-family:'Inter',sans-serif; font-size:11px; padding:3px 7px; outline:none; cursor:pointer; min-width:180px; }
   .tp-status { font-size:10px; white-space:nowrap; }
   .tp-status.matched { color:var(--green); } .tp-status.unmatched { color:var(--dim); }
-
-  /* ITEM FINDER */
   #item-finder { display:none; }
   .if-search { width:100%; background:var(--bg2); border:1px solid var(--border); color:var(--text);
     font-family:'Inter',sans-serif; font-size:13px; padding:8px 13px; outline:none; margin-bottom:14px; }
@@ -209,8 +189,6 @@
   .if-item-name { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700;
     color:var(--yellow); letter-spacing:.1em; margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid var(--border); }
   .if-item-price { font-size:11px; color:var(--dim); font-weight:400; margin-left:10px; font-family:'Inter',sans-serif; }
-
-  /* BLACKLIST TAB */
   #blacklist-view { display:none; }
   .bl-section { margin-bottom:22px; }
   .bl-section-title { font-family:'Orbitron',sans-serif; font-size:10px; color:var(--cyan);
@@ -237,19 +215,13 @@
     background:var(--bg2); border:1px solid var(--border); font-size:11px; color:var(--dim); cursor:pointer; transition:all .12s; }
   .bl-dungeon-chip:hover { border-color:var(--amber); color:var(--amber); }
   .bl-dungeon-chip.bld { border-color:var(--amber); color:var(--amber); opacity:.5; pointer-events:none; }
-
-  /* NOTICE */
   #notice { background:rgba(255,180,0,.08); border:1px solid rgba(255,180,0,.25);
     border-left:3px solid var(--amber); padding:8px 14px; font-size:12px; color:var(--amber);
     margin-bottom:12px; display:none; line-height:1.7; }
   #notice a { color:var(--cyan); cursor:pointer; text-decoration:underline; }
-
-  /* EMPTY */
   #empty { text-align:center; padding:60px 20px; color:var(--dim3); }
   #empty .ico { font-size:32px; margin-bottom:12px; }
   #empty p { font-size:13px; line-height:1.9; }
-
-  /* SETTINGS MODAL */
   #settings-overlay { display:none; position:fixed; inset:0; background:rgba(0,4,10,.88);
     z-index:100000; align-items:center; justify-content:center; }
   #settings-overlay.open { display:flex; }
@@ -270,8 +242,6 @@
   .sfield .hint code { background:var(--bg3); padding:1px 4px; }
   #settings-footer { padding:12px 20px; border-top:1px solid var(--border);
     display:flex; justify-content:flex-end; gap:8px; background:var(--bg3); }
-
-  /* DRP RANKINGS VIEW */
   #drp-view { display:none; }
   .drp-banner { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
   .drp-card { background:var(--bg2); border:1px solid var(--border); padding:11px 16px; flex:1; min-width:140px; }
@@ -309,8 +279,6 @@
   .drp-tbl-time { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--blue); }
   .drp-tbl-hr { font-family:'Orbitron',sans-serif; font-size:12px; color:var(--green); }
   .drp-tbl-clears { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); }
-
-  /* MY LISTINGS VIEW */
   #listings-view { display:none; }
   .lst-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
   .lst-header-title { font-family:'Orbitron',sans-serif; font-size:10px; color:var(--cyan); letter-spacing:.12em; }
@@ -341,14 +309,11 @@
   .lst-market-price { font-family:'JetBrains Mono',monospace; font-size:11px; white-space:nowrap; }
   .lst-market-price.cheaper { color:var(--red); }
   .lst-market-price.same    { color:var(--green); }
-  .lst-trade-info { font-size:10px; font-family:'JetBrains Mono',monospace; white-space:nowrap; }
   .lst-trade-price { color:var(--blue2); white-space:nowrap; }
   .lst-trade-age   { color:var(--dim3); margin-left:4px; }
   .lst-badge-partial { display:inline-block; font-size:9px; padding:1px 5px; border:1px solid var(--border); color:var(--dim2); }
   .lst-badge-full   { display:inline-block; font-size:9px; padding:1px 5px; border:1px solid var(--border2); color:var(--dim3); }
   .lst-badge-partial-fill { border-color:var(--amber); color:var(--amber); }
-
-  /* REFRESH DROPDOWN */
   .ref-group { position:relative; display:inline-flex; }
   .ref-dropdown { display:none; position:absolute; top:100%; right:0; background:var(--bg1);
     border:1px solid var(--border); z-index:1000; min-width:160px; margin-top:2px; }
@@ -357,8 +322,6 @@
     font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; letter-spacing:.08em;
     border:none; background:transparent; color:var(--amber); cursor:pointer; }
   .ref-opt:hover { background:rgba(255,179,71,.1); }
-
-  /* ══ ADMIN PANEL ══ */
   #admin-view { display:none; }
   .adm-banner { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:18px; }
   .adm-card { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--purple); padding:12px 16px; }
@@ -377,10 +340,8 @@
   .adm-chips { display:flex; flex-wrap:wrap; gap:6px; }
   .adm-chip { display:inline-flex; align-items:center; gap:8px; padding:5px 12px;
     background:#0c0e1e; border:1px solid var(--purple); font-size:12px; color:var(--purple); }
-  .adm-chip-rm { border:none; background:none; color:var(--dim3); cursor:pointer; font-size:13px;
-    padding:0; transition:color .12s; }
+  .adm-chip-rm { border:none; background:none; color:var(--dim3); cursor:pointer; font-size:13px; padding:0; transition:color .12s; }
   .adm-chip-rm:hover { color:var(--red); }
-  /* usage table */
   table.adm-tbl { width:100%; border-collapse:collapse; }
   table.adm-tbl thead th { padding:7px 12px; text-align:left; font-family:'Orbitron',sans-serif;
     font-size:8px; letter-spacing:.14em; color:var(--dim2); border-bottom:1px solid var(--border); white-space:nowrap; }
@@ -404,7 +365,6 @@
   .adm-token-inp:focus { border-color:var(--purple); }
   .adm-hint { font-size:10px; color:var(--dim3); line-height:1.7; margin-top:6px; }
   .adm-hint code { background:var(--bg3); padding:1px 5px; font-family:'JetBrains Mono',monospace; }
-  .adm-refresh-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
   .adm-last-refresh { font-size:10px; color:var(--dim3); }
   .adm-danger { border-color:#3a1010; }
   .adm-danger .adm-section-head { background:#0c0808; }
@@ -413,8 +373,6 @@
 </head>
 <body>
 <div id="tooltip"></div>
-
-<!-- SETTINGS MODAL -->
 <div id="settings-overlay">
   <div id="settings-panel">
     <div id="settings-head">
@@ -427,7 +385,7 @@
         <textarea id="cfg-cookie" placeholder="session_id=paste_your_cookie_value_here"></textarea>
         <div class="hint">
           Format: <code>session_id=yourValue</code> — the <code>session_id=</code> prefix is required.<br>
-          F12 → Application → Cookies → <code>thedigitalodyssey.com</code> → find <code>session_id</code> → copy its Value, then paste as <code>session_id=thatValue</code>.<br>
+          F12 → Application → Cookies → <code>thedigitalodyssey.com</code> → find <code>session_id</code> → copy its Value.<br>
           Stored only in your browser's localStorage, forwarded through your Worker only.
         </div>
       </div>
@@ -438,13 +396,11 @@
     </div>
   </div>
 </div>
-
-<!-- MAIN APP -->
 <div id="app">
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.7</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.8</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -458,48 +414,43 @@
         </div>
       </div>
       <button class="btn green" id="btn-times" style="display:none">⏱ My Times</button>
+      <button class="btn purple" id="btn-speedtimes" style="display:none" title="Fetch top-50 all-time speed records for dungeons without a personal best">⚡ Speed Times</button>
       <button class="btn muted" id="btn-clearcache" title="Re-fetch all dungeon drop tables">↺ Clear Cache</button>
       <div class="sep"></div>
       <button class="btn muted" id="btn-settings">⚙ Settings</button>
     </div>
   </div>
-
   <div id="toolbar">
     <input class="srch" id="fo-search" placeholder="Search dungeon…">
     <button class="pill active" data-diff="All">All</button>
     <button class="pill" data-diff="Normal">Normal</button>
     <button class="pill" data-diff="Story">Story</button>
   </div>
-
   <div id="main-tabs">
     <button class="main-tab active" data-view="rankings">DUNGEON RANKINGS</button>
     <button class="main-tab" data-view="itemfinder">ITEM FINDER</button>
     <button class="main-tab" data-view="blacklist">BLACKLIST</button>
     <button class="main-tab" data-view="drp">DRP RANKINGS</button>
     <button class="main-tab" data-view="listings">MY LISTINGS</button>
-    <!-- Admin tab — injected by JS only for Odyssey -->
   </div>
-
   <div id="sort-tabs">
     <button class="sort-tab active" data-sort="ev">EV / Run</button>
-    <button class="sort-tab" data-sort="evhr"      id="tab-evhr"      style="display:none">EV / Hour ⚡</button>
+    <button class="sort-tab" data-sort="evhr" id="tab-evhr" style="display:none">EV / Hour ⚡</button>
     <button class="sort-tab" data-sort="evInstant" id="tab-evinstant" style="display:none">Instant Sell ⚡</button>
-    <button class="sort-tab" data-sort="evMedian"  id="tab-evmedian"  style="display:none">Trade Median</button>
+    <button class="sort-tab" data-sort="evMedian" id="tab-evmedian" style="display:none">Trade Median</button>
   </div>
-
   <div id="body">
     <div id="notice"></div>
     <div id="progress">
       <div class="pbar-wrap"><div class="pbar" id="pbar"></div></div>
       <div class="log" id="log"></div>
     </div>
-
     <div id="formula">
       <strong>EV / run</strong> = Σ ( drop_chance × avg_qty × cheapest_sell_price ) + rank rewards.<br>
       Blacklisted items and dungeons are excluded. Dashed chip = rank reward. Hover any chip for details.<br>
-      <strong>Right-click</strong> any item chip to blacklist it. Click <strong>🚫</strong> next to a dungeon name to hide it.
+      <strong>Right-click</strong> any item chip to blacklist it. Click <strong>🚫</strong> next to a dungeon name to hide it.<br>
+      Time sources: <span style="color:#2a9a6a">👤 mine</span> = your personal best &nbsp;·&nbsp; <span style="color:#aaaa50">⚡50</span> = rank #50 all-time &nbsp;·&nbsp; <span style="color:#5a8aaa">〜est</span> = estimated from top-50 median
     </div>
-
     <div id="times-panel">
       <div id="tp-header">
         <span id="tp-chevron">▼</span>
@@ -511,31 +462,27 @@
         <div id="tp-rows"></div>
       </div>
     </div>
-
     <div id="cards"></div>
-
     <div id="table-wrap">
       <table class="tbl">
         <thead><tr>
           <th>#</th>
           <th data-col="name">Dungeon</th>
           <th data-col="ev" class="sorted" id="th-ev">EV / Run ▼</th>
-          <th id="th-evhr"      style="display:none" data-col="evhr">EV / Hour ▼</th>
+          <th id="th-evhr" style="display:none" data-col="evhr">EV / Hour ▼</th>
           <th id="th-evinstant" style="display:none" data-col="evInstant">Instant Sell ▼</th>
-          <th id="th-evmedian"  style="display:none" data-col="evMedian">Trade Median ▼</th>
+          <th id="th-evmedian" style="display:none" data-col="evMedian">Trade Median ▼</th>
           <th>Clear Time</th>
           <th>Bar</th>
-          <th>Drops <span style="font-size:8px;color:var(--dim3);font-family:'Inter',sans-serif">(hover · right-click=blacklist item · 🚫=blacklist dungeon)</span></th>
+          <th>Drops <span style="font-size:8px;color:var(--dim3);font-family:'Inter',sans-serif">(hover · right-click=blacklist · 🚫=hide dungeon)</span></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
-
     <div id="item-finder">
       <input class="if-search" id="if-input" placeholder="Type an item name to find which dungeons drop it…">
       <div id="if-results"></div>
     </div>
-
     <div id="blacklist-view">
       <div class="bl-section">
         <div class="bl-section-title">// BLACKLISTED DUNGEONS</div>
@@ -564,8 +511,6 @@
         </div>
       </div>
     </div>
-
-    <!-- DRP RANKINGS VIEW -->
     <div id="drp-view">
       <div class="drp-sort-bar">
         <button class="drp-sort-btn active" data-drpsort="drpPerRun">DRP / Run</button>
@@ -597,8 +542,6 @@
         </table>
       </div>
     </div>
-
-    <!-- MY LISTINGS VIEW -->
     <div id="listings-view">
       <div class="lst-header">
         <div class="lst-header-title">// MY MARKET LISTINGS</div>
@@ -624,10 +567,7 @@
         </div>
       </div>
     </div>
-
-    <!-- ADMIN VIEW — only rendered for Odyssey -->
     <div id="admin-view">
-      <!-- Token config -->
       <div class="adm-section" style="margin-bottom:16px">
         <div class="adm-section-head">
           <div class="adm-section-title">// ADMIN TOKEN</div>
@@ -639,36 +579,20 @@
             <button class="btn purple" id="adm-token-save">Save Token</button>
             <button class="btn muted" id="adm-load-btn">↻ Load Data</button>
           </div>
-          <div class="adm-hint">
-            This is the <code>ADMIN_TOKEN</code> secret you set in your Cloudflare Worker → Settings → Variables.<br>
-            It's stored only in your browser's localStorage and never sent to the game server.
-          </div>
+          <div class="adm-hint">This is the <code>ADMIN_TOKEN</code> secret set in your Cloudflare Worker → Settings → Variables.</div>
         </div>
       </div>
-
-      <!-- Stats banner -->
-      <div class="adm-banner" id="adm-banner">
-        <div class="adm-card"><div class="adm-card-lbl">Loading…</div><div class="adm-card-val">—</div></div>
-      </div>
-
-      <!-- Allowlist -->
+      <div class="adm-banner" id="adm-banner"><div class="adm-card"><div class="adm-card-lbl">Loading…</div><div class="adm-card-val">—</div></div></div>
       <div class="adm-section">
-        <div class="adm-section-head">
-          <div class="adm-section-title">// ALLOWLIST</div>
-          <div style="font-size:10px;color:var(--dim3);margin-left:auto">case-insensitive · add tamer names here</div>
-        </div>
+        <div class="adm-section-head"><div class="adm-section-title">// ALLOWLIST</div></div>
         <div class="adm-section-body">
           <div class="adm-add-row">
-            <input class="adm-inp" id="adm-add-inp" placeholder="Tamer name to allow (e.g. Papaoofty)">
+            <input class="adm-inp" id="adm-add-inp" placeholder="Tamer name to allow">
             <button class="btn purple" id="adm-add-btn">+ Allow</button>
           </div>
-          <div class="adm-chips" id="adm-chips">
-            <span style="color:var(--dim3);font-size:11px">Load data to see allowlist…</span>
-          </div>
+          <div class="adm-chips" id="adm-chips"><span style="color:var(--dim3);font-size:11px">Load data to see allowlist…</span></div>
         </div>
       </div>
-
-      <!-- Usage table -->
       <div class="adm-section">
         <div class="adm-section-head">
           <div class="adm-section-title">// USAGE LOG</div>
@@ -676,60 +600,44 @@
         </div>
         <div style="overflow-x:auto">
           <table class="adm-tbl">
-            <thead><tr>
-              <th>Tamer</th><th>Status</th><th>Requests</th><th>Last Seen</th>
-              <th>24h Activity</th><th>Recent Endpoints</th><th>Actions</th>
-            </tr></thead>
-            <tbody id="adm-tbody">
-              <tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim3);font-size:11px">Click "Load Data" to fetch usage stats</td></tr>
-            </tbody>
+            <thead><tr><th>Tamer</th><th>Status</th><th>Requests</th><th>Last Seen</th><th>24h Activity</th><th>Recent Endpoints</th><th>Actions</th></tr></thead>
+            <tbody id="adm-tbody"><tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim3);font-size:11px">Click "Load Data" to fetch usage stats</td></tr></tbody>
           </table>
         </div>
       </div>
-
-      <!-- Danger zone -->
       <div class="adm-section adm-danger">
-        <div class="adm-section-head">
-          <div class="adm-section-title">// DANGER ZONE</div>
-        </div>
+        <div class="adm-section-head"><div class="adm-section-title">// DANGER ZONE</div></div>
         <div class="adm-section-body" style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn red" id="adm-clear-usage">✕ Clear All Usage Data</button>
         </div>
       </div>
     </div>
-
     <div id="empty">
       <div class="ico">⚔</div>
       <p>Hit <strong style="color:var(--cyan)">Run Analysis</strong> to fetch dungeon drop tables<br>and calculate live expected value from market prices.</p>
     </div>
   </div>
 </div>
-
 <script>
- // Register service worker so users always get fresh HTML automatically
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    reg.update(); // Check for SW updates immediately on page load
+    reg.update();
     reg.addEventListener('updatefound', () => {
       const sw = reg.installing;
       sw.addEventListener('statechange', () => {
-        // New SW activated while page is open → reload silently
-        if (sw.state === 'activated' && navigator.serviceWorker.controller) {
-          window.location.reload();
-        }
+        if (sw.state === 'activated' && navigator.serviceWorker.controller) window.location.reload();
       });
     });
   });
 }
 (function () {
   'use strict';
-  console.log('%c[FarmOpt v4.7] Loaded', 'color:#00e5ff;font-weight:bold');
+  console.log('%c[FarmOpt v4.8] Loaded', 'color:#00e5ff;font-weight:bold');
 
-  /* ══ CONFIG ══ */
   const CFG_KEY    = 'fo_v43_config';
   const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
   const ADMIN_NS   = 'fo_admin_token';
-  const MY_NAME    = 'odyssey'; // lowercase — admin panel only shows for this tamer
+  const MY_NAME    = 'odyssey';
 
   let cfg = { cookie: '' };
   try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r) }; } catch(e) {}
@@ -786,11 +694,16 @@ if ('serviceWorker' in navigator) {
   const NS          = 'fo_v43_';
   const TTL_FOREVER = Infinity;
   const TTL_PRICES  = 10 * 60 * 1000;
+  const TTL_SPEED   = 6 * 60 * 60 * 1000;
 
-  let customTimes = {};
-  function saveTimes() { try { localStorage.setItem(NS + 'times', JSON.stringify(customTimes)); } catch(e) {} }
-  function loadTimes() { try { const r = localStorage.getItem(NS + 'times'); if (r) customTimes = JSON.parse(r); } catch(e) {} }
-  loadTimes();
+  let customTimes  = {};
+  let timeSources  = {};
+
+  function saveTimes()       { try { localStorage.setItem(NS + 'times', JSON.stringify(customTimes)); } catch(e) {} }
+  function loadTimes()       { try { const r = localStorage.getItem(NS + 'times'); if (r) customTimes = JSON.parse(r); } catch(e) {} }
+  function saveTimeSources() { try { localStorage.setItem(NS + 'tsrc',  JSON.stringify(timeSources));  } catch(e) {} }
+  function loadTimeSources() { try { const r = localStorage.getItem(NS + 'tsrc');  if (r) timeSources  = JSON.parse(r); } catch(e) {} }
+  loadTimes(); loadTimeSources();
 
   function cacheSet(key, value) { try { localStorage.setItem(NS + key, JSON.stringify({ t: Date.now(), v: value })); } catch(e) {} }
   function cacheGet(key, ttl) {
@@ -826,23 +739,24 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ══ STATE ══ */
-  let allResults      = [];
-  let sortCol         = 'ev';
-  let sortAsc         = false;
-  let diffFilter      = 'All';
-  let sortMode        = 'ev';
-  let ratePausedUntil = 0;
-  let prices          = {};
-  let allItemsSeen    = new Map();
-  let cachedDetails   = [];
-  let itemIndex       = {};
-  let currentView     = 'rankings';
-  let isRunning       = false;
-  let drpLoaded       = false;
-  let listingsLoaded  = false;
+  let allResults        = [];
+  let sortCol           = 'ev';
+  let sortAsc           = false;
+  let diffFilter        = 'All';
+  let sortMode          = 'ev';
+  let ratePausedUntil   = 0;
+  let prices            = {};
+  let allItemsSeen      = new Map();
+  let cachedDetails     = [];
+  let itemIndex         = {};
+  let currentView       = 'rankings';
+  let isRunning         = false;
+  let drpLoaded         = false;
+  let listingsLoaded    = false;
   let isListingsRunning = false;
-  let resolvedTamerName = null; // set after /me is fetched
-  let isAdmin         = false;
+  let resolvedTamerName = null;
+  let isAdmin           = false;
+  let cachedRankDungeons = null;
 
   /* ══ DOM ══ */
   const $ = id => document.getElementById(id);
@@ -855,12 +769,11 @@ if ('serviceWorker' in navigator) {
   const drpView = $('drp-view'), listingsView = $('listings-view');
   const adminView = $('admin-view');
 
-  /* ══ ADMIN: detect and show panel ══ */
+  /* ══ ADMIN ══ */
   function maybeMakeAdmin(tamerName) {
     if (!tamerName || tamerName.toLowerCase() !== MY_NAME) return;
     if (isAdmin) return;
     isAdmin = true;
-    // Inject admin tab
     const tab = document.createElement('button');
     tab.className = 'main-tab admin-tab';
     tab.dataset.view = 'admin';
@@ -871,7 +784,6 @@ if ('serviceWorker' in navigator) {
       switchView('admin');
     });
     mainTabs.appendChild(tab);
-    console.log('%c[FarmOpt] Admin mode enabled', 'color:#8888cc;font-weight:bold');
   }
 
   /* ══ SETTINGS ══ */
@@ -923,6 +835,7 @@ if ('serviceWorker' in navigator) {
   searchEl.addEventListener('input', applyFilters);
   $('btn-run').addEventListener('click', () => runAnalysis('fresh'));
   $('btn-times').addEventListener('click', loadMyTimes);
+  $('btn-speedtimes').addEventListener('click', () => fetchSpeedTimes(true));
   $('btn-clearcache').addEventListener('click', () => { cacheClearDungeons(); cacheClearPrices(); log('Cache cleared.', 'warn'); });
   ifInput.addEventListener('input', renderItemFinder);
   $('btn-drp-load').addEventListener('click', () => { drpLoaded = false; loadDrpRankings(); });
@@ -930,18 +843,12 @@ if ('serviceWorker' in navigator) {
 
   /* ══ DUNGEON BLACKLIST UI ══ */
   $('dbl-add-btn').addEventListener('click', () => {
-    const val = $('dbl-add-input').value.trim();
-    if (!val) return;
-    addDungeonToBlacklist(val);
-    $('dbl-add-input').value = '';
-    renderBlacklistView();
-    applyFilters();
+    const val = $('dbl-add-input').value.trim(); if (!val) return;
+    addDungeonToBlacklist(val); $('dbl-add-input').value = '';
+    renderBlacklistView(); applyFilters();
   });
-
-  /* ══ ITEM BLACKLIST UI ══ */
   $('bl-add-btn').addEventListener('click', () => {
-    const val = $('bl-add-input').value.trim();
-    if (!val) return;
+    const val = $('bl-add-input').value.trim(); if (!val) return;
     const looksLikeId = /^i[a-z0-9]{4,}$/i.test(val);
     if (looksLikeId) addToBlacklist(val, allItemsSeen.get(val) || val);
     else addToBlacklist(null, val);
@@ -957,22 +864,17 @@ if ('serviceWorker' in navigator) {
       dblGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">No dungeons hidden yet.</div>';
     } else {
       for (const key of dungeonBlacklist) {
-        const chip = document.createElement('div');
-        chip.className = 'bl-chip dungeon-chip';
+        const chip = document.createElement('div'); chip.className = 'bl-chip dungeon-chip';
         chip.innerHTML = `<span class="bl-chip-name">${key}</span>`;
-        const rm = document.createElement('button');
-        rm.className = 'bl-chip-rm'; rm.textContent = '✕';
+        const rm = document.createElement('button'); rm.className = 'bl-chip-rm'; rm.textContent = '✕';
         rm.addEventListener('click', () => { removeDungeonFromBlacklist(key); renderBlacklistView(); applyFilters(); });
-        chip.appendChild(rm);
-        dblGrid.appendChild(chip);
+        chip.appendChild(rm); dblGrid.appendChild(chip);
       }
     }
-    const dblKnown = $('dbl-known-grid');
-    dblKnown.innerHTML = '';
+    const dblKnown = $('dbl-known-grid'); dblKnown.innerHTML = '';
     const uniqueDungeons = [...new Set(allResults.map(r => r.key))].sort();
-    if (!uniqueDungeons.length) {
-      dblKnown.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>';
-    } else {
+    if (!uniqueDungeons.length) { dblKnown.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>'; }
+    else {
       uniqueDungeons.forEach(key => {
         const already = dungeonBlacklist.has(key);
         const chip = document.createElement('div');
@@ -982,28 +884,21 @@ if ('serviceWorker' in navigator) {
         dblKnown.appendChild(chip);
       });
     }
-    const grid = $('bl-active-grid');
-    grid.innerHTML = '';
+    const grid = $('bl-active-grid'); grid.innerHTML = '';
     const entries = Object.entries(blacklist);
-    if (!entries.length) {
-      grid.innerHTML = '<div style="color:var(--dim3);font-size:11px">No items blacklisted yet.</div>';
-    } else {
+    if (!entries.length) { grid.innerHTML = '<div style="color:var(--dim3);font-size:11px">No items blacklisted yet.</div>'; }
+    else {
       entries.forEach(([key, name]) => {
-        const chip = document.createElement('div');
-        chip.className = 'bl-chip';
+        const chip = document.createElement('div'); chip.className = 'bl-chip';
         chip.innerHTML = `<span class="bl-chip-name">${name}</span><span class="bl-chip-id">${key.startsWith('name:') ? '(name match)' : key}</span>`;
-        const rm = document.createElement('button');
-        rm.className = 'bl-chip-rm'; rm.textContent = '✕';
+        const rm = document.createElement('button'); rm.className = 'bl-chip-rm'; rm.textContent = '✕';
         rm.addEventListener('click', () => { removeFromBlacklist(key); renderBlacklistView(); if (allResults.length) { allResults = buildResults(cachedDetails); applyFilters(); } });
-        chip.appendChild(rm);
-        grid.appendChild(chip);
+        chip.appendChild(rm); grid.appendChild(chip);
       });
     }
-    const knownGrid = $('bl-known-grid');
-    knownGrid.innerHTML = '';
+    const knownGrid = $('bl-known-grid'); knownGrid.innerHTML = '';
     if (!allItemsSeen.size) { knownGrid.innerHTML = '<div style="color:var(--dim3);font-size:11px">Run analysis first.</div>'; return; }
-    const sorted = [...allItemsSeen.entries()].sort((a,b) => a[1].localeCompare(b[1]));
-    sorted.forEach(([id, name]) => {
+    [...allItemsSeen.entries()].sort((a,b) => a[1].localeCompare(b[1])).forEach(([id, name]) => {
       const already = isBlacklisted(id, name);
       const chip = document.createElement('div');
       chip.className = 'bl-known-chip' + (already ? ' bld' : '');
@@ -1042,14 +937,12 @@ if ('serviceWorker' in navigator) {
   function setBar(v, max) { pbarEl.style.width = ((v / max) * 100).toFixed(1) + '%'; }
   function showNotice(html) { noticeEl.innerHTML = html; noticeEl.style.display = 'block'; }
   function hideNotice() { noticeEl.style.display = 'none'; }
-
   function fmt(n) {
     if (n == null || isNaN(n)) return '—';
     if (n >= 1000000) return (n/1000000).toFixed(2) + ' <span style="color:var(--red);font-weight:700">[T]</span>';
     if (n >= 1000)    return (n/1000).toFixed(2)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
     return Math.round(n) + ' <span style="color:#888;font-weight:700">[B]</span>';
   }
-  function fmtRaw(n) { return fmt(n); }
   function fmtTime(ms) {
     if (!ms || ms <= 0) return null;
     const s = Math.floor(ms / 1000);
@@ -1067,13 +960,11 @@ if ('serviceWorker' in navigator) {
   }
   function fmtDate(ms) {
     if (!ms) return '—';
-    return new Date(ms).toLocaleString('en-GB', { timeZone:'Asia/Jerusalem',
-      day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit' });
+    return new Date(ms).toLocaleString('en-GB', { timeZone:'Asia/Jerusalem', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
   }
   function fmtExpiry(ms) {
     if (!ms) return '—';
-    const rem = ms - Date.now();
-    if (rem <= 0) return 'expired';
+    const rem = ms - Date.now(); if (rem <= 0) return 'expired';
     const days=Math.floor(rem/86400000), hours=Math.floor((rem%86400000)/3600000), mins=Math.floor((rem%3600000)/60000);
     if (days>0) return `${days}d ${hours}h left`;
     if (hours>0) return `${hours}h ${mins}m left`;
@@ -1097,20 +988,15 @@ if ('serviceWorker' in navigator) {
       const headers = { 'Content-Type': 'application/json' };
       if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
       let res;
-      try { res = await fetch(url, { headers }); }
-      catch(e) { await sleep(3000); continue; }
+      try { res = await fetch(url, { headers }); } catch(e) { await sleep(3000); continue; }
       if (res.status === 429) { await sleep(2000); continue; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const ct = res.headers.get('content-type') || '';
-      if (!ct.includes('application/json') && !ct.includes('text/json')) {
-        const text = await res.text();
-        throw new Error(`Got non-JSON (${ct}) — check your session_id cookie in Settings`);
-      }
+      if (!ct.includes('application/json') && !ct.includes('text/json')) throw new Error(`Got non-JSON (${ct}) — check your session_id cookie in Settings`);
       return res.json();
     }
     throw new Error('Too many retries');
   }
-
   async function marketGet(path) {
     const url = WORKER_URL + path;
     for (let i = 0; i < 10; i++) {
@@ -1118,8 +1004,7 @@ if ('serviceWorker' in navigator) {
       const headers = { 'Content-Type': 'application/json' };
       if (cfg.cookie) headers['X-Game-Cookie'] = cfg.cookie;
       let res;
-      try { res = await fetch(url, { headers }); }
-      catch(e) { await sleep(3000); continue; }
+      try { res = await fetch(url, { headers }); } catch(e) { await sleep(3000); continue; }
       if (res.status === 429) {
         let retryAfter = 1;
         try { const body = await res.json(); if (body?.retry_after) retryAfter = Math.max(body.retry_after, 0.3); } catch(e2) {}
@@ -1136,15 +1021,13 @@ if ('serviceWorker' in navigator) {
   /* ══ PRICE PHASES ══ */
   async function fetchSellPrice(itemId) {
     const res = await marketGet(`/api/market/listings?item=${itemId}&side=sell&limit=1`);
-    if (!res || res.status === 400) return null;
-    if (!res.ok) return null;
+    if (!res || res.status === 400 || !res.ok) return null;
     const data = await res.json();
     return data?.listings?.length ? data.listings[0].price : null;
   }
   async function fetchBuyPrice(itemId) {
     const res = await marketGet(`/api/market/listings?item=${itemId}&side=buy&limit=1`);
-    if (!res || res.status === 400) return null;
-    if (!res.ok) return null;
+    if (!res || res.status === 400 || !res.ok) return null;
     const data = await res.json();
     return data?.listings?.length ? data.listings[0].price : null;
   }
@@ -1160,12 +1043,10 @@ if ('serviceWorker' in navigator) {
       for (const t of sorted) { cum += t.qty; if (cum >= half) { medianPrice = t.price; break; } }
       const spanH = (trades[0].at - trades[trades.length-1].at) / 3600000;
       const totalU = trades.reduce((s,t) => s + t.qty, 0);
-      return { medianPrice, lastSalePrice: trades[0]?.price ?? null, lastSaleAt: trades[0]?.at ?? null,
-        velocity: spanH > 0.01 ? Math.round(totalU / spanH) : null };
+      return { medianPrice, lastSalePrice: trades[0]?.price ?? null, lastSaleAt: trades[0]?.at ?? null, velocity: spanH > 0.01 ? Math.round(totalU / spanH) : null };
     } catch(e) { return null; }
   }
 
-  /* ══ EXTRACT ITEMS ══ */
   function extractItems(d) {
     const items = new Map();
     for (const diff of (d.difficulties || [])) {
@@ -1177,65 +1058,54 @@ if ('serviceWorker' in navigator) {
     return items;
   }
 
+  /* ══ SHARED RANK DUNGEONS ══ */
+  async function getRankDungeons() {
+    if (cachedRankDungeons) return cachedRankDungeons;
+    const lsCached = cacheGet('rank_dungeons', TTL_SPEED);
+    if (lsCached) { cachedRankDungeons = lsCached; return lsCached; }
+    const data = await apiFetch('/api/rankings/dungeons');
+    cachedRankDungeons = data || [];
+    cacheSet('rank_dungeons', cachedRankDungeons);
+    return cachedRankDungeons;
+  }
+
   /* ══ MAIN ANALYSIS ══ */
   async function runAnalysis(phase = 'fresh') {
     if (isRunning) return;
-    hideNotice();
-    isRunning = true;
-    const allBtns = [$('btn-run'), $('btn-refresh'), $('btn-times')];
+    hideNotice(); isRunning = true;
+    const allBtns = [$('btn-run'), $('btn-refresh'), $('btn-times'), $('btn-speedtimes')];
     allBtns.forEach(b => b && (b.disabled = true));
-    progressEl.style.display = 'block';
-    emptyEl.style.display = 'none';
-    logEl.innerHTML = ''; setBar(0, 1);
-    ratePausedUntil = 0;
-
+    progressEl.style.display = 'block'; emptyEl.style.display = 'none';
+    logEl.innerHTML = ''; setBar(0, 1); ratePausedUntil = 0;
     try {
       log('Loading dungeon list…');
       let dungeons;
       const cachedList = cacheGet('dungeon_list', TTL_FOREVER);
-      if (cachedList) {
-        dungeons = cachedList;
-        log(`Cached: ${dungeons.length} dungeons.`, 'ok');
-      } else {
+      if (cachedList) { dungeons = cachedList; log(`Cached: ${dungeons.length} dungeons.`, 'ok'); }
+      else {
         const listData = await apiFetch('/api/wiki/dungeons?page=1&per_page=500');
         dungeons = listData.data || [];
         cacheSet('dungeon_list', dungeons);
         log(`Found ${dungeons.length} dungeons.`, 'ok');
       }
-
-      const details = [];
-      const itemNameMap = new Map();
-      const total = dungeons.length;
-
+      const details = []; const itemNameMap = new Map(); const total = dungeons.length;
       for (let i = 0; i < total; i++) {
         const cached = cacheGet('dungeon_' + dungeons[i].id, TTL_FOREVER);
         let detail;
-        if (cached) {
-          detail = cached;
-        } else {
+        if (cached) { detail = cached; }
+        else {
           if (i > 0) await sleep(400);
-          try {
-            detail = await apiFetch(`/api/wiki/dungeons?id=${dungeons[i].id}`);
-            cacheSet('dungeon_' + dungeons[i].id, detail);
-          } catch(e) {
-            log(`SKIP ${dungeons[i].name}: ${e.message}`, 'err');
-            continue;
-          }
+          try { detail = await apiFetch(`/api/wiki/dungeons?id=${dungeons[i].id}`); cacheSet('dungeon_' + dungeons[i].id, detail); }
+          catch(e) { log(`SKIP ${dungeons[i].name}: ${e.message}`, 'err'); continue; }
         }
-        details.push(detail);
-        setBar(i + 1, total);
+        details.push(detail); setBar(i + 1, total);
         for (const [id, name] of extractItems(detail)) {
-          itemNameMap.set(id, name);
-          allItemsSeen.set(id, name);
-          const nk = 'name:' + name.toLowerCase();
-          if (blacklist[nk]) addToBlacklist(id, name);
+          itemNameMap.set(id, name); allItemsSeen.set(id, name);
+          const nk = 'name:' + name.toLowerCase(); if (blacklist[nk]) addToBlacklist(id, name);
         }
       }
+      log(`${details.length} dungeons loaded.`, 'ok'); cachedDetails = details;
 
-      log(`${details.length} dungeons loaded.`, 'ok');
-      cachedDetails = details;
-
-      // Try to detect tamer name from /me if cookie is set
       if (cfg.cookie && !resolvedTamerName) {
         try {
           const meRaw = await apiFetch('/api/rankings/me');
@@ -1246,31 +1116,21 @@ if ('serviceWorker' in navigator) {
             maybeMakeAdmin(resolvedTamerName);
             log(`Logged in as: ${resolvedTamerName}`, 'ok');
           }
-        } catch(e) { /* not critical */ }
+        } catch(e) {}
       }
 
       if (phase === 'fresh') {
         prices = {};
-        for (const [id] of itemNameMap) {
-          const c = cacheGet('price_' + id, TTL_PRICES);
-          if (c) prices[id] = c;
-        }
+        for (const [id] of itemNameMap) { const c = cacheGet('price_' + id, TTL_PRICES); if (c) prices[id] = c; }
       } else {
-        cacheClearPrices(phase === 'all' ? 'all' : phase);
-        prices = {};
-        for (const [id] of itemNameMap) {
-          const c = cacheGet('price_' + id, TTL_PRICES);
-          if (c) prices[id] = c;
-        }
+        cacheClearPrices(phase === 'all' ? 'all' : phase); prices = {};
+        for (const [id] of itemNameMap) { const c = cacheGet('price_' + id, TTL_PRICES); if (c) prices[id] = c; }
       }
-
       const allIds = [...itemNameMap.keys()].filter(id => !isBlacklisted(id, itemNameMap.get(id)));
 
-      /* Sell phase */
       if (phase === 'fresh' || phase === 'all' || phase === 'sell') {
         const sellIds = allIds.filter(id => !prices[id]?.listPrice);
-        log(`Sell phase: ${sellIds.length} items…`, 'ok');
-        setBar(0, sellIds.length);
+        log(`Sell phase: ${sellIds.length} items…`, 'ok'); setBar(0, sellIds.length);
         for (let i = 0; i < sellIds.length; i++) {
           await sleep(i === 0 ? 200 : 500);
           const listPrice = await fetchSellPrice(sellIds[i]);
@@ -1281,16 +1141,14 @@ if ('serviceWorker' in navigator) {
         log(`Sell done — ${Object.values(prices).filter(p => p.listPrice).length} items listed.`, 'ok');
       }
 
-      allResults = buildResults(details);
-      buildItemIndex(allResults);
-      setBar(1, 1);
-      showResultsUI();
-      renderCards(allResults);
-      applyFilters();
+      allResults = buildResults(details); buildItemIndex(allResults);
+      setBar(1, 1); showResultsUI(); renderCards(allResults); applyFilters();
       log(`Table ready — ${allResults.length} combos. Fetching buy orders…`, 'ok');
+
+      // Auto-load my times immediately
+      if (cfg.cookie) loadMyTimes().catch(() => {});
       if (!listingsLoaded && cfg.cookie) setTimeout(() => loadMyListings(), 500);
 
-      /* Buy phase */
       if (phase === 'fresh' || phase === 'all' || phase === 'buy') {
         const buyIds = allIds.filter(id => prices[id]?.listPrice && !prices[id]?.buyPrice);
         for (let i = 0; i < buyIds.length; i++) {
@@ -1306,7 +1164,6 @@ if ('serviceWorker' in navigator) {
         log('Buy done. Fetching trade history…', 'ok');
       }
 
-      /* History phase */
       if (phase === 'fresh' || phase === 'all' || phase === 'history') {
         const histIds = allIds.filter(id => prices[id]?.listPrice && !prices[id]?.historyReady);
         for (let i = 0; i < histIds.length; i++) {
@@ -1326,30 +1183,24 @@ if ('serviceWorker' in navigator) {
         const tm = $('tab-evmedian'), thm = $('th-evmedian');
         if (tm) tm.style.display = ''; if (thm) thm.style.display = '';
         allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
-        log('All done ✓', 'ok');
-       if (cfg.cookie) loadMyTimes();
+        log('All prices done ✓ — fetching speed times for missing dungeons…', 'ok');
+        setTimeout(() => fetchSpeedTimes(false), 600);
       }
-
       setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
-
     } catch(err) {
-      log('FATAL: ' + err.message, 'err');
-      console.error('[FarmOpt]', err);
+      log('FATAL: ' + err.message, 'err'); console.error('[FarmOpt]', err);
     } finally {
-      isRunning = false;
-      allBtns.forEach(b => b && (b.disabled = false));
+      isRunning = false; allBtns.forEach(b => b && (b.disabled = false));
     }
   }
 
-  /* ══ SHOW RESULTS UI ══ */
   function showResultsUI() {
-    cardsEl.style.display   = 'grid';
-    tableWrap.style.display = 'block';
-    sortTabs.style.display  = 'flex';
-    mainTabs.style.display  = 'flex';
+    cardsEl.style.display = 'grid'; tableWrap.style.display = 'block';
+    sortTabs.style.display = 'flex'; mainTabs.style.display = 'flex';
     formulaEl.style.display = 'block';
     $('ref-group').style.display = 'inline-flex';
     $('btn-times').style.display = 'inline-block';
+    $('btn-speedtimes').style.display = 'inline-block';
     if (Object.keys(customTimes).length > 0) {
       const thEv = $('th-evhr'), tabEv = $('tab-evhr');
       if (thEv) thEv.style.display = ''; if (tabEv) tabEv.style.display = '';
@@ -1363,77 +1214,63 @@ if ('serviceWorker' in navigator) {
       const allDiffs = d.difficulties || [];
       const hasNonStory = allDiffs.some(diff => diff.difficulty !== 'Story');
       const diffsToProcess = hasNonStory ? allDiffs.filter(diff => diff.difficulty !== 'Story') : allDiffs;
-
       for (const diff of diffsToProcess) {
         const key = `${d.name}_${diff.difficulty}`;
         if (isDungeonBlacklisted(key, d.name)) continue;
-
-        let evRaid = 0;
-        const drops = [];
-
+        let evRaid = 0; const drops = [];
         for (const obj of (diff.objectives || [])) {
           for (const rk of (obj.raid_rankings || [])) {
             for (const r of (rk.rewards || [])) {
-              const bl   = isBlacklisted(r.item_id, r.item_name);
-              const mkt  = prices[r.item_id];
+              const bl = isBlacklisted(r.item_id, r.item_name);
+              const mkt = prices[r.item_id];
               const prob = r.rate_permil / 10000;
-              const avg  = (r.min + r.max) / 2;
-              const ev   = bl ? 0 : prob * avg * (mkt?.price || 0);
+              const avg = (r.min + r.max) / 2;
+              const ev = bl ? 0 : prob * avg * (mkt?.price || 0);
               if (!bl) evRaid += ev;
               drops.push({ item_id:r.item_id, name:r.item_name, prob, avg,
-                price:mkt?.price??null, listPrice:mkt?.listPrice??null,
-                buyPrice:mkt?.buyPrice??null, medianPrice:mkt?.medianPrice??null,
-                velocity:mkt?.velocity??null, isOutlier:mkt?.isOutlier??false,
+                price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
+                medianPrice:mkt?.medianPrice??null, velocity:mkt?.velocity??null, isOutlier:mkt?.isOutlier??false,
                 ev, type:'raid', blacklisted:bl });
             }
           }
         }
-
-        const rewardGroups = [];
-        let cg = [];
+        const rewardGroups = []; let cg = [];
         for (const r of (diff.rewards || [])) {
           if (r.rank === 0 && cg.length > 0) { rewardGroups.push(cg); cg = []; }
           cg.push(r);
         }
         if (cg.length) rewardGroups.push(cg);
-
         let evComp = 0;
         for (const group of rewardGroups) {
-          const base  = group[0];
+          const base = group[0];
           const srank = group.find(r => r.rank === 7) || (group.length > 1 ? group[group.length-1] : null);
           const addDrop = (id, name, avg, src, bRank) => {
-            const bl  = isBlacklisted(id, name);
-            const mkt = prices[id];
-            const ev  = bl ? 0 : avg * (mkt?.price || 0);
-            if (!bl) evComp += ev;
-            drops.push({ item_id:id, name, prob:null, avg, baseQty:0, bestQty:avg,
-              bestRank:bRank, price:mkt?.price??null, listPrice:mkt?.listPrice??null,
-              buyPrice:mkt?.buyPrice??null, medianPrice:mkt?.medianPrice??null,
-              isOutlier:mkt?.isOutlier??false, ev, type:'rank', rewardSource:src, rankNum:0, blacklisted:bl });
+            const bl = isBlacklisted(id, name); const mkt = prices[id];
+            const ev = bl ? 0 : avg * (mkt?.price || 0); if (!bl) evComp += ev;
+            drops.push({ item_id:id, name, prob:null, avg, baseQty:0, bestQty:avg, bestRank:bRank,
+              price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
+              medianPrice:mkt?.medianPrice??null, isOutlier:mkt?.isOutlier??false,
+              ev, type:'rank', rewardSource:src, rankNum:0, blacklisted:bl });
           };
           if (srank && srank.rank > 0 && srank.item_id !== base.item_id) {
             addDrop(base.item_id, base.item_name, base.item_count, 'base', 0);
             addDrop(srank.item_id, srank.item_name, srank.item_count, 's', srank.rank);
           } else {
             const bestQty = (srank && srank.rank > 0) ? srank.item_count : 0;
-            const total   = base.item_count + bestQty;
-            const bl      = isBlacklisted(base.item_id, base.item_name);
-            const mkt     = prices[base.item_id];
-            const ev      = bl ? 0 : total * (mkt?.price || 0);
-            if (!bl) evComp += ev;
+            const total = base.item_count + bestQty;
+            const bl = isBlacklisted(base.item_id, base.item_name); const mkt = prices[base.item_id];
+            const ev = bl ? 0 : total * (mkt?.price || 0); if (!bl) evComp += ev;
             drops.push({ item_id:base.item_id, name:base.item_name, prob:null, avg:total,
               baseQty:base.item_count, bestQty, bestRank:srank?.rank??0,
-              price:mkt?.price??null, listPrice:mkt?.listPrice??null,
-              buyPrice:mkt?.buyPrice??null, medianPrice:mkt?.medianPrice??null,
-              isOutlier:mkt?.isOutlier??false, ev, type:'rank',
+              price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
+              medianPrice:mkt?.medianPrice??null, isOutlier:mkt?.isOutlier??false, ev, type:'rank',
               rewardSource:bestQty>0?'base+s':'base', rankNum:0, blacklisted:bl });
           }
         }
-
         const raidDrops = drops.filter(d => d.type==='raid').sort((a,b)=>b.ev-a.ev);
         const rankDrops = drops.filter(d => d.type==='rank');
-        const clearMs   = customTimes[key] ?? null;
-
+        const clearMs = customTimes[key] ?? null;
+        const timeSource = timeSources[key] ?? null;
         let evInstant = 0, evMedian = 0;
         for (const drop of drops) {
           if (drop.blacklisted) continue;
@@ -1442,21 +1279,17 @@ if ('serviceWorker' in navigator) {
           if (mkt?.buyPrice)    evInstant += qty * mkt.buyPrice;
           if (mkt?.medianPrice) evMedian  += qty * mkt.medianPrice;
         }
-
         const ev = evRaid + evComp;
         results.push({ key, name:d.name, difficulty:diff.difficulty,
           ev, evRaid, evComp, evInstant:evInstant||null, evMedian:evMedian||null,
-          drops:[...raidDrops,...rankDrops], clearMs,
+          drops:[...raidDrops,...rankDrops], clearMs, timeSource,
           evhr:clearMs?(ev/clearMs)*3600000:null });
       }
     }
-    results.sort((a,b)=>b.ev-a.ev);
-    return results;
+    results.sort((a,b)=>b.ev-a.ev); return results;
   }
-
   function computeEvhr(r) { r.evhr = r.clearMs ? (r.ev / r.clearMs) * 3600000 : null; }
 
-  /* ══ ITEM INDEX ══ */
   function buildItemIndex(results) {
     itemIndex = {};
     for (const r of results) {
@@ -1464,45 +1297,51 @@ if ('serviceWorker' in navigator) {
         const key = d.name.toLowerCase();
         if (!itemIndex[key]) itemIndex[key] = { name:d.name, price:d.price, entries:[] };
         else if (d.price && !itemIndex[key].price) itemIndex[key].price = d.price;
-        itemIndex[key].entries.push({ dungeon:r.name, difficulty:r.difficulty,
-          type:d.type, prob:d.prob, avg:d.avg, price:d.price, ev:d.ev });
+        itemIndex[key].entries.push({ dungeon:r.name, difficulty:r.difficulty, type:d.type, prob:d.prob, avg:d.avg, price:d.price, ev:d.ev });
       }
     }
   }
 
-  /* ══ MY TIMES ══ */
-  const DIFF_MAP = { 1:'Story', 2:'Normal', 3:'Hard', 4:'Extreme' };
+  /* ══ DIFF MAPS ══ */
+  const DIFF_MAP    = { 1:'Story', 2:'Normal', 3:'Hard', 4:'Extreme' };
+  const DIFF_TO_NUM = { Story:1, Normal:2, Hard:3, Extreme:4 };
 
+  /* ══ APPLY TIME (with source) ══ */
+  function applyTimeSilently(key, ms, source = 'mine') {
+    const existingSource = timeSources[key];
+    if (source === 'mine') {
+      if (customTimes[key] && ms >= customTimes[key] && existingSource === 'mine') return;
+      customTimes[key] = ms; timeSources[key] = 'mine';
+    } else {
+      if (existingSource === 'mine') return; // never overwrite personal best
+      customTimes[key] = ms; timeSources[key] = source;
+    }
+    saveTimes(); saveTimeSources();
+    const r = allResults.find(x => x.key === key);
+    if (r) { r.clearMs = ms; r.timeSource = timeSources[key]; computeEvhr(r); }
+    const thEv = $('th-evhr'), tabEv = $('tab-evhr');
+    if (thEv) thEv.style.display = ''; if (tabEv) tabEv.style.display = '';
+  }
+
+  /* ══ MY TIMES ══ */
   async function loadMyTimes() {
     if (!cfg.cookie) { showNotice('Session cookie required. Open ⚙ Settings and enter <code>session_id=yourValue</code>.'); return; }
     $('btn-times').disabled = true;
-    progressEl.style.display = 'block';
-    logEl.innerHTML = '';
-    timesPanel.style.display = 'block';
-    timesPanel.classList.remove('collapsed');
+    progressEl.style.display = 'block'; logEl.innerHTML = '';
+    timesPanel.style.display = 'block'; timesPanel.classList.remove('collapsed');
     $('tp-note').textContent = 'Fetching ranking data…';
-    $('tp-rows').innerHTML = '';
-    $('tp-header-summary').textContent = '';
+    $('tp-rows').innerHTML = ''; $('tp-header-summary').textContent = '';
     const tpH = $('tp-header');
     if (!tpH._w) { tpH._w = true; tpH.addEventListener('click', () => timesPanel.classList.toggle('collapsed')); }
     try {
       log('Fetching ranking data…');
-      const [rankDungeons, meData] = await Promise.all([
-        apiFetch('/api/rankings/dungeons'),
-        apiFetch('/api/rankings/me')
-      ]);
+      const [rankDungeons, meData] = await Promise.all([ getRankDungeons(), apiFetch('/api/rankings/me') ]);
       const rankMap = {};
       for (const e of (rankDungeons || [])) rankMap[`${e.dungeon_id}_${e.difficulty}`] = e.dungeon_name;
       const tamers = meData.tamers || [];
       if (!tamers.length) { log('No ranking data found.', 'warn'); $('tp-note').textContent = 'No ranking data found.'; return; }
       const main = tamers.reduce((a,b) => (a.clear_count||0) > (b.clear_count||0) ? a : b);
-
-      // Check admin status from my times too
-      if (main.tamer_name) {
-        resolvedTamerName = main.tamer_name.trim().toLowerCase();
-        maybeMakeAdmin(resolvedTamerName);
-      }
-
+      if (main.tamer_name) { resolvedTamerName = main.tamer_name.trim().toLowerCase(); maybeMakeAdmin(resolvedTamerName); }
       const bestTimes = {};
       for (const e of (main.dungeon_breakdown || [])) {
         const k = `${e.dungeon_id}_${e.difficulty}`;
@@ -1511,13 +1350,12 @@ if ('serviceWorker' in navigator) {
       const entries = Object.values(bestTimes).sort((a,b)=>b.clear_count-a.clear_count);
       const wikiNames = [...new Set(allResults.map(r=>r.name))].sort();
       log(`${entries.length} dungeons for ${main.tamer_name}.`, 'ok');
-      const rowsCon = $('tp-rows');
-      let matched = 0;
+      const rowsCon = $('tp-rows'); let matched = 0;
       entries.forEach((e) => {
         const dName  = DIFF_MAP[e.difficulty] || `Mode ${e.difficulty}`;
         const rName  = rankMap[`${e.dungeon_id}_${e.difficulty}`] || null;
         const autoKey = rName ? autoMatch(rName, dName, wikiNames) : null;
-        if (autoKey) { matched++; applyTimeSilently(autoKey, e.best_time_ms); }
+        if (autoKey) { matched++; applyTimeSilently(autoKey, e.best_time_ms, 'mine'); }
         const row = document.createElement('div'); row.className = 'tp-row';
         const inf = document.createElement('div'); inf.className = 'tp-info';
         inf.textContent = rName ? `${rName} · ${dName}` : `ID ${e.dungeon_id} · ${dName}`;
@@ -1534,11 +1372,10 @@ if ('serviceWorker' in navigator) {
         st.textContent = autoKey ? '✓ auto' : '○ unmatched';
         sel.addEventListener('change', () => {
           if (!sel.value) return;
-          applyTimeSilently(sel.value, e.best_time_ms);
+          applyTimeSilently(sel.value, e.best_time_ms, 'mine');
           st.textContent = '✓ applied'; st.className = 'tp-status matched';
         });
-        row.append(inf, tim, sel, st);
-        rowsCon.appendChild(row);
+        row.append(inf, tim, sel, st); rowsCon.appendChild(row);
       });
       renderCards(allResults); applyFilters();
       const unmatched = entries.length - matched;
@@ -1548,15 +1385,6 @@ if ('serviceWorker' in navigator) {
       setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
     } catch(err) { log('Failed: ' + err.message, 'err'); }
     finally { $('btn-times').disabled = false; }
-  }
-
-  function applyTimeSilently(key, ms) {
-    if (customTimes[key] && ms >= customTimes[key]) return;
-    customTimes[key] = ms; saveTimes();
-    const r = allResults.find(x => x.key === key);
-    if (r) { r.clearMs = ms; computeEvhr(r); }
-    const thEv = $('th-evhr'), tabEv = $('tab-evhr');
-    if (thEv) thEv.style.display = ''; if (tabEv) tabEv.style.display = '';
   }
 
   function autoMatch(rankName, diffName, wikiNames) {
@@ -1576,6 +1404,77 @@ if ('serviceWorker' in navigator) {
     return best ? `${best}_${diffName}` : null;
   }
 
+  /* ══ SPEED RANKINGS ══ */
+  function computeSpeedTime(entries) {
+    const sorted = [...entries].sort((a,b) => a.best_time_ms - b.best_time_ms);
+    if (sorted.length >= 50) {
+      const rank1 = sorted[0].best_time_ms, rank50 = sorted[49].best_time_ms;
+      if (rank50 <= rank1 * 3) return { ms: rank50, source: 'speed50' };
+      const top25 = sorted.slice(0, 25).map(e => e.best_time_ms).sort((a,b)=>a-b);
+      return { ms: top25[Math.floor(top25.length / 2)], source: 'speedAvg' };
+    }
+    const times = sorted.map(e => e.best_time_ms);
+    return { ms: times[Math.floor(times.length / 2)], source: 'speedAvg' };
+  }
+
+  async function fetchSpeedTimes(forceAll = false) {
+    if (!allResults.length) return;
+    const btn = $('btn-speedtimes'); if (btn) btn.disabled = true;
+    progressEl.style.display = 'block'; logEl.innerHTML = '';
+    try {
+      const rankDungeons = await getRankDungeons();
+      const rdMap = new Map();
+      for (const e of (rankDungeons || [])) rdMap.set(`${e.dungeon_name}|||${e.difficulty}`, e.dungeon_id);
+
+      const toFetch = [];
+      for (const r of allResults) {
+        if (isDungeonBlacklisted(r.key, r.name)) continue;
+        if (!forceAll && timeSources[r.key] === 'mine') continue;
+        const cached = cacheGet(`speed_${r.key}`, TTL_SPEED);
+        if (cached !== null && !forceAll) { applyTimeSilently(r.key, cached.ms, cached.source); continue; }
+        const diffNum = DIFF_TO_NUM[r.difficulty]; if (!diffNum) continue;
+        let dungeonId = rdMap.get(`${r.name}|||${diffNum}`);
+        if (!dungeonId) {
+          const rn = r.name.toLowerCase();
+          for (const [mapKey, id] of rdMap.entries()) {
+            const [mName, mDiff] = mapKey.split('|||');
+            if (parseInt(mDiff) !== diffNum) continue;
+            if (mName.toLowerCase() === rn || mName.toLowerCase().includes(rn) || rn.includes(mName.toLowerCase())) { dungeonId = id; break; }
+          }
+        }
+        if (!dungeonId) continue;
+        toFetch.push({ r, dungeonId, diffNum });
+      }
+
+      if (!toFetch.length) {
+        log('Speed times: all up to date.', 'ok');
+        setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
+        if (btn) btn.disabled = false; return;
+      }
+
+      log(`Speed times: fetching for ${toFetch.length} dungeons…`); setBar(0, toFetch.length);
+      let fetched = 0;
+      for (let i = 0; i < toFetch.length; i++) {
+        const { r, dungeonId, diffNum } = toFetch[i];
+        if (i > 0) await sleep(500); await rateGate();
+        try {
+          const data = await apiFetch(`/api/rankings/speed?dungeon_id=${dungeonId}&difficulty=${diffNum}&week=alltime`);
+          if (!Array.isArray(data) || data.length < 5) {
+            log(`Speed: ${r.name} (${r.difficulty}) — not enough data (${data?.length||0})`, 'warn');
+          } else {
+            const { ms, source } = computeSpeedTime(data);
+            cacheSet(`speed_${r.key}`, { ms, source });
+            applyTimeSilently(r.key, ms, source); fetched++;
+          }
+        } catch(e) { log(`Speed: ${r.key} — ${e.message}`, 'err'); }
+        setBar(i + 1, toFetch.length);
+      }
+      log(`Speed times done — ${fetched}/${toFetch.length} applied.`, 'ok');
+      renderCards(allResults); applyFilters();
+    } catch(err) { log('Speed times error: ' + err.message, 'err'); }
+    finally { if (btn) btn.disabled = false; setTimeout(() => { progressEl.style.display = 'none'; }, 1000); }
+  }
+
   /* ══ TOOLTIP ══ */
   function showTooltip(html, el) {
     tooltipEl.innerHTML = html; tooltipEl.classList.add('visible');
@@ -1589,10 +1488,8 @@ if ('serviceWorker' in navigator) {
     });
   }
   function hideTooltip() { tooltipEl.classList.remove('visible'); }
-
   const RANK_LABEL = {0:'Base',1:'F',2:'E',3:'D',4:'C',5:'B',6:'A',7:'S'};
   function makeTooltipHtml(d) {
-    const rl = RANK_LABEL[d.bestRank] ?? `R${d.bestRank}`;
     const bkRow = d.blacklisted ? `<div class="trow"><span class="tlbl" style="color:var(--red)">🚫 Blacklisted</span><span class="tval" style="color:var(--red)">excluded from EV</span></div>` : '';
     if (d.type === 'rank') {
       return `${bkRow}
@@ -1629,8 +1526,7 @@ if ('serviceWorker' in navigator) {
   /* ══ ITEM FINDER ══ */
   function renderItemFinder() {
     const q = (ifInput?.value||'').toLowerCase().trim();
-    const con = $('if-results');
-    if (!con) return;
+    const con = $('if-results'); if (!con) return;
     if (!q) { con.innerHTML = '<div style="color:var(--dim3);font-size:12px;padding:10px 0">Type an item name above.</div>'; return; }
     const matches = Object.entries(itemIndex).filter(([k]) => k.includes(q));
     if (!matches.length) { con.innerHTML = `<div style="color:var(--dim3);font-size:12px;padding:10px 0">No match for "${q}".</div>`; return; }
@@ -1652,15 +1548,12 @@ if ('serviceWorker' in navigator) {
     }).join('');
   }
 
-  /* ══ MAKE CHIP ══ */
+  /* ══ CHIP ══ */
   function makeChip(d) {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;gap:0';
+    const wrap = document.createElement('div'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:0';
     const span = document.createElement('span');
     span.className = 'chip'+(d.type==='rank'?' rank-reward':'')+(d.blacklisted?' blacklisted':'');
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = (d.blacklisted?'🚫 ':'')+d.name;
-    span.appendChild(nameSpan);
+    const nameSpan = document.createElement('span'); nameSpan.textContent = (d.blacklisted?'🚫 ':'')+d.name; span.appendChild(nameSpan);
     if (d.type === 'raid') {
       const pct = document.createElement('span'); pct.className = 'chip-pct'; pct.textContent = Math.round(d.prob*100)+'%'; span.appendChild(pct);
     } else {
@@ -1675,8 +1568,7 @@ if ('serviceWorker' in navigator) {
     span.addEventListener('mouseenter', ()=>showTooltip(makeTooltipHtml(d),span));
     span.addEventListener('mouseleave', hideTooltip);
     span.addEventListener('contextmenu', e => {
-      e.preventDefault();
-      addToBlacklist(d.item_id, d.name);
+      e.preventDefault(); addToBlacklist(d.item_id, d.name);
       allResults = buildResults(cachedDetails); buildItemIndex(allResults); applyFilters();
     });
     wrap.appendChild(span);
@@ -1684,9 +1576,7 @@ if ('serviceWorker' in navigator) {
       const mkt = prices[d.item_id];
       const meta = document.createElement('div'); meta.className = 'chip-meta'; meta.style.paddingLeft = '6px';
       const buyRow = document.createElement('div'); buyRow.className = 'chip-sub';
-      buyRow.innerHTML = mkt?.buyPrice
-        ? `<span class="chip-sub-ico">⚡</span><span class="chip-sub-buy">${fmt(mkt.buyPrice)}</span>`
-        : `<span class="chip-sub-ico">⚡</span><span class="chip-sub-na">no buy order</span>`;
+      buyRow.innerHTML = mkt?.buyPrice ? `<span class="chip-sub-ico">⚡</span><span class="chip-sub-buy">${fmt(mkt.buyPrice)}</span>` : `<span class="chip-sub-ico">⚡</span><span class="chip-sub-na">no buy order</span>`;
       const histRow = document.createElement('div'); histRow.className = 'chip-sub';
       if (mkt?.lastSalePrice && mkt?.lastSaleAt) {
         histRow.innerHTML = `<span class="chip-sub-ico">◷</span><span class="chip-sub-hist">${fmt(mkt.lastSalePrice)}</span><span class="chip-sub-age">· ${fmtAgo(mkt.lastSaleAt)}</span>`;
@@ -1700,7 +1590,19 @@ if ('serviceWorker' in navigator) {
     return wrap;
   }
 
-  /* ══ APPLY FILTERS & RENDER TABLE ══ */
+  /* ══ TIME SOURCE BADGE ══ */
+  const SRC_META = {
+    mine:     { cls: 'tsrc-mine',     icon: '👤',   tip: 'your personal best' },
+    speed50:  { cls: 'tsrc-speed50',  icon: '⚡50',  tip: 'rank #50 all-time' },
+    speedAvg: { cls: 'tsrc-speedAvg', icon: '〜est', tip: 'estimated from top-50 median' },
+  };
+  function makeTimeSrcBadge(source) {
+    if (!source || !SRC_META[source]) return '';
+    const { cls, icon, tip } = SRC_META[source];
+    return `<span class="tsrc ${cls}" title="${tip}">${icon}</span>`;
+  }
+
+  /* ══ TABLE ══ */
   function applyFilters() {
     const q = searchEl.value.toLowerCase();
     let data = allResults.filter(r => {
@@ -1715,35 +1617,29 @@ if ('serviceWorker' in navigator) {
       if (typeof vb==='string') vb=vb.toLowerCase();
       return sortAsc?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
     });
-
     const showEvhr    = $('th-evhr').style.display    !== 'none';
     const showInstant = $('th-evinstant')?.style.display !== 'none';
     const showMedian  = $('th-evmedian')?.style.display  !== 'none';
     const barMetric   = sortMode==='evhr'?'evhr':'ev';
     const maxBar      = Math.max(...data.map(r=>r[barMetric]??0),1);
     tbodyEl.innerHTML = '';
-
     data.forEach((row,i) => {
       const rankClass = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
       const barPct    = (((row[barMetric]??0)/maxBar)*100).toFixed(1);
       const timeStr   = fmtTime(row.clearMs);
+      const srcBadge  = makeTimeSrcBadge(row.timeSource);
       const tr = document.createElement('tr');
-
       const tdR = document.createElement('td'); tdR.className='fo-rank '+rankClass; tdR.textContent=i+1; tr.appendChild(tdR);
-
       const tdN = document.createElement('td');
       const nameWrap = document.createElement('div'); nameWrap.className='dname-wrap';
       const nameSpan = document.createElement('span'); nameSpan.className='dname'; nameSpan.textContent=row.name;
       const blBtn = document.createElement('button'); blBtn.className='dname-bl-btn'; blBtn.textContent='🚫 hide';
       blBtn.addEventListener('click',()=>{ addDungeonToBlacklist(row.key); allResults=buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters(); });
-      nameWrap.appendChild(nameSpan); nameWrap.appendChild(blBtn);
-      tdN.appendChild(nameWrap);
+      nameWrap.appendChild(nameSpan); nameWrap.appendChild(blBtn); tdN.appendChild(nameWrap);
       tdN.insertAdjacentHTML('beforeend',`<span class="badge badge-${row.difficulty}">${row.difficulty||'?'}</span>`);
       tr.appendChild(tdN);
-
       const tdE = document.createElement('td'); tdE.className='ev';
       tdE.innerHTML=`<span class="ev-val">${fmt(row.ev)}</span><span class="ev-sub">/ run</span>`; tr.appendChild(tdE);
-
       if (showEvhr) {
         const tdH = document.createElement('td'); tdH.style.textAlign='right';
         tdH.innerHTML=row.evhr?`<span class="evhr-val">${fmt(row.evhr)}</span><span class="ev-sub" style="color:#2a8060">/ hr</span>`:`<span class="evhr-na">no time</span>`;
@@ -1759,11 +1655,10 @@ if ('serviceWorker' in navigator) {
         tdM.innerHTML=row.evMedian?`<span class="evhr-val" style="color:var(--blue2)">${fmt(row.evMedian)}</span><span class="ev-sub">median</span>`:`<span class="evhr-na">loading…</span>`;
         tr.appendChild(tdM);
       }
-
       const tdT = document.createElement('td'); tdT.className='time-cell';
       const dispEl = document.createElement('div');
       dispEl.className='time-display'+(timeStr?'':' no-time');
-      dispEl.innerHTML=`<span>${timeStr||'not set'}</span><span class="time-edit-ico">✏</span>`;
+      dispEl.innerHTML=`<span>${timeStr||'not set'}</span>${timeStr?srcBadge:''}<span class="time-edit-ico">✏</span>`;
       const wrapEl = document.createElement('div'); wrapEl.className='time-input-wrap'; wrapEl.style.display='none';
       const inp = document.createElement('input'); inp.className='time-input'; inp.type='number'; inp.min='1'; inp.placeholder='secs';
       if (row.clearMs) inp.value=Math.round(row.clearMs/1000);
@@ -1774,52 +1669,43 @@ if ('serviceWorker' in navigator) {
       savBtn.addEventListener('click',()=>{
         const secs=parseFloat(inp.value);
         if (!isNaN(secs)&&secs>0) {
-          customTimes[kStr]=Math.round(secs*1000); saveTimes();
+          customTimes[kStr]=Math.round(secs*1000); timeSources[kStr]='mine';
+          saveTimes(); saveTimeSources();
           const r=allResults.find(x=>x.key===kStr);
-          if (r){r.clearMs=customTimes[kStr];computeEvhr(r);}
+          if (r){r.clearMs=customTimes[kStr];r.timeSource='mine';computeEvhr(r);}
           renderCards(allResults);
         }
         dispEl.style.display=''; wrapEl.style.display='none'; applyFilters();
       });
       inp.addEventListener('keydown',e=>{if(e.key==='Enter')savBtn.click();});
-
       const tdB = document.createElement('td'); tdB.className='bar-cell';
       tdB.innerHTML=`<div class="ev-bar"><div class="ev-bar-fill" style="width:${barPct}%"></div></div>`; tr.appendChild(tdB);
-
       const tdD = document.createElement('td');
       const dropsDiv = document.createElement('div'); dropsDiv.className='drops';
       const chips=[...row.drops.filter(d=>d.type==='raid').slice(0,5),...row.drops.filter(d=>d.type==='rank').slice(0,8)];
       if (!chips.length) dropsDiv.innerHTML='<span style="color:var(--dim3);font-size:10px">no drop data</span>';
       else chips.forEach(d=>dropsDiv.appendChild(makeChip(d)));
-      tdD.appendChild(dropsDiv); tr.appendChild(tdD);
-      tbodyEl.appendChild(tr);
+      tdD.appendChild(dropsDiv); tr.appendChild(tdD); tbodyEl.appendChild(tr);
     });
   }
 
   /* ══ DRP RANKINGS ══ */
   const KNOWN_DRP_MAP = {
-    "Agumon's Madness":5,"Shellmon's Place":7,"Kuwagamon's Terror":10,
-    "Love Serenade":20,"Meramon Attacks":15,"Seadramon's Confusion":15,
-    "Ogremon's Rampage":15,"Bound Champion":15,"Guardian of the Ruins":15,
-    "The First Trial":20,"The Rise of the Fallen Angel":18,"Gazimon Panic":18,
+    "Agumon's Madness":5,"Shellmon's Place":7,"Kuwagamon's Terror":10,"Love Serenade":20,
+    "Meramon Attacks":15,"Seadramon's Confusion":15,"Ogremon's Rampage":15,"Bound Champion":15,
+    "Guardian of the Ruins":15,"The First Trial":20,"The Rise of the Fallen Angel":18,"Gazimon Panic":18,
     "Server Continent Canyon":100,"Infernal Bone Demon":20,"Nanomon's Hideout":20,
     "Dokugumon's Barricade":20,"Mammothmon's Stampede":20,"Hell in Tokyo Tower":20,
     "Gesomon in Real World":20,"Raremon's Assault":20,"Night Raid":20,
     "Night Raid in Minato":20,"Stage of Phantom":20,"The Dark Roar":20,
     "The Undead King":30,"The Undying":30,"Tailmon's Choice":30,"The Golden Seadragon":600
   };
-
-  let drpRows = [];
-  let drpSortCol = 'drpPerRun';
+  let drpRows = []; let drpSortCol = 'drpPerRun';
 
   function renderDrpTable(col) {
     if (col) drpSortCol = col;
-    const tbody = $('drp-tbody');
-    if (!tbody||!drpRows.length) return;
-    const sorted = [...drpRows].sort((a,b)=>{
-      const va=a[drpSortCol]??-Infinity, vb=b[drpSortCol]??-Infinity;
-      return vb-va;
-    });
+    const tbody = $('drp-tbody'); if (!tbody||!drpRows.length) return;
+    const sorted = [...drpRows].sort((a,b)=>{ const va=a[drpSortCol]??-Infinity, vb=b[drpSortCol]??-Infinity; return vb-va; });
     tbody.innerHTML = '';
     sorted.forEach(row=>{
       const tr=document.createElement('tr');
@@ -1838,16 +1724,14 @@ if ('serviceWorker' in navigator) {
 
   async function loadDrpRankings() {
     if (!cfg.cookie) { $('drp-note').textContent='Session cookie required — open ⚙ Settings.'; return; }
-    drpLoaded = true;
-    $('btn-drp-load').disabled = true;
+    drpLoaded = true; $('btn-drp-load').disabled = true;
     $('drp-note').textContent = 'Fetching ranking data…';
     drpRows = []; $('drp-tbody').innerHTML=''; $('drp-banner').innerHTML=''; $('drp-nearby').style.display='none';
     try {
-      const [rankDungeons,meData] = await Promise.all([apiFetch('/api/rankings/dungeons'),apiFetch('/api/rankings/me')]);
+      const [rankDungeons,meData] = await Promise.all([getRankDungeons(),apiFetch('/api/rankings/me')]);
       const rankMap = {};
-      for (const e of (rankDungeons||[])) rankMap[`${e.dungeon_id}_${e.difficulty}`]=e.dungeon_name||e.name||`Dungeon ${e.dungeon_id}`;
-      const tamers = meData?.tamers||[];
-      if (!tamers.length) { $('drp-note').textContent='No ranking data found.'; return; }
+      for (const e of (rankDungeons||[])) rankMap[`${e.dungeon_id}_${e.difficulty}`]=e.dungeon_name||`Dungeon ${e.dungeon_id}`;
+      const tamers = meData?.tamers||[]; if (!tamers.length) { $('drp-note').textContent='No ranking data found.'; return; }
       const me = tamers.reduce((a,b)=>(a.total_drp||0)>(b.total_drp||0)?a:b);
       $('drp-banner').innerHTML=`
         <div class="drp-card"><div class="drp-card-lbl">Rank Position</div><div class="drp-card-val">#${me.position??'?'}</div><div class="drp-card-sub">Bracket ${me.bracket??'?'}</div></div>
@@ -1856,8 +1740,7 @@ if ('serviceWorker' in navigator) {
       if (me.nearby&&me.nearby.length) {
         const nearbyEl=$('drp-nearby-rows'); nearbyEl.innerHTML=''; $('drp-nearby').style.display='block';
         me.nearby.forEach(n=>{
-          const row=document.createElement('div'); row.className='drp-nearby-row';
-          const isMe=n.is_me;
+          const row=document.createElement('div'); row.className='drp-nearby-row'; const isMe=n.is_me;
           row.innerHTML=`<div class="drp-nearby-pos ${isMe?'drp-nearby-me':''}">#${n.position}</div>
             <div class="drp-nearby-name" style="${isMe?'color:var(--cyan);font-weight:600':''}">${isMe?'▶ ':''}${n.tamer_name}</div>
             <div class="drp-nearby-drp">${(n.total_drp||0).toLocaleString()} DRP</div>`;
@@ -1891,19 +1774,16 @@ if ('serviceWorker' in navigator) {
 
   /* ══ MY LISTINGS ══ */
   const ICON_BASE = 'https://thedigitalodyssey.com/static/icons/';
-
   function makeLstItemCell(l) {
-    const iconUrl=`${ICON_BASE}${l.icon}.png`;
     return `<div class="lst-item-cell">
-      <img class="lst-item-icon" src="${iconUrl}" alt="" onerror="this.style.display='none'">
+      <img class="lst-item-icon" src="${ICON_BASE}${l.icon}.png" alt="" onerror="this.style.display='none'">
       <div class="lst-item-info"><div class="lst-item-name">${l.name.replace('\n',' ')}</div><div class="lst-item-qty">${l.qty_open}/${l.qty_total} open</div></div></div>`;
   }
-
   async function loadMyListings() {
     if (!cfg.cookie) { $('lst-note').textContent='Session cookie required — open ⚙ Settings.'; return; }
     if (isListingsRunning) return;
-    isListingsRunning=true; listingsLoaded=true;
-    $('btn-lst-load').disabled=true; $('lst-note').textContent='Fetching your listings…';
+    isListingsRunning=true; listingsLoaded=true; $('btn-lst-load').disabled=true;
+    $('lst-note').textContent='Fetching your listings…';
     $('lst-sell-section').style.display='none'; $('lst-buy-section').style.display='none';
     $('lst-sell-tbody').innerHTML=''; $('lst-buy-tbody').innerHTML='';
     try {
@@ -1916,7 +1796,7 @@ if ('serviceWorker' in navigator) {
         const soldQty=l.qty_total-l.qty_open;
         const qtyBadge=soldQty===0?'<span class="lst-badge-full">untouched</span>':`<span class="lst-badge-partial lst-badge-partial-fill">${soldQty} sold</span>`;
         const expiryColor=(l.expires-Date.now())<86400000?'var(--red)':'var(--dim)';
-        tr.innerHTML=`<td>${makeLstItemCell(l)}</td><td><span class="lst-price ${l.side}">${fmtRaw(l.price)}</span></td>
+        tr.innerHTML=`<td>${makeLstItemCell(l)}</td><td><span class="lst-price ${l.side}">${fmt(l.price)}</span></td>
           <td>${l.side==='sell'?qtyBadge:'—'}</td>
           <td><span class="lst-status load" id="lst-status-${l.listing_id}">⏳ checking…</span></td>
           <td id="lst-mkt-${l.listing_id}" style="font-size:11px;color:var(--dim3)">—</td>
@@ -1929,34 +1809,26 @@ if ('serviceWorker' in navigator) {
       $('lst-note').textContent=`${listings.length} listings found. Checking market prices…`;
       const allListings=[...sells,...buys];
       for (let i=0;i<allListings.length;i++) {
-        const l=allListings[i];
-        if (i>0) await sleep(600);
-        await rateGate();
+        const l=allListings[i]; if (i>0) await sleep(600); await rateGate();
         try {
           const mktRes=await marketGet(`/api/market/listings?item=${l.item}&side=${l.side}&limit=20`);
           const tradeRes=await marketGet(`/api/market/trades?item=${l.item}&limit=5`);
           let mktData=null,tradeData=null;
           if (mktRes&&mktRes.ok) { try{mktData=await mktRes.json();}catch(e){} }
           if (tradeRes&&tradeRes.ok) { try{tradeData=await tradeRes.json();}catch(e){} }
-          const statusEl=$(`lst-status-${l.listing_id}`);
-          const mktEl=$(`lst-mkt-${l.listing_id}`);
-          const tradeEl=$(`lst-trade-${l.listing_id}`);
+          const statusEl=$(`lst-status-${l.listing_id}`), mktEl=$(`lst-mkt-${l.listing_id}`), tradeEl=$(`lst-trade-${l.listing_id}`);
           if (mktData?.listings?.length) {
             const all2=mktData.listings;
             if (l.side==='sell') {
               const sorted=[...all2].sort((a,b)=>a.price-b.price);
-              const cheapest=sorted[0].price;
-              const cheaper=sorted.filter(x=>x.price<l.price);
-              const myIsBest=l.price<=cheapest;
+              const cheapest=sorted[0].price, cheaper=sorted.filter(x=>x.price<l.price), myIsBest=l.price<=cheapest;
               if (statusEl){statusEl.className='lst-status '+(myIsBest?'best':'warn');statusEl.textContent=myIsBest?'✓ cheapest':'⚠ not cheapest';}
-              if (mktEl){mktEl.innerHTML=myIsBest?`<span class="lst-market-price same">${fmtRaw(cheapest)}</span>`:`<span class="lst-market-price cheaper">${fmtRaw(cheapest)}</span><span style="font-size:9px;color:var(--dim3);margin-left:5px">${cheaper.length} cheaper</span>`;}
+              if (mktEl){mktEl.innerHTML=myIsBest?`<span class="lst-market-price same">${fmt(cheapest)}</span>`:`<span class="lst-market-price cheaper">${fmt(cheapest)}</span><span style="font-size:9px;color:var(--dim3);margin-left:5px">${cheaper.length} cheaper</span>`;}
             } else {
               const sorted=[...all2].sort((a,b)=>b.price-a.price);
-              const highest=sorted[0].price;
-              const higher=sorted.filter(x=>x.price>l.price);
-              const myIsBest=l.price>=highest;
+              const highest=sorted[0].price, higher=sorted.filter(x=>x.price>l.price), myIsBest=l.price>=highest;
               if (statusEl){statusEl.className='lst-status '+(myIsBest?'best':'warn');statusEl.textContent=myIsBest?'✓ highest bid':'⚠ not highest bid';}
-              if (mktEl){mktEl.innerHTML=myIsBest?`<span class="lst-market-price same">${fmtRaw(highest)}</span>`:`<span class="lst-market-price cheaper">${fmtRaw(highest)}</span><span style="font-size:9px;color:var(--dim3);margin-left:5px">${higher.length} higher</span>`;}
+              if (mktEl){mktEl.innerHTML=myIsBest?`<span class="lst-market-price same">${fmt(highest)}</span>`:`<span class="lst-market-price cheaper">${fmt(highest)}</span><span style="font-size:9px;color:var(--dim3);margin-left:5px">${higher.length} higher</span>`;}
             }
           } else if (statusEl) {
             statusEl.className='lst-status best'; statusEl.textContent=l.side==='sell'?'✓ only listing':'✓ only bid';
@@ -1964,90 +1836,59 @@ if ('serviceWorker' in navigator) {
           }
           if (tradeEl&&Array.isArray(tradeData)&&tradeData.length) {
             const last=tradeData[0];
-            tradeEl.innerHTML=`<span class="lst-trade-price">${fmtRaw(last.price||0)}</span><span class="lst-trade-age"> · ${fmtAgo(last.at)}</span>${tradeData.length>1?`<span style="color:var(--dim3);font-size:9px;margin-left:4px">(${tradeData.length} recent)</span>`:''}`;
-          } else if (tradeEl) {
-            tradeEl.innerHTML=`<span style="color:var(--dim3);font-style:italic">no history</span>`;
-          }
-        } catch(e) {
-          const statusEl=$(`lst-status-${l.listing_id}`);
-          if (statusEl){statusEl.className='lst-status warn';statusEl.textContent='⚠ error';}
-        }
+            tradeEl.innerHTML=`<span class="lst-trade-price">${fmt(last.price||0)}</span><span class="lst-trade-age"> · ${fmtAgo(last.at)}</span>${tradeData.length>1?`<span style="color:var(--dim3);font-size:9px;margin-left:4px">(${tradeData.length} recent)</span>`:''}`;
+          } else if (tradeEl) { tradeEl.innerHTML=`<span style="color:var(--dim3);font-style:italic">no history</span>`; }
+        } catch(e) { const statusEl=$(`lst-status-${l.listing_id}`); if (statusEl){statusEl.className='lst-status warn';statusEl.textContent='⚠ error';} }
       }
       $('lst-note').textContent=`${listings.length} listings — last refreshed just now.`;
     } catch(err) { $('lst-note').textContent='Error: '+err.message; }
     finally { isListingsRunning=false; $('btn-lst-load').disabled=false; }
   }
 
-  /* ══ ADMIN PANEL ══ */
-  // Token save
+  /* ══ ADMIN ══ */
   $('adm-token-save').addEventListener('click', () => {
     adminToken = $('adm-token-inp').value.trim();
     try { localStorage.setItem(ADMIN_NS, adminToken); } catch(e) {}
     $('adm-token-inp').value = adminToken ? '••••••••' : '';
     showAdminToast('Token saved');
   });
-
-  // Pre-fill token field indicator
   if (adminToken) $('adm-token-inp').placeholder = '(token saved — click to change)';
-
   $('adm-load-btn').addEventListener('click', loadAdminData);
-
   $('adm-add-btn').addEventListener('click', async () => {
-    const name = $('adm-add-inp').value.trim();
-    if (!name) return;
-    await adminApi('POST', '/fo-admin/allowlist', { name });
-    $('adm-add-inp').value = '';
-    await loadAdminData();
+    const name = $('adm-add-inp').value.trim(); if (!name) return;
+    await adminApi('POST', '/fo-admin/allowlist', { name }); $('adm-add-inp').value = ''; await loadAdminData();
   });
   $('adm-add-inp').addEventListener('keydown', e => { if (e.key==='Enter') $('adm-add-btn').click(); });
-
   $('adm-clear-usage').addEventListener('click', async () => {
     if (!confirm('Clear ALL usage data? Cannot be undone.')) return;
-    await adminApi('DELETE', '/fo-admin/usage');
-    await loadAdminData();
+    await adminApi('DELETE', '/fo-admin/usage'); await loadAdminData();
   });
-
   async function adminApi(method, path, body) {
     const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
     if (!token) { showAdminToast('No admin token set', true); return null; }
     try {
       const res = await fetch(WORKER_URL + path, {
-        method,
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
       });
       if (!res.ok) { showAdminToast(`Error ${res.status}`, true); return null; }
       return res;
     } catch(e) { showAdminToast('Network error', true); return null; }
   }
-
   function showAdminToast(msg, err=false) {
-    // Use the notice bar as a toast for admin actions
     noticeEl.style.borderLeftColor = err ? 'var(--red)' : 'var(--green)';
     noticeEl.style.color = err ? 'var(--red)' : 'var(--green)';
     noticeEl.style.background = err ? 'rgba(255,77,106,.07)' : 'rgba(61,214,140,.07)';
-    showNotice(msg);
-    setTimeout(hideNotice, 2500);
-    noticeEl.style.borderLeftColor = '';
-    noticeEl.style.color = '';
-    noticeEl.style.background = '';
+    showNotice(msg); setTimeout(hideNotice, 2500);
+    noticeEl.style.borderLeftColor=''; noticeEl.style.color=''; noticeEl.style.background='';
   }
-
   async function loadAdminData() {
     $('adm-last-refresh').textContent = 'loading…';
     $('adm-tbody').innerHTML = '<tr><td colspan="7" style="padding:16px;text-align:center;color:var(--dim3);font-size:11px">Loading…</td></tr>';
     $('adm-banner').innerHTML = '<div class="adm-card"><div class="adm-card-lbl">Loading</div><div class="adm-card-val">—</div></div>';
-
-    const res = await adminApi('GET', '/fo-admin/data');
-    if (!res) return;
-
-    let data;
-    try { data = await res.json(); } catch(e) { showAdminToast('Bad response', true); return; }
-
-    const { allowlist, usages } = data;
-    const now = Date.now();
-
-    // Banner
+    const res = await adminApi('GET', '/fo-admin/data'); if (!res) return;
+    let data; try { data = await res.json(); } catch(e) { showAdminToast('Bad response', true); return; }
+    const { allowlist, usages } = data; const now = Date.now();
     const totalReqs   = usages.reduce((s,u)=>s+(u.count||0), 0);
     const blockedReqs = usages.filter(u=>!allowlist.some(n=>n.toLowerCase()===u.name)).reduce((s,u)=>s+(u.count||0),0);
     $('adm-banner').innerHTML = `
@@ -2055,99 +1896,60 @@ if ('serviceWorker' in navigator) {
       <div class="adm-card"><div class="adm-card-lbl">Seen Tamers</div><div class="adm-card-val">${usages.length}</div><div class="adm-card-sub">ever accessed</div></div>
       <div class="adm-card"><div class="adm-card-lbl">Total Requests</div><div class="adm-card-val">${totalReqs.toLocaleString()}</div><div class="adm-card-sub">all time</div></div>
       <div class="adm-card" style="border-left-color:var(--red)"><div class="adm-card-lbl">Blocked</div><div class="adm-card-val" style="color:var(--red)">${blockedReqs.toLocaleString()}</div><div class="adm-card-sub">from non-allowed</div></div>`;
-
-    // Allowlist chips
     const chips = $('adm-chips');
     chips.innerHTML = allowlist.length
-      ? allowlist.map(n => `
-          <span class="adm-chip">
-            ${n}
-            <button class="adm-chip-rm" data-name="${n}" title="Remove from allowlist">✕</button>
-          </span>`).join('')
+      ? allowlist.map(n => `<span class="adm-chip">${n}<button class="adm-chip-rm" data-name="${n}">✕</button></span>`).join('')
       : '<span style="color:var(--dim3);font-size:11px">Empty — add names above</span>';
-
     chips.querySelectorAll('.adm-chip-rm').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm(`Remove ${btn.dataset.name} from allowlist?`)) return;
-        await adminApi('DELETE', '/fo-admin/allowlist', { name: btn.dataset.name });
-        await loadAdminData();
+        if (!confirm(`Remove ${btn.dataset.name}?`)) return;
+        await adminApi('DELETE', '/fo-admin/allowlist', { name: btn.dataset.name }); await loadAdminData();
       });
     });
-
-    // Usage table
-    const tbody = $('adm-tbody');
-    tbody.innerHTML = '';
-    if (!usages.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim3);font-size:11px">No usage data yet</td></tr>';
-    } else {
+    const tbody = $('adm-tbody'); tbody.innerHTML = '';
+    if (!usages.length) { tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--dim3);font-size:11px">No usage data yet</td></tr>'; }
+    else {
       usages.forEach(u => {
         const allowed = allowlist.some(n => n.toLowerCase() === u.name);
-
-        // 24h sparkline
         const hours = Array(24).fill(0);
-        (u.history||[]).forEach(h => {
-          const hoursAgo = Math.floor((now - h.ts) / 3600000);
-          if (hoursAgo < 24) hours[hoursAgo]++;
-        });
+        (u.history||[]).forEach(h => { const ha = Math.floor((now - h.ts) / 3600000); if (ha < 24) hours[ha]++; });
         const maxH = Math.max(...hours, 1);
         const spark = hours.reverse().map(v => {
           const ht = Math.max(Math.round((v/maxH)*20), 1);
           const color = v > 0 ? (allowed ? '#00e5ff' : '#ff4d6a') : '#1a3a55';
           return `<div class="adm-spark-bar" style="height:${ht}px;background:${color}"></div>`;
         }).join('');
-
-        // Recent endpoints (last 5)
         const recentEps = (u.history||[]).slice(0,5).map(h => {
           const t = new Date(h.ts).toLocaleTimeString('en-GB', { timeZone:'Asia/Jerusalem' });
           return `<div class="${h.blocked?'ep-blocked':''}">${t} ${h.ep}${h.blocked?' [blocked]':''}</div>`;
         }).join('');
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>
-            <div class="adm-tamer-name ${allowed?'':'blocked-row'}">${u.name}</div>
-            <div style="font-size:9px;color:var(--dim3);margin-top:2px">first: ${fmtDate(u.firstSeen)}</div>
-          </td>
-          <td>${allowed
-            ? '<span class="adm-status-ok">✓ allowed</span>'
-            : '<span class="adm-status-blocked">✗ blocked</span>'}</td>
+          <td><div class="adm-tamer-name ${allowed?'':'blocked-row'}">${u.name}</div><div style="font-size:9px;color:var(--dim3);margin-top:2px">first: ${fmtDate(u.firstSeen)}</div></td>
+          <td>${allowed?'<span class="adm-status-ok">✓ allowed</span>':'<span class="adm-status-blocked">✗ blocked</span>'}</td>
           <td><span class="adm-count">${(u.count||0).toLocaleString()}</span></td>
-          <td>
-            <div class="adm-ago">${fmtAgo(u.lastSeen)||'—'}</div>
-            <div class="adm-ago-date">${fmtDate(u.lastSeen)}</div>
-          </td>
+          <td><div class="adm-ago">${fmtAgo(u.lastSeen)||'—'}</div><div class="adm-ago-date">${fmtDate(u.lastSeen)}</div></td>
           <td><div class="adm-spark">${spark}</div><div style="font-size:9px;color:var(--dim3);margin-top:2px">last 24h</div></td>
           <td><div class="adm-log-ep">${recentEps||'<span style="color:var(--dim4)">—</span>'}</div></td>
-          <td style="white-space:nowrap">
-            ${allowed
-              ? `<button class="btn red" style="font-size:8px;padding:4px 8px" data-action="remove" data-name="${u.name}">✕ Remove</button>`
-              : `<button class="btn green" style="font-size:8px;padding:4px 8px" data-action="add" data-name="${u.name}">+ Allow</button>`}
-          </td>`;
-
+          <td style="white-space:nowrap">${allowed
+            ?`<button class="btn red" style="font-size:8px;padding:4px 8px" data-action="remove" data-name="${u.name}">✕ Remove</button>`
+            :`<button class="btn green" style="font-size:8px;padding:4px 8px" data-action="add" data-name="${u.name}">+ Allow</button>`}</td>`;
         tr.querySelectorAll('[data-action]').forEach(btn => {
           btn.addEventListener('click', async () => {
             const name = btn.dataset.name;
-            if (btn.dataset.action === 'remove') {
-              if (!confirm(`Remove ${name}?`)) return;
-              await adminApi('DELETE', '/fo-admin/allowlist', { name });
-            } else {
-              await adminApi('POST', '/fo-admin/allowlist', { name });
-            }
+            if (btn.dataset.action === 'remove') { if (!confirm(`Remove ${name}?`)) return; await adminApi('DELETE', '/fo-admin/allowlist', { name }); }
+            else { await adminApi('POST', '/fo-admin/allowlist', { name }); }
             await loadAdminData();
           });
         });
-
         tbody.appendChild(tr);
       });
     }
-
     $('adm-last-refresh').textContent = 'refreshed ' + fmtAgo(now);
   }
 
   /* ── Auto-run on warm cache ── */
-  if (cacheGet('dungeon_list', Infinity)) {
-    setTimeout(() => runAnalysis('fresh'), 300);
-  }
+  if (cacheGet('dungeon_list', Infinity)) setTimeout(() => runAnalysis('fresh'), 300);
 
 })();
 </script>
