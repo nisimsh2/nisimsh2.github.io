@@ -2195,10 +2195,15 @@ if ('serviceWorker' in navigator) {
   let serverSealDb = {}; // loaded from KV
 
   async function loadServerSealDb() {
+     const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
     try {
       const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
-        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
-      });
+  headers: {
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json',
+    ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {})
+  }
+});
       if (res.ok) serverSealDb = await res.json();
     } catch(e) { console.warn('[SealBox] KV DB load failed', e); }
     // Also load box content overrides
@@ -2734,8 +2739,12 @@ if ('serviceWorker' in navigator) {
       });
       // Reload server DB
       const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
-        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
-      });
+  headers: {
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json',
+    ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {})
+  }
+});
       if (res.ok) serverSealDb = await res.json();
     } catch(e) { alert('Failed to save to server: ' + e.message); }
   }
@@ -2749,8 +2758,12 @@ if ('serviceWorker' in navigator) {
         body: JSON.stringify({ boxKey, ts })
       });
       const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
-        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
-      });
+  headers: {
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json',
+    ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {})
+  }
+});
       if (res.ok) serverSealDb = await res.json();
     } catch(e) { alert('Delete failed: ' + e.message); }
   }
