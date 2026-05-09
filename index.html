@@ -2195,25 +2195,32 @@ if ('serviceWorker' in navigator) {
   let serverSealDb = {}; // loaded from KV
 
   async function loadServerSealDb() {
-     const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+    // 1. Get the token from your local storage or define it here
+    const token = localStorage.getItem('fo_admin_token') || 'YOUR_SECRET_TOKEN_HERE'; 
+    
     try {
-      const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
-  headers: {
-    'Authorization': 'Bearer ' + token,
-    'Content-Type': 'application/json',
-    ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {})
-  }
-});
-      if (res.ok) serverSealDb = await res.json();
-    } catch(e) { console.warn('[SealBox] KV DB load failed', e); }
-    // Also load box content overrides
-    try {
-      const res2 = await fetch(WORKER_URL + '/fo-admin/sealboxcontents', {
-        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
-      });
-      if (res2.ok) SEAL_BOX_CONTENTS_OVERRIDE = await res2.json();
-    } catch(e) {}
-  }
+        const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
+            method: 'GET',
+            headers: {
+                // This is the specific part that prevents the 403 error
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.status === 403) {
+            console.error("Access Forbidden: Blah Blah Dev Stuff");
+            return;
+        }
+
+        if (res.ok) {
+            serverSealDb = await res.json();
+            console.log("Seal Database loaded successfully.");
+        }
+    } catch(e) {
+        console.warn('[SealBox] KV DB load failed', e);
+    }
+}
 
   async function initSealBox() {
     if (sbInited) { renderSbSessionsList(); return; }
