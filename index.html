@@ -2101,17 +2101,27 @@ if ('serviceWorker' in navigator) {
   ═══════════════════════════════════════════════════ */
 
   /* ── Static seal contents per box type ── */
-  const SEAL_BOX_CONTENTS = {
-    'AT': ['Guilmon Seal','Devimon Seal','Patamon Seal','Giromon Seal','Tanemon Seal','Mushroomon Seal','Chrysalimon Seal','Garurumon(Black) Seal','Cherrymon Seal','Marine Devimon Seal'],
+  // Overrides loaded from KV (admin-editable). Merged at runtime.
+  let SEAL_BOX_CONTENTS_OVERRIDE = {};
+  const SEAL_BOX_CONTENTS_BUILTIN = {
+    'AT': ['Guilmon Seal','Devimon Seal','Patamon Seal','Giromon Seal','Tanemon Seal','Mushroomon Seal','Chrysalimon Seal','Garurumon(Black) Seal','Cherrymon Seal','Marin Devimon Seal'],
     'Hp': ['V-mon Seal','Soulmon Seal','Xuanwumon Seal','Tsunomon Seal','Keramon Seal','Gazimon Seal','Gardromon Seal','Centalmon Seal','SkullSatamon Seal','DexDoruGreymon Seal','Sinduramon Seal'],
     'DS': ['Diabolomon Seal','Agumon Seal','Coredramon Green Seal','Zhuqiaomon Seal','DemiMeramon Seal','Candlemon Seal','Woodmon Seal','SkullGreymon Seal','Asuramon Seal','WereGarurumon Seal','Toy Agumon Seal'],
     'CT': ['Sharmamon Seal','Koromon Seal','Kunemon Seal','Kyubimon Seal','Togemon Seal','Volcamon Seal','Nanomon Seal','SaberLeomon Seal'],
-    'DE': ['Goblimon Seal','Leomon Seal','Upamon Seal','Renamon Seal','Elecmon Seal','Flymon Seal','Meramon Seal','Meteormon Seal','Chimairamon Seal','WaruMonzemon Seal'],
+    'DE': ['Goblimon Seal','Leomon Seal','Upamon Seal','Renamon Seal','Elecmon Seal','Flymon Seal','Meramon Seal','Meteormon Seal','Chimairamon Seal','Warumonzaemon Seal'],
   };
+  function SEAL_BOX_CONTENTS(key) {
+    return SEAL_BOX_CONTENTS_OVERRIDE[key] || SEAL_BOX_CONTENTS_BUILTIN[key] || [];
+  }
   /* Seals missing from wiki — known market IDs */
   const SEAL_EXTRA_IDS = {
-    'Tsunomon Seal':  'i7l7zdx',
-    'Xuanwumon Seal': 'ifyp16i',
+    'Tsunomon Seal':       'i7l7zdx',
+    'Xuanwumon Seal':      'ifyp16i',
+    'Tanemon Seal':        'ihyzrpg',
+    'Marin Devimon Seal':  'i10bmshs',
+    'Garurumon(Black) Seal':'i8ufbbz', 
+    'Koromon Seal':        'ix3iizt',  
+    'Upamon Seal':         'i1jbjdij',    // replace with real ID
   };
   /* Hardcoded sample DB — HP box (3 live samples) */
   const SEAL_DROP_DB_BUILTIN = {
@@ -2127,6 +2137,9 @@ if ('serviceWorker' in navigator) {
 
   function getSealDropDb() {
     const db = JSON.parse(JSON.stringify(SEAL_DROP_DB_BUILTIN));
+    // Merge server KV samples (shared, authoritative)
+    for (const [k,v] of Object.entries(serverSealDb)) { if (!db[k]) db[k]=[]; db[k].push(...v); }
+    // Merge local user samples (legacy / offline fallback)
     try {
       const user = JSON.parse(localStorage.getItem(SB_USER_DB_KEY)||'{}');
       for (const [k,v] of Object.entries(user)) { if (!db[k]) db[k]=[]; db[k].push(...v); }
@@ -2179,10 +2192,28 @@ if ('serviceWorker' in navigator) {
   loadSbSessions();
 
   let sbInited = false;
+  let serverSealDb = {}; // loaded from KV
+
+  async function loadServerSealDb() {
+    try {
+      const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
+        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
+      });
+      if (res.ok) serverSealDb = await res.json();
+    } catch(e) { console.warn('[SealBox] KV DB load failed', e); }
+    // Also load box content overrides
+    try {
+      const res2 = await fetch(WORKER_URL + '/fo-admin/sealboxcontents', {
+        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
+      });
+      if (res2.ok) SEAL_BOX_CONTENTS_OVERRIDE = await res2.json();
+    } catch(e) {}
+  }
 
   async function initSealBox() {
     if (sbInited) { renderSbSessionsList(); return; }
     sbInited = true;
+    await loadServerSealDb();
     const cached = cacheGet('sb_seals', 6 * 3600000);
     if (cached) { sbSealItems = cached.seals||[]; sbBoxItems = cached.boxes||[]; }
     else await fetchSbItems();
@@ -2263,7 +2294,7 @@ if ('serviceWorker' in navigator) {
         simPanel.style.display = 'block';
         $('sb-simulate-result').textContent = 'Fetching seal prices for simulation…';
         // Fetch prices for known seals we don't have yet
-        const sealList = SEAL_BOX_CONTENTS[boxKey] || [];
+        const sealList = SEAL_BOX_CONTENTS(boxKey) || [];
         for (const sealName of sealList) {
           const item = sbSealItems.find(s => s.name === sealName);
           const sealId = item?.id || SEAL_EXTRA_IDS[sealName] || null;
@@ -2296,7 +2327,9 @@ if ('serviceWorker' in navigator) {
         if (boxNet != null) {
           simHtml += `<br><span style="color:${boxNet>0?'var(--green)':'var(--amber)'}">vs selling box (${fmtRaw(boxPrice)}): ${boxNet>0?'+'+fmtRaw(Math.round(boxNet)):fmtRaw(Math.round(boxNet))} scanning advantage</span>`;
         }
-        if (parts.length) simHtml += `<div style="margin-top:6px;font-size:9px;color:var(--dim3);line-height:1.8">${parts.join(' &nbsp;·&nbsp; ')}</div>`;
+        if (parts.length) simHtml += `<div style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:5px">${
+          parts.map(p => `<div style="background:var(--bg3);border:1px solid var(--border2);padding:5px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;line-height:1.5">${p}</div>`).join('')
+        }</div>`;
         else simHtml += '<br><span style="color:var(--dim3);font-size:10px">No seal prices available yet — run main analysis first.</span>';
         $('sb-simulate-result').innerHTML = simHtml;
       } else {
@@ -2313,11 +2346,12 @@ if ('serviceWorker' in navigator) {
     con.innerHTML = '';
     const sel = $('sb-box-select');
     const boxKey = sel?.value ? sbBoxKeyMap[sel.value] : null;
-    const sealList = boxKey ? SEAL_BOX_CONTENTS[boxKey] : null;
+    const sealList = boxKey ? SEAL_BOX_CONTENTS(boxKey) : null;
     if (sealList) {
       // Sync sbEntries with known seal list
       const firstSeal = sbEntries[0]?.sealName;
       if (!sbEntries.length || firstSeal !== sealList[0]) {
+        // sealList already from SEAL_BOX_CONTENTS(boxKey) above
         sbEntries = sealList.map(name => {
           const item = sbSealItems.find(s => s.name === name);
           const id   = item?.id || SEAL_EXTRA_IDS[name] || '';
@@ -2344,6 +2378,14 @@ if ('serviceWorker' in navigator) {
           hint.style.cssText = 'font-size:9px;color:var(--dim3);font-family:\'JetBrains Mono\',monospace;white-space:nowrap';
           hint.textContent = '~' + (dbRates[entry.sealName]*100).toFixed(1)+'%';
           nameDiv.appendChild(hint);
+        }
+        // Show price if available
+        const sealPriceVal = entry.sealId ? (sbSealPrices[entry.sealId] ?? null) : null;
+        if (sealPriceVal != null) {
+          const priceHint = document.createElement('span');
+          priceHint.style.cssText = 'font-size:9px;color:var(--yellow);font-family:\'JetBrains Mono\',monospace;white-space:nowrap';
+          priceHint.innerHTML = fmtRaw(sealPriceVal);
+          nameDiv.appendChild(priceHint);
         }
         const qtyInp = document.createElement('input');
         qtyInp.type='number'; qtyInp.min='0'; qtyInp.placeholder='0';
@@ -2438,7 +2480,9 @@ if ('serviceWorker' in navigator) {
         <div class="sb-session-info"><div class="sb-session-name">${s.name}</div><div style="font-size:10px;color:var(--dim3)">${s.boxName} · ${boxes} boxes · ${s.entries.length} seal types</div></div>`;
       const rmBtn=document.createElement('button'); rmBtn.className='sb-session-rm'; rmBtn.textContent='✕';
       rmBtn.addEventListener('click', e=>{
-        e.stopPropagation(); sbSessions=sbSessions.filter(x=>x.id!==s.id); saveSbSessions();
+        e.stopPropagation();
+        if (!confirm(`Delete session "${s.name}"? Cannot undo.`)) return;
+        sbSessions=sbSessions.filter(x=>x.id!==s.id); saveSbSessions();
         if (sbCurrentSession?.id===s.id){sbCurrentSession=null;$('sb-analysis').style.display='none';$('sb-analysis-empty').style.display='block';}
         renderSbSessionsList();
       });
@@ -2502,19 +2546,46 @@ if ('serviceWorker' in navigator) {
     const totalBoxes=session.totalBoxes||Math.floor(totalQty/5);
     const boxSellValue=boxPrice!=null?totalBoxes*boxPrice:null;
     const verdictEl=$('sb-verdict'), noteEl=$('sb-price-note');
+    const dbRatesVerdict = session.boxKey ? computeDbRates(session.boxKey) : {};
+    const sealList4V = session.boxKey ? SEAL_BOX_CONTENTS(session.boxKey) : [];
+    // Build per-seal breakdown for verdict
+    const verdictLines = session.entries.map(e => {
+      const qty = e.qty||e.scans*5||0;
+      const rate = dbRatesVerdict[e.sealName];
+      const expQty = rate != null ? Math.round(rate * 5 * (session.totalBoxes||Math.floor(totalQty/5))) : null;
+      const price = sbSealPrices[e.sealId] ?? null;
+      const val = price != null ? qty * price : null;
+      return { name: e.sealName, qty, expQty, price, val };
+    }).filter(x => x.val != null);
+
+    const verdictBreakdown = verdictLines.length
+      ? `<div style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px">${
+          verdictLines.map(x=>`<div style="background:var(--bg3);border:1px solid var(--border2);padding:5px 8px;font-size:10px">
+            <span style="color:var(--blue)">${x.name}</span><br>
+            <span style="color:var(--dim3)">Got ${x.qty}${x.expQty!=null?' · Exp ~'+x.expQty:''}</span><br>
+            <span style="color:var(--yellow)">${fmtRaw(x.val)}</span>
+          </div>`).join('')
+        }</div>` : '';
+
     if (!allPriced) {
       verdictEl.className='sb-verdict neutral';
-      verdictEl.textContent='⚠ Some seals no listing — partial calc.';
+      verdictEl.innerHTML=`⚠ Some seals missing price — partial calc${verdictBreakdown}`;
     } else if (boxSellValue==null) {
       verdictEl.className='sb-verdict neutral';
-      verdictEl.innerHTML=`Seal value: <strong>${fmtRaw(totalSealValue)}</strong> · Box price unknown`;
+      verdictEl.innerHTML=`Seal total: <strong>${fmtRaw(totalSealValue)}</strong> · Box price unknown${verdictBreakdown}`;
       noteEl.textContent=`Scan cost: ${fmtRaw(totalCost)} · Net: ${fmtRaw(totalSealValue-totalCost)}`;
     } else {
       const scanNet=totalSealValue-totalCost, diff=scanNet-boxSellValue;
-      if (diff>0){verdictEl.className='sb-verdict profit';verdictEl.innerHTML=`✓ Scanning better by ${fmtRaw(diff)} · Seals: ${fmtRaw(totalSealValue)} vs Sell boxes: ${fmtRaw(boxSellValue)}`;}
-      else if (diff<0){verdictEl.className='sb-verdict loss';verdictEl.innerHTML=`✗ Selling boxes better by ${fmtRaw(-diff)} · Seals: ${fmtRaw(totalSealValue)} vs Sell boxes: ${fmtRaw(boxSellValue)}`;}
-      else{verdictEl.className='sb-verdict neutral';verdictEl.textContent='Break even.';}
-      noteEl.textContent=`Scan fee: ${fmtRaw(totalCost)} · Box price: ${fmtRaw(boxPrice)} each`;
+      const recTxt = diff>0
+        ? `✓ SCAN boxes — gain ${fmtRaw(diff)} vs selling`
+        : diff<0
+        ? `✗ SELL boxes — gain ${fmtRaw(-diff)} vs scanning`
+        : 'Break even — either works';
+      verdictEl.className='sb-verdict '+(diff>0?'profit':diff<0?'loss':'neutral');
+      verdictEl.innerHTML=`<div style="font-size:13px;font-weight:700;margin-bottom:6px">${recTxt}</div>
+        <div style="font-size:11px">Seal value: ${fmtRaw(totalSealValue)} · Scan cost: ${fmtRaw(totalCost)} · Net: ${fmtRaw(scanNet)}<br>
+        Sell boxes at ${fmtRaw(boxPrice)} each = ${fmtRaw(boxSellValue)}</div>${verdictBreakdown}`;
+      noteEl.textContent='';
     }
   }
 
@@ -2646,63 +2717,257 @@ if ('serviceWorker' in navigator) {
     $('adm-last-refresh').textContent = 'refreshed ' + fmtAgo(now);
   }
 
-  /* ── Admin seal DB ── */
+  /* ── Admin seal DB (v2) ── */
   function initAdminSealDb() {
     const section = $('adm-sealdb-section'); if (!section) return;
     section.style.display = 'block';
-    renderAdminSealDbSummary();
-    $('adm-db-boxkey').addEventListener('change', renderAdminSealDbInputs);
-    $('adm-db-add-btn').addEventListener('click', submitAdminSealSample);
-    $('adm-db-clear-btn').addEventListener('click', ()=>{
-      if (!confirm('Clear all user-added seal DB samples?')) return;
-      localStorage.removeItem(SB_USER_DB_KEY);
-      renderAdminSealDbSummary(); renderAdminSealDbInputs();
-    });
-    renderAdminSealDbInputs();
+    renderAdminSealDbFull();
   }
-  function renderAdminSealDbInputs() {
-    const boxKey = $('adm-db-boxkey')?.value || 'Hp';
-    const sealList = SEAL_BOX_CONTENTS[boxKey] || [];
-    const con = $('adm-db-seal-inputs'); if (!con) return;
+
+  async function adminSealDbPush(boxKey, boxes, data) {
+    const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+    try {
+      await fetch(WORKER_URL + '/fo-admin/sealdb', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boxKey, boxes, data })
+      });
+      // Reload server DB
+      const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
+        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
+      });
+      if (res.ok) serverSealDb = await res.json();
+    } catch(e) { alert('Failed to save to server: ' + e.message); }
+  }
+
+  async function adminSealDbDelete(boxKey, ts) {
+    const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+    try {
+      await fetch(WORKER_URL + '/fo-admin/sealdb', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boxKey, ts })
+      });
+      const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
+        headers: { 'Content-Type': 'application/json', ...(cfg.cookie ? { 'X-Game-Cookie': cfg.cookie } : {}) }
+      });
+      if (res.ok) serverSealDb = await res.json();
+    } catch(e) { alert('Delete failed: ' + e.message); }
+  }
+
+  async function adminBoxContentsSave(boxKey, seals) {
+    const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+    try {
+      await fetch(WORKER_URL + '/fo-admin/sealboxcontents', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boxKey, seals })
+      });
+      SEAL_BOX_CONTENTS_OVERRIDE[boxKey] = seals;
+    } catch(e) { alert('Save failed: ' + e.message); }
+  }
+
+  function renderAdminSealDbFull() {
+    const section = $('adm-sealdb-section'); if (!section) return;
+    const body = section.querySelector('.adm-section-body'); if (!body) return;
+    body.innerHTML = '';
+
+    // ── ADD SAMPLE FORM ──
+    const allBoxKeys = [...new Set([...Object.keys(SEAL_BOX_CONTENTS_BUILTIN), ...Object.keys(SEAL_BOX_CONTENTS_OVERRIDE)])];
+    const formHtml = `
+      <div style="background:var(--bg3);border:1px solid var(--border);padding:14px;margin-bottom:16px">
+        <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--amber);letter-spacing:.12em;margin-bottom:10px">// ADD SAMPLE</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+          <select class="adm-inp" id="adm-db-boxkey2" style="flex:0 0 140px">
+            ${allBoxKeys.map(k=>`<option value="${k}">${k}</option>`).join('')}
+          </select>
+          <input class="adm-inp" id="adm-db-boxes2" type="number" min="1" placeholder="# boxes scanned" style="flex:0 0 160px">
+          <button class="btn amber" id="adm-db-add-btn2">+ Add Sample</button>
+        </div>
+        <div id="adm-db-seal-inputs2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-bottom:10px"></div>
+        <div id="adm-db-validation" style="font-size:11px;min-height:16px"></div>
+      </div>`;
+    body.insertAdjacentHTML('beforeend', formHtml);
+    $('adm-db-boxkey2').addEventListener('change', renderAdminSealInputs2);
+    $('adm-db-add-btn2').addEventListener('click', submitAdminSealSample2);
+    $('adm-db-boxes2').addEventListener('input', validateAdminSealInputs);
+    renderAdminSealInputs2();
+
+    // ── EXISTING SERVER SAMPLES ──
+    const samplesDiv = document.createElement('div');
+    samplesDiv.id = 'adm-db-samples-list';
+    body.appendChild(samplesDiv);
+    renderAdminSamplesList(samplesDiv);
+
+    // ── EDIT BOX CONTENTS ──
+    const contentsDiv = document.createElement('div');
+    contentsDiv.style.cssText = 'margin-top:18px;background:var(--bg3);border:1px solid var(--border);padding:14px';
+    contentsDiv.innerHTML = `
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--purple);letter-spacing:.12em;margin-bottom:10px">// EDIT BOX SEAL LIST</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
+        <select class="adm-inp" id="adm-contents-boxkey" style="flex:0 0 140px">
+          ${allBoxKeys.map(k=>`<option value="${k}">${k}</option>`).join('')}
+        </select>
+        <button class="btn purple" id="adm-contents-load">Load</button>
+        <button class="btn green" id="adm-contents-save">Save to Server</button>
+        <button class="btn muted" id="adm-contents-reset">Reset to Builtin</button>
+      </div>
+      <textarea id="adm-contents-ta" style="width:100%;min-height:100px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px;outline:none;resize:vertical" placeholder="One seal name per line"></textarea>
+      <div style="font-size:10px;color:var(--dim3);margin-top:4px">One seal name per line. Saved to server and shared across all users.</div>`;
+    body.appendChild(contentsDiv);
+    $('adm-contents-load').addEventListener('click', () => {
+      const k = $('adm-contents-boxkey').value;
+      $('adm-contents-ta').value = SEAL_BOX_CONTENTS(k).join('\n');
+    });
+    $('adm-contents-save').addEventListener('click', async () => {
+      const k = $('adm-contents-boxkey').value;
+      const seals = $('adm-contents-ta').value.split('\n').map(s=>s.trim()).filter(Boolean);
+      await adminBoxContentsSave(k, seals);
+      alert(`✓ ${k} seal list saved (${seals.length} seals).`);
+    });
+    $('adm-contents-reset').addEventListener('click', () => {
+      const k = $('adm-contents-boxkey').value;
+      $('adm-contents-ta').value = (SEAL_BOX_CONTENTS_BUILTIN[k]||[]).join('\n');
+    });
+
+    // ── EDIT/DELETE SESSIONS ──
+    const sessDiv = document.createElement('div');
+    sessDiv.style.cssText = 'margin-top:18px';
+    sessDiv.innerHTML = `<div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--cyan);letter-spacing:.12em;margin-bottom:10px">// SAVED SESSIONS (EDIT/DELETE)</div>`;
+    if (!sbSessions.length) {
+      sessDiv.insertAdjacentHTML('beforeend', '<div style="color:var(--dim3);font-size:11px">No sessions.</div>');
+    } else {
+      sbSessions.forEach((s, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'background:var(--bg2);border:1px solid var(--border);padding:10px 12px;margin-bottom:8px';
+        const totalQty = s.entries.reduce((sum,e)=>sum+(e.qty||0),0);
+        row.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="flex:1;font-size:12px;font-weight:600;color:var(--blue)">${s.name}</div>
+            <div style="font-size:10px;color:var(--dim3)">${s.boxName} · ${s.totalBoxes||Math.floor(totalQty/5)} boxes</div>
+            <button class="btn red" style="font-size:8px;padding:3px 8px" data-sess-del="${idx}">✕ Delete</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px;margin-bottom:8px">
+            ${s.entries.map((e,ei)=>`
+              <div style="display:flex;align-items:center;gap:4px;background:var(--bg3);padding:4px 8px;border:1px solid var(--border2)">
+                <span style="flex:1;font-size:10px;color:var(--text)">${e.sealName}</span>
+                <input type="number" min="0" value="${e.qty||0}" style="width:55px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:10px;padding:2px 5px;font-family:'JetBrains Mono',monospace;text-align:right" data-sess="${idx}" data-ei="${ei}">
+              </div>`).join('')}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" value="${s.totalBoxes||''}" placeholder="Total boxes" style="width:120px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 8px" data-sess-boxes="${idx}">
+            <button class="btn green" style="font-size:8px;padding:4px 10px" data-sess-save="${idx}">💾 Save Changes</button>
+          </div>`;
+        sessDiv.appendChild(row);
+      });
+    }
+    body.appendChild(sessDiv);
+
+    // Wire session edit/delete
+    body.querySelectorAll('[data-sess-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.sessDel);
+        if (!confirm(`Delete session "${sbSessions[idx].name}"?`)) return;
+        sbSessions.splice(idx, 1); saveSbSessions(); renderAdminSealDbFull(); renderSbSessionsList();
+      });
+    });
+    body.querySelectorAll('[data-sess-save]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.sessSave);
+        const s = sbSessions[idx];
+        const boxesInp = body.querySelector(`[data-sess-boxes="${idx}"]`);
+        if (boxesInp) s.totalBoxes = parseInt(boxesInp.value)||null;
+        body.querySelectorAll(`input[data-sess="${idx}"]`).forEach(inp => {
+          const ei = parseInt(inp.dataset.ei);
+          s.entries[ei].qty = parseInt(inp.value)||0;
+          s.entries[ei].scans = Math.floor(s.entries[ei].qty/5);
+        });
+        saveSbSessions(); alert(`✓ Session "${s.name}" updated.`);
+        if (sbCurrentSession?.id === s.id) viewSbSession(s);
+      });
+    });
+  }
+
+  function renderAdminSealInputs2() {
+    const boxKey = $('adm-db-boxkey2')?.value || 'Hp';
+    const sealList = SEAL_BOX_CONTENTS(boxKey);
+    const con = $('adm-db-seal-inputs2'); if (!con) return;
     con.innerHTML = '';
     sealList.forEach(name => {
       const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex;align-items:center;gap:6px';
+      wrap.style.cssText = 'display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border2);padding:6px 10px';
       const lbl = document.createElement('label');
       lbl.style.cssText = 'flex:1;font-size:11px;color:var(--text)'; lbl.textContent = name;
       const inp = document.createElement('input');
-      inp.className='adm-inp'; inp.type='number'; inp.min='0'; inp.placeholder='0';
-      inp.style.cssText='flex:0 0 80px;padding:4px 8px;font-size:11px';
+      inp.type='number'; inp.min='0'; inp.placeholder='qty received';
+      inp.style.cssText='width:90px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'JetBrains Mono\',monospace;font-size:11px;padding:4px 7px;text-align:right';
       inp.dataset.sealName = name;
+      inp.addEventListener('input', validateAdminSealInputs);
       wrap.appendChild(lbl); wrap.appendChild(inp); con.appendChild(wrap);
     });
   }
-  function submitAdminSealSample() {
-    const boxKey = $('adm-db-boxkey')?.value;
-    const boxes  = parseInt($('adm-db-boxes')?.value)||0;
+
+  function validateAdminSealInputs() {
+    const boxes = parseInt($('adm-db-boxes2')?.value)||0;
+    const inputs = $('adm-db-seal-inputs2')?.querySelectorAll('input[data-seal-name]')||[];
+    const sum = [...inputs].reduce((s,i)=>s+(parseInt(i.value)||0),0);
+    const vEl = $('adm-db-validation'); if (!vEl) return;
+    if (!boxes||!sum) { vEl.textContent=''; return; }
+    const exp = boxes*5;
+    if (sum===exp) { vEl.style.color='var(--green)'; vEl.textContent=`✓ ${sum} = ${boxes}×5`; }
+    else { vEl.style.color='var(--amber)'; vEl.textContent=`⚠ Sum ${sum} ≠ ${boxes}×5=${exp} (diff: ${sum-exp>0?'+':''}${sum-exp})`; }
+  }
+
+  async function submitAdminSealSample2() {
+    const boxKey = $('adm-db-boxkey2')?.value;
+    const boxes  = parseInt($('adm-db-boxes2')?.value)||0;
     if (!boxKey||boxes<=0){alert('Select box type and enter # boxes scanned.');return;}
-    const inputs = $('adm-db-seal-inputs')?.querySelectorAll('input[data-seal-name]')||[];
+    const inputs = $('adm-db-seal-inputs2')?.querySelectorAll('input[data-seal-name]')||[];
     const data={};
     for (const inp of inputs){const v=parseInt(inp.value)||0;if(v>0)data[inp.dataset.sealName]=v;}
     if (!Object.keys(data).length){alert('Enter at least one seal qty.');return;}
     const sumQty=Object.values(data).reduce((s,v)=>s+v,0);
     const expected=boxes*5;
     if (sumQty!==expected&&!confirm(`⚠ Sum ${sumQty} ≠ ${boxes}×5=${expected}. Add anyway?`)) return;
-    addSealDbSample(boxKey,boxes,data);
-    $('adm-db-boxes').value='';
-    $('adm-db-seal-inputs')?.querySelectorAll('input').forEach(i=>i.value='');
-    renderAdminSealDbSummary();
-    alert(`✓ Sample added (${boxes} boxes, ${Object.keys(data).length} seal types).`);
+    await adminSealDbPush(boxKey, boxes, data);
+    $('adm-db-boxes2').value='';
+    $('adm-db-seal-inputs2')?.querySelectorAll('input').forEach(i=>i.value='');
+    $('adm-db-validation').textContent='';
+    renderAdminSealDbFull();
+    alert(`✓ Sample saved to server (${boxes} boxes).`);
   }
-  function renderAdminSealDbSummary() {
-    const con=$('adm-db-summary'); if (!con) return;
-    const db=getSealDropDb(); const lines=[];
-    for (const [key,samples] of Object.entries(db)){
-      const totalBoxes=samples.reduce((s,x)=>s+x.boxes,0);
-      const userSamples=(JSON.parse(localStorage.getItem(SB_USER_DB_KEY)||'{}')||{})[key]?.length||0;
-      lines.push(`<strong style="color:var(--amber)">${key}</strong>: ${samples.length} samples (${userSamples} user-added) · ${totalBoxes.toLocaleString()} total boxes`);
-    }
-    con.innerHTML = lines.length ? lines.join('<br>') : '<span style="color:var(--dim3)">No DB data yet.</span>';
+
+  function renderAdminSamplesList(con) {
+    con.innerHTML = `<div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--amber);letter-spacing:.12em;margin-bottom:8px">// SERVER SAMPLES</div>`;
+    const db = getSealDropDb();
+    const allKeys = [...new Set([...Object.keys(SEAL_DROP_DB_BUILTIN), ...Object.keys(serverSealDb)])];
+    if (!allKeys.length) { con.insertAdjacentHTML('beforeend','<div style="color:var(--dim3);font-size:11px">No samples.</div>'); return; }
+    allKeys.forEach(key => {
+      const samples = db[key] || [];
+      const totalBoxes = samples.reduce((s,x)=>s+x.boxes,0);
+      const serverSamples = serverSealDb[key] || [];
+      const builtinCount = (SEAL_DROP_DB_BUILTIN[key]||[]).length;
+      const block = document.createElement('div');
+      block.style.cssText = 'margin-bottom:12px';
+      block.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:6px">${key} — ${samples.length} samples (${builtinCount} builtin + ${serverSamples.length} server) · ${totalBoxes.toLocaleString()} boxes total</div>`;
+      serverSamples.forEach(s => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);padding:6px 10px;margin-bottom:4px;font-size:11px';
+        const date = new Date(s.ts).toLocaleString('en-GB');
+        const sealsCount = Object.keys(s.data).length;
+        row.innerHTML = `<span style="color:var(--dim3);font-family:'JetBrains Mono',monospace;font-size:10px">${date}</span>
+          <span style="flex:1;color:var(--text)">${s.boxes} boxes · ${sealsCount} seal types</span>
+          <button class="btn red" style="font-size:8px;padding:3px 8px">✕</button>`;
+        row.querySelector('button').addEventListener('click', async () => {
+          if (!confirm(`Delete this sample (${s.boxes} boxes, ${date})?`)) return;
+          await adminSealDbDelete(key, s.ts);
+          renderAdminSamplesList(con);
+        });
+        block.appendChild(row);
+      });
+      if (!serverSamples.length) block.insertAdjacentHTML('beforeend','<div style="font-size:10px;color:var(--dim3);padding:4px 0">No server samples yet — only builtin data.</div>');
+      con.appendChild(block);
+    });
   }
 
   /* ── Auto-run on warm cache ── */
