@@ -663,10 +663,6 @@
 
     <!-- ══ SEAL BOX VIEW ══ -->
     <div id="sealbox-view">
-      <div class="sb-hint">
-        📦 Track seal box scanning sessions. <strong>1 scan = 5 of one specific seal.</strong> Enter how many scans you did per seal type.
-        Cost per scan = 100[B] (the scan fee). Compares scanning profit vs just selling the boxes.
-      </div>
       <div class="sb-layout">
         <!-- LEFT: Input panel -->
         <div>
@@ -683,19 +679,28 @@
               </div>
               <div id="sb-box-preview" style="display:none" class="sb-box-header">
                 <img class="sb-box-icon" id="sb-box-icon-img" src="" alt="">
-                <div>
+                <div style="flex:1">
                   <div class="sb-box-name" id="sb-box-icon-name"></div>
-                  <div class="sb-box-meta">100[B] per scan · 5 seals per scan</div>
+                  <div class="sb-box-meta" id="sb-box-meta">100[B] per scan · 5 seals per scan</div>
                 </div>
+                <div id="sb-box-price-badge" style="font-family:'Orbitron',sans-serif;font-size:13px;color:var(--yellow);text-align:right"></div>
+              </div>
+              <div id="sb-simulate-panel" style="display:none;margin-bottom:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--amber)">
+                <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--amber);letter-spacing:.12em;margin-bottom:6px">// EXPECTED EV / BOX (from DB rates)</div>
+                <div id="sb-simulate-result" style="font-size:11px;color:var(--dim)">Calculating…</div>
               </div>
               <div class="sb-field">
                 <label class="sb-label">Session Name (optional)</label>
                 <input class="sb-inp" id="sb-session-name" placeholder="e.g. Day 1 grind">
               </div>
               <div class="sb-field">
-                <label class="sb-label">Seals Obtained (scans × seal type)</label>
+                <label class="sb-label">Total Boxes Scanned</label>
+                <input class="sb-inp" id="sb-total-boxes" type="number" min="1" placeholder="e.g. 549">
+                <div id="sb-validation-msg" style="font-size:10px;margin-top:4px;min-height:14px"></div>
+              </div>
+              <div class="sb-field">
+                <label class="sb-label">Seals Received <span style="font-weight:400;font-size:9px;color:var(--dim3)">(qty you GOT — app auto-computes scans ÷5)</span></label>
                 <div id="sb-seal-entries"></div>
-                <button class="sb-add-seal-btn" id="sb-add-seal-btn">+ Add Seal Type</button>
               </div>
               <div style="display:flex;gap:8px;">
                 <button class="btn amber" id="sb-save-btn" style="flex:1">💾 Save Session</button>
@@ -703,8 +708,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Saved sessions list -->
           <div style="margin-top:16px;">
             <div class="sb-sessions-title">// SAVED SESSIONS</div>
             <div id="sb-sessions-list"></div>
@@ -714,7 +717,7 @@
         <!-- RIGHT: Analysis panel -->
         <div>
           <div id="sb-analysis-empty" class="sb-no-data">
-            Select a box type and add seal data on the left, then save or select a session to see analysis.
+            Select a box type and fill data on the left, then save or select a session.
           </div>
           <div id="sb-analysis" style="display:none">
             <div class="sb-summary">
@@ -727,9 +730,10 @@
               <table class="sb-tbl">
                 <thead><tr>
                   <th>Seal</th>
-                  <th>Scans</th>
-                  <th>Total Seals (×5)</th>
-                  <th>Drop Rate</th>
+                  <th>Got</th>
+                  <th>Scans (÷5)</th>
+                  <th>Actual %</th>
+                  <th>DB %</th>
                   <th>Market Price</th>
                   <th>Total Value</th>
                 </tr></thead>
@@ -783,6 +787,29 @@
         <div class="adm-section-head"><div class="adm-section-title">// DANGER ZONE</div></div>
         <div class="adm-section-body" style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn red" id="adm-clear-usage">✕ Clear All Usage Data</button>
+        </div>
+      </div>
+      <div class="adm-section" id="adm-sealdb-section" style="display:none;border-left-color:var(--amber)">
+        <div class="adm-section-head" style="background:rgba(255,179,71,.05)">
+          <div class="adm-section-title" style="color:var(--amber)">// SEAL DROP DATABASE</div>
+          <div style="font-size:10px;color:var(--dim3);margin-left:auto">add sample data to improve drop rate accuracy</div>
+        </div>
+        <div class="adm-section-body">
+          <div class="adm-hint" style="margin-bottom:12px">Add real scan samples. Merges with builtin data to compute weighted drop rates.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <select class="adm-inp" id="adm-db-boxkey" style="flex:0 0 160px">
+              <option value="Hp">HP Box</option>
+              <option value="AT">AT Box</option>
+              <option value="DS">DS Box</option>
+              <option value="CT">CT Box</option>
+              <option value="DE">DE Box</option>
+            </select>
+            <input class="adm-inp" id="adm-db-boxes" type="number" min="1" placeholder="# boxes scanned" style="flex:0 0 150px">
+            <button class="btn amber" id="adm-db-add-btn">+ Add Sample</button>
+            <button class="btn red" id="adm-db-clear-btn" style="margin-left:auto">✕ Clear User Samples</button>
+          </div>
+          <div id="adm-db-seal-inputs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-bottom:12px"></div>
+          <div id="adm-db-summary" style="font-size:11px;color:var(--dim)"></div>
         </div>
       </div>
     </div>
@@ -963,6 +990,7 @@ if ('serviceWorker' in navigator) {
       switchView('admin');
     });
     mainTabs.appendChild(tab);
+    initAdminSealDb(); // reveal seal DB panel in admin view
   }
 
   /* ══ SETTINGS ══ */
@@ -1832,6 +1860,13 @@ if ('serviceWorker' in navigator) {
       const timeStr   = fmtTime(row.clearMs);
       const srcBadge  = makeTimeSrcBadge(row.timeSource);
       const tr = document.createElement('tr');
+      if (row.dungImage) {
+        const imgUrl = dungeonThumbUrl(row.dungImage);
+        tr.style.backgroundImage = `linear-gradient(rgba(4,8,15,0.87),rgba(4,8,15,0.87)),url(${imgUrl})`;
+        tr.style.backgroundSize = 'auto 85%';
+        tr.style.backgroundPosition = 'right 18px center';
+        tr.style.backgroundRepeat = 'no-repeat';
+      }
       const tdR = document.createElement('td'); tdR.className='fo-rank '+rankClass; tdR.textContent=i+1; tr.appendChild(tdR);
 
       // Dungeon name cell with thumbnail
@@ -2060,22 +2095,80 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ══════════════════════════════════════════════════
-     SEAL BOX TRACKER
-     Logic: 1 scan = 5 of ONE specific seal type.
-     Track scans per seal type.
-     Odds = (scans for seal X) / (total scans).
-     Cost = total scans × 100[B] scan fee.
+     SEAL BOX TRACKER v2
+     User enters seals RECEIVED. scans = qty / 5.
+     Validation: sum(qty) === totalBoxes * 5.
   ═══════════════════════════════════════════════════ */
+
+  /* ── Static seal contents per box type ── */
+  const SEAL_BOX_CONTENTS = {
+    'AT': ['Guilmon Seal','Devimon Seal','Patamon Seal','Giromon Seal','Tanemon Seal','Mushroomon Seal','Chrysalimon Seal','Garurumon(Black) Seal','Cherrymon Seal','Marine Devimon Seal'],
+    'Hp': ['V-mon Seal','Soulmon Seal','Xuanwumon Seal','Tsunomon Seal','Keramon Seal','Gazimon Seal','Gardromon Seal','Centalmon Seal','SkullSatamon Seal','DexDoruGreymon Seal','Sinduramon Seal'],
+    'DS': ['Diabolomon Seal','Agumon Seal','Coredramon Green Seal','Zhuqiaomon Seal','DemiMeramon Seal','Candlemon Seal','Woodmon Seal','SkullGreymon Seal','Asuramon Seal','WereGarurumon Seal','Toy Agumon Seal'],
+    'CT': ['Sharmamon Seal','Koromon Seal','Kunemon Seal','Kyubimon Seal','Togemon Seal','Volcamon Seal','Nanomon Seal','SaberLeomon Seal'],
+    'DE': ['Goblimon Seal','Leomon Seal','Upamon Seal','Renamon Seal','Elecmon Seal','Flymon Seal','Meramon Seal','Meteormon Seal','Chimairamon Seal','WaruMonzemon Seal'],
+  };
+  /* Seals missing from wiki — known market IDs */
+  const SEAL_EXTRA_IDS = {
+    'Tsunomon Seal':  'i7l7zdx',
+    'Xuanwumon Seal': 'ifyp16i',
+  };
+  /* Hardcoded sample DB — HP box (3 live samples) */
+  const SEAL_DROP_DB_BUILTIN = {
+    'Hp': [
+      { boxes:558, data:{'V-mon Seal':375,'Soulmon Seal':335,'Xuanwumon Seal':315,'Tsunomon Seal':260,'Keramon Seal':295,'Gazimon Seal':270,'Gardromon Seal':160,'Centalmon Seal':205,'SkullSatamon Seal':205,'DexDoruGreymon Seal':135,'Sinduramon Seal':215} },
+      { boxes:618, data:{'V-mon Seal':470,'Soulmon Seal':430,'Xuanwumon Seal':425,'Tsunomon Seal':330,'Keramon Seal':255,'Gazimon Seal':290,'Gardromon Seal':215,'Centalmon Seal':190,'SkullSatamon Seal':230,'DexDoruGreymon Seal':155,'Sinduramon Seal':100} },
+      { boxes:549, data:{'V-mon Seal':365,'Soulmon Seal':385,'Xuanwumon Seal':355,'Tsunomon Seal':295,'Keramon Seal':270,'Gazimon Seal':230,'Gardromon Seal':215,'Centalmon Seal':170,'SkullSatamon Seal':150,'DexDoruGreymon Seal':170,'Sinduramon Seal':140} },
+    ]
+  };
+  const SB_USER_DB_KEY  = 'fo_v49_sb_userdb';
   const SB_SESSIONS_KEY = 'fo_v49_sb_sessions';
-  const SB_SEALS_KEY    = 'fo_v49_sb_seals';   // cached seal item list
-  const SCAN_FEE_B = 100; // 100[B] per scan
+  const SCAN_FEE_B = 100;
+
+  function getSealDropDb() {
+    const db = JSON.parse(JSON.stringify(SEAL_DROP_DB_BUILTIN));
+    try {
+      const user = JSON.parse(localStorage.getItem(SB_USER_DB_KEY)||'{}');
+      for (const [k,v] of Object.entries(user)) { if (!db[k]) db[k]=[]; db[k].push(...v); }
+    } catch(e) {}
+    return db;
+  }
+  function addSealDbSample(boxKey, boxes, data) {
+    try {
+      const user = JSON.parse(localStorage.getItem(SB_USER_DB_KEY)||'{}');
+      if (!user[boxKey]) user[boxKey]=[];
+      user[boxKey].push({ boxes, data, ts:Date.now() });
+      localStorage.setItem(SB_USER_DB_KEY, JSON.stringify(user));
+    } catch(e) {}
+  }
+  function computeDbRates(boxKey) {
+    // returns { sealName: rate 0-1 }
+    const db = getSealDropDb(); const samples = db[boxKey];
+    if (!samples?.length) return {};
+    const totalBoxes = samples.reduce((s,x)=>s+x.boxes,0);
+    const totals = {};
+    for (const s of samples) for (const [n,q] of Object.entries(s.data)) totals[n]=(totals[n]||0)+q;
+    const rates = {};
+    for (const [n,q] of Object.entries(totals)) rates[n] = q / (totalBoxes * 5);
+    return rates;
+  }
+  function getBoxKey(name) {
+    const n = name.toLowerCase();
+    if (n.includes('maxhp')||n.includes('max hp')||n.includes('[hp]')) return 'Hp';
+    if (/\[at\]|\bat\b/.test(n)) return 'AT';
+    if (/\[ds\]|\bds\b/.test(n)) return 'DS';
+    if (/\[ct\]|\bct\b/.test(n)) return 'CT';
+    if (/\[de\]|\bde\b/.test(n)) return 'DE';
+    return null;
+  }
 
   let sbSessions = [];
-  let sbSealItems = []; // { id, name, icon_id }
-  let sbBoxItems  = []; // seal box items from wiki
-  let sbCurrentSession = null; // session being viewed/edited
-  let sbSealPrices = {}; // itemId -> price (fetched lazily)
+  let sbSealItems = [];
+  let sbBoxItems  = [];
+  let sbCurrentSession = null;
+  let sbSealPrices = {};
   let sbPriceFetching = false;
+  let sbBoxKeyMap = {}; // boxId → 'Hp'|'AT'|etc
 
   function loadSbSessions() {
     try { const r = localStorage.getItem(SB_SESSIONS_KEY); if (r) sbSessions = JSON.parse(r); } catch(e) { sbSessions = []; }
@@ -2090,42 +2183,37 @@ if ('serviceWorker' in navigator) {
   async function initSealBox() {
     if (sbInited) { renderSbSessionsList(); return; }
     sbInited = true;
-
-    // Load seal items from cache or API
     const cached = cacheGet('sb_seals', 6 * 3600000);
-    if (cached) {
-      sbSealItems = cached.seals || [];
-      sbBoxItems  = cached.boxes || [];
-    } else {
-      await fetchSbItems();
-    }
-
+    if (cached) { sbSealItems = cached.seals||[]; sbBoxItems = cached.boxes||[]; }
+    else await fetchSbItems();
+    // Build boxId → boxKey map
+    sbBoxKeyMap = {};
+    for (const b of sbBoxItems) { const k = getBoxKey(b.name); if (k) sbBoxKeyMap[b.id] = k; }
     populateSbBoxSelect();
+    sbEntries = [];
     renderSbSealEntries();
     renderSbSessionsList();
-
     $('sb-box-select').addEventListener('change', onSbBoxChange);
-    $('sb-add-seal-btn').addEventListener('click', addSbSealEntry);
     $('sb-save-btn').addEventListener('click', saveSbSession);
     $('sb-clear-btn').addEventListener('click', clearSbForm);
+    $('sb-total-boxes').addEventListener('input', validateSbTotals);
   }
 
   async function fetchSbItems() {
     try {
-      // Fetch seal items (type_name=Seal Item)
       const data = await apiFetch('/api/wiki/items?page=1&per_page=1000&type_name=Seal%20Item');
       sbSealItems = (data.data || []).map(x => ({ id: x.id, name: x.name, icon_id: x.icon_id }));
-
-      // Fetch seal box items (scan items that contain "Seal Box")
+      // Inject wiki-missing seals
+      for (const [name, id] of Object.entries(SEAL_EXTRA_IDS)) {
+        if (!sbSealItems.find(s => s.name === name))
+          sbSealItems.push({ id, name, icon_id: 'ncpd1e5' });
+      }
       const boxData = await apiFetch('/api/wiki/items?page=1&per_page=500&type_name=Scan%20item');
       sbBoxItems = (boxData.data || [])
-        .filter(x => x.name.toLowerCase().includes('seal box') || x.name.toLowerCase().includes('seal box'))
+        .filter(x => x.name.toLowerCase().includes('seal box'))
         .map(x => ({ id: x.id, name: x.name, icon_id: x.icon_id }));
-
       cacheSet('sb_seals', { seals: sbSealItems, boxes: sbBoxItems });
-    } catch(e) {
-      console.error('[SealBox] fetch failed', e);
-    }
+    } catch(e) { console.error('[SealBox] fetch failed', e); }
   }
 
   function populateSbBoxSelect() {
@@ -2138,99 +2226,186 @@ if ('serviceWorker' in navigator) {
       sbBoxItems.map(b => `<option value="${b.id}" data-icon="${b.icon_id||''}" data-name="${b.name}">${b.name}</option>`).join('');
   }
 
-  function onSbBoxChange() {
+  async function onSbBoxChange() {
     const sel = $('sb-box-select');
     const opt = sel.options[sel.selectedIndex];
     const preview = $('sb-box-preview');
-    if (!opt || !opt.value) { preview.style.display = 'none'; return; }
-    const iconId = opt.dataset.icon;
-    const name   = opt.dataset.name;
+    const simPanel = $('sb-simulate-panel');
+    if (!opt || !opt.value) {
+      preview.style.display = 'none';
+      if (simPanel) simPanel.style.display = 'none';
+      sbEntries = []; renderSbSealEntries(); return;
+    }
+    const iconId = opt.dataset.icon, name = opt.dataset.name;
     $('sb-box-icon-img').src = iconId ? itemIconUrl(iconId) : '';
     $('sb-box-icon-name').textContent = name;
+    $('sb-box-meta').textContent = '100[B] per scan · 5 seals per scan';
+    $('sb-box-price-badge').innerHTML = '<span style="color:var(--dim3);font-size:10px">fetching price…</span>';
     preview.style.display = 'flex';
+    sbEntries = []; renderSbSealEntries();
+    // Fetch box price
+    try {
+      const res = await marketGet(`/api/market/listings?item=${opt.value}&side=sell&limit=1`);
+      if (res && res.ok) {
+        const d = await res.json();
+        const price = d?.listings?.[0]?.price ?? null;
+        sbSealPrices['__box__'+opt.value] = price;
+        $('sb-box-price-badge').innerHTML = price!=null
+          ? fmt(price)+' <span style="font-size:10px;color:var(--dim)">each</span>'
+          : '<span style="color:var(--dim3);font-size:10px">no listing</span>';
+      }
+    } catch(e) { $('sb-box-price-badge').innerHTML=''; }
+    // Simulate EV from DB rates
+    const boxKey = sbBoxKeyMap[opt.value];
+    if (simPanel && boxKey) {
+      const rates = computeDbRates(boxKey);
+      if (Object.keys(rates).length) {
+        simPanel.style.display = 'block';
+        $('sb-simulate-result').textContent = 'Fetching seal prices for simulation…';
+        // Fetch prices for known seals we don't have yet
+        const sealList = SEAL_BOX_CONTENTS[boxKey] || [];
+        for (const sealName of sealList) {
+          const item = sbSealItems.find(s => s.name === sealName);
+          const sealId = item?.id || SEAL_EXTRA_IDS[sealName] || null;
+          if (!sealId || sbSealPrices[sealId] !== undefined) continue;
+          try {
+            await sleep(300);
+            const r = await marketGet(`/api/market/listings?item=${sealId}&side=sell&limit=1`);
+            if (r && r.ok) { const d = await r.json(); sbSealPrices[sealId] = d?.listings?.[0]?.price ?? null; }
+            else sbSealPrices[sealId] = null;
+          } catch(e) { sbSealPrices[sealId] = null; }
+        }
+        // Compute expected EV per box
+        let evPerBox = 0; const parts = [];
+        for (const sealName of sealList) {
+          const rate = rates[sealName] || 0;
+          const item = sbSealItems.find(s => s.name === sealName);
+          const sealId = item?.id || SEAL_EXTRA_IDS[sealName] || null;
+          const price = sealId ? (sbSealPrices[sealId] ?? null) : null;
+          if (price != null) {
+            const contrib = rate * 5 * price; // rate × 5 seals × price
+            evPerBox += contrib;
+            if (contrib > 0) parts.push(`<span style="color:var(--blue)">${sealName}</span>: ${(rate*100).toFixed(1)}% → ${fmtRaw(Math.round(contrib))}`);
+          }
+        }
+        const boxPrice = sbSealPrices['__box__'+opt.value];
+        const scanCost = 100;
+        const net = evPerBox - scanCost;
+        const boxNet = boxPrice != null ? evPerBox - scanCost - boxPrice : null;
+        let simHtml = `<strong style="color:${net>0?'var(--green)':'var(--red)'}">EV/box: ${fmtRaw(Math.round(evPerBox))} − ${fmtRaw(scanCost)} fee = ${fmtRaw(Math.round(net))}/box</strong>`;
+        if (boxNet != null) {
+          simHtml += `<br><span style="color:${boxNet>0?'var(--green)':'var(--amber)'}">vs selling box (${fmtRaw(boxPrice)}): ${boxNet>0?'+'+fmtRaw(Math.round(boxNet)):fmtRaw(Math.round(boxNet))} scanning advantage</span>`;
+        }
+        if (parts.length) simHtml += `<div style="margin-top:6px;font-size:9px;color:var(--dim3);line-height:1.8">${parts.join(' &nbsp;·&nbsp; ')}</div>`;
+        else simHtml += '<br><span style="color:var(--dim3);font-size:10px">No seal prices available yet — run main analysis first.</span>';
+        $('sb-simulate-result').innerHTML = simHtml;
+      } else {
+        simPanel.style.display = 'none';
+      }
+    } else if (simPanel) { simPanel.style.display = 'none'; }
   }
 
-  // Seal entries state: array of { sealId, sealName, sealIcon, scans }
+  // sbEntries: [{ sealId, sealName, sealIcon, qty }]  qty = seals received
   let sbEntries = [];
 
-  function addSbSealEntry(prefill = null) {
-    const entry = prefill || { sealId: '', sealName: '', sealIcon: '', scans: '' };
-    sbEntries.push(entry);
-    renderSbSealEntries();
-  }
-
   function renderSbSealEntries() {
-    const con = $('sb-seal-entries'); con.innerHTML = '';
-    if (!sbEntries.length) {
-      addSbSealEntry();
-      return;
-    }
-    sbEntries.forEach((entry, idx) => {
-      const row = document.createElement('div'); row.className = 'sb-seal-entry';
-
-      // Autocomplete input
-      const acWrap = document.createElement('div'); acWrap.className = 'sb-seal-ac';
-      const inp = document.createElement('input');
-      inp.className = 'sb-seal-inp'; inp.type = 'text';
-      inp.placeholder = 'Seal name…'; inp.value = entry.sealName;
-      inp.autocomplete = 'off';
-      const acList = document.createElement('div'); acList.className = 'sb-ac-list';
-      acWrap.appendChild(inp); acWrap.appendChild(acList);
-
-      function updateAc() {
-        const q = inp.value.toLowerCase();
-        const matches = sbSealItems.filter(s => s.name.toLowerCase().includes(q)).slice(0, 20);
-        acList.innerHTML = '';
-        if (!q || !matches.length) { acList.classList.remove('open'); return; }
-        matches.forEach(s => {
-          const item = document.createElement('div'); item.className = 'sb-ac-item';
-          if (s.icon_id) {
-            const ico = document.createElement('img'); ico.className = 'sb-ac-icon';
-            ico.src = itemIconUrl(s.icon_id); ico.onerror = () => ico.style.display='none';
-            item.appendChild(ico);
-          }
-          item.appendChild(document.createTextNode(s.name));
-          item.addEventListener('mousedown', e => {
-            e.preventDefault();
-            sbEntries[idx].sealId = s.id; sbEntries[idx].sealName = s.name; sbEntries[idx].sealIcon = s.icon_id||'';
-            inp.value = s.name; acList.classList.remove('open');
-          });
-          acList.appendChild(item);
+    const con = $('sb-seal-entries'); if (!con) return;
+    con.innerHTML = '';
+    const sel = $('sb-box-select');
+    const boxKey = sel?.value ? sbBoxKeyMap[sel.value] : null;
+    const sealList = boxKey ? SEAL_BOX_CONTENTS[boxKey] : null;
+    if (sealList) {
+      // Sync sbEntries with known seal list
+      const firstSeal = sbEntries[0]?.sealName;
+      if (!sbEntries.length || firstSeal !== sealList[0]) {
+        sbEntries = sealList.map(name => {
+          const item = sbSealItems.find(s => s.name === name);
+          const id   = item?.id || SEAL_EXTRA_IDS[name] || '';
+          return { sealId: id, sealName: name, sealIcon: item?.icon_id||'', qty: 0 };
         });
-        acList.classList.add('open');
       }
-      inp.addEventListener('input', () => { sbEntries[idx].sealName = inp.value; sbEntries[idx].sealId = ''; updateAc(); });
-      inp.addEventListener('focus', updateAc);
-      inp.addEventListener('blur', () => setTimeout(() => acList.classList.remove('open'), 150));
-
-      // Scans input
-      const scansInp = document.createElement('input');
-      scansInp.className = 'sb-qty-inp'; scansInp.type = 'number'; scansInp.min = '1'; scansInp.placeholder = 'Scans';
-      scansInp.value = entry.scans || '';
-      scansInp.addEventListener('input', () => { sbEntries[idx].scans = parseInt(scansInp.value) || 0; });
-
-      // Remove btn
-      const rmBtn = document.createElement('button'); rmBtn.className = 'sb-rm-btn'; rmBtn.textContent = '✕';
-      rmBtn.addEventListener('click', () => { sbEntries.splice(idx, 1); renderSbSealEntries(); });
-
-      row.appendChild(acWrap); row.appendChild(scansInp); row.appendChild(rmBtn);
-      con.appendChild(row);
-    });
+      const dbRates = computeDbRates(boxKey);
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-bottom:6px';
+      sbEntries.forEach((entry, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:grid;grid-template-columns:1fr 80px;gap:6px;align-items:center';
+        const nameDiv = document.createElement('div');
+        nameDiv.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text)';
+        if (entry.sealIcon) {
+          const ico = document.createElement('img');
+          ico.style.cssText = 'width:18px;height:18px;object-fit:contain;image-rendering:pixelated;flex-shrink:0';
+          ico.src = itemIconUrl(entry.sealIcon); ico.onerror = ()=>ico.style.display='none';
+          nameDiv.appendChild(ico);
+        }
+        const nameTxt = document.createElement('span'); nameTxt.textContent = entry.sealName; nameDiv.appendChild(nameTxt);
+        if (dbRates[entry.sealName] != null) {
+          const hint = document.createElement('span');
+          hint.style.cssText = 'font-size:9px;color:var(--dim3);font-family:\'JetBrains Mono\',monospace;white-space:nowrap';
+          hint.textContent = '~' + (dbRates[entry.sealName]*100).toFixed(1)+'%';
+          nameDiv.appendChild(hint);
+        }
+        const qtyInp = document.createElement('input');
+        qtyInp.type='number'; qtyInp.min='0'; qtyInp.placeholder='0';
+        qtyInp.className='sb-qty-inp'; qtyInp.value = entry.qty||'';
+        qtyInp.addEventListener('input', () => { sbEntries[idx].qty = parseInt(qtyInp.value)||0; validateSbTotals(); });
+        row.appendChild(nameDiv); row.appendChild(qtyInp);
+        grid.appendChild(row);
+      });
+      con.appendChild(grid);
+    } else {
+      con.innerHTML='<div style="color:var(--dim3);font-size:11px;padding:8px 0">Select a seal box above to see seal list.</div>';
+    }
   }
+
+  function validateSbTotals() {
+    const msgEl = $('sb-validation-msg'); if (!msgEl) return;
+    const totalBoxes = parseInt($('sb-total-boxes')?.value)||0;
+    const sumQty = sbEntries.reduce((s,e)=>s+(parseInt(e.qty)||0),0);
+    if (!totalBoxes || !sumQty) { msgEl.textContent=''; return; }
+    const expected = totalBoxes * 5;
+    if (sumQty === expected) {
+      msgEl.style.color='var(--green)'; msgEl.textContent=`✓ ${sumQty} seals = ${totalBoxes} × 5`;
+    } else {
+      const diff = sumQty - expected;
+      const sel = $('sb-box-select');
+      const boxKey = sel?.value ? sbBoxKeyMap[sel.value] : null;
+      const dbRates = boxKey ? computeDbRates(boxKey) : {};
+      let worstSeal='', worstDev=0;
+      if (Object.keys(dbRates).length) {
+        for (const e of sbEntries) {
+          const expRate = dbRates[e.sealName]||0;
+          const actRate = sumQty>0 ? (e.qty||0)/sumQty : 0;
+          const dev = Math.abs(actRate-expRate);
+          if (dev>worstDev) { worstDev=dev; worstSeal=e.sealName; }
+        }
+      }
+      msgEl.style.color='var(--amber)';
+      msgEl.textContent=`⚠ Got ${sumQty}, expected ${expected} (${diff>0?'+':''}${diff}).${worstSeal?' Possible typo: '+worstSeal:''}`;
+    }
+  }
+
 
   function saveSbSession() {
     const boxSel = $('sb-box-select');
     if (!boxSel.value) { alert('Select a seal box type first.'); return; }
-    const validEntries = sbEntries.filter(e => e.sealName && e.scans > 0);
-    if (!validEntries.length) { alert('Add at least one seal with scans > 0.'); return; }
+    const validEntries = sbEntries.filter(e => e.sealName && (e.qty||0)>0);
+    if (!validEntries.length) { alert('Enter at least one seal qty > 0.'); return; }
+    const totalBoxes = parseInt($('sb-total-boxes')?.value)||null;
     const session = {
       id: Date.now(),
       name: $('sb-session-name').value.trim() || new Date().toLocaleString('en-GB'),
       boxId: boxSel.value,
       boxName: boxSel.options[boxSel.selectedIndex].dataset.name,
-      boxIcon: boxSel.options[boxSel.selectedIndex].dataset.icon || '',
+      boxIcon: boxSel.options[boxSel.selectedIndex].dataset.icon||'',
+      boxKey: sbBoxKeyMap[boxSel.value]||null,
       ts: Date.now(),
-      entries: validEntries.map(e => ({ sealId: e.sealId, sealName: e.sealName, sealIcon: e.sealIcon, scans: e.scans }))
+      totalBoxes,
+      entries: validEntries.map(e => ({
+        sealId: e.sealId, sealName: e.sealName, sealIcon: e.sealIcon,
+        qty: e.qty||0,
+        scans: Math.floor((e.qty||0)/5),
+      }))
     };
     sbSessions.unshift(session);
     saveSbSessions();
@@ -2242,6 +2417,9 @@ if ('serviceWorker' in navigator) {
   function clearSbForm() {
     $('sb-box-select').value = '';
     $('sb-session-name').value = '';
+    if ($('sb-total-boxes')) $('sb-total-boxes').value = '';
+    if ($('sb-validation-msg')) $('sb-validation-msg').textContent='';
+    if ($('sb-simulate-panel')) $('sb-simulate-panel').style.display='none';
     $('sb-box-preview').style.display = 'none';
     sbEntries = [];
     renderSbSealEntries();
@@ -2251,134 +2429,116 @@ if ('serviceWorker' in navigator) {
     const con = $('sb-sessions-list'); con.innerHTML = '';
     if (!sbSessions.length) { con.innerHTML = '<div style="color:var(--dim3);font-size:11px;padding:8px 0">No sessions yet.</div>'; return; }
     sbSessions.forEach(s => {
-      const totalScans = s.entries.reduce((sum, e) => sum + e.scans, 0);
+      const totalQty = s.entries.reduce((sum,e)=>sum+(e.qty||e.scans*5||0),0);
+      const boxes = s.totalBoxes || Math.floor(totalQty/5);
       const item = document.createElement('div');
-      item.className = 'sb-session-item' + (sbCurrentSession?.id === s.id ? ' active-session' : '');
-      item.innerHTML = `
+      item.className = 'sb-session-item'+(sbCurrentSession?.id===s.id?' active-session':'');
+      item.innerHTML=`
         <div class="sb-session-date">${new Date(s.ts).toLocaleDateString('en-GB')}</div>
-        <div class="sb-session-info"><div class="sb-session-name">${s.name}</div><div style="font-size:10px;color:var(--dim3)">${s.boxName} · ${totalScans} scans · ${s.entries.length} seal types</div></div>`;
-      const rmBtn = document.createElement('button'); rmBtn.className = 'sb-session-rm'; rmBtn.textContent = '✕';
-      rmBtn.title = 'Delete session';
-      rmBtn.addEventListener('click', e => { e.stopPropagation(); sbSessions = sbSessions.filter(x => x.id !== s.id); saveSbSessions(); if (sbCurrentSession?.id === s.id) { sbCurrentSession = null; $('sb-analysis').style.display='none'; $('sb-analysis-empty').style.display='block'; } renderSbSessionsList(); });
+        <div class="sb-session-info"><div class="sb-session-name">${s.name}</div><div style="font-size:10px;color:var(--dim3)">${s.boxName} · ${boxes} boxes · ${s.entries.length} seal types</div></div>`;
+      const rmBtn=document.createElement('button'); rmBtn.className='sb-session-rm'; rmBtn.textContent='✕';
+      rmBtn.addEventListener('click', e=>{
+        e.stopPropagation(); sbSessions=sbSessions.filter(x=>x.id!==s.id); saveSbSessions();
+        if (sbCurrentSession?.id===s.id){sbCurrentSession=null;$('sb-analysis').style.display='none';$('sb-analysis-empty').style.display='block';}
+        renderSbSessionsList();
+      });
       item.appendChild(rmBtn);
-      item.addEventListener('click', () => viewSbSession(s));
+      item.addEventListener('click',()=>viewSbSession(s));
       con.appendChild(item);
     });
   }
 
   async function viewSbSession(session) {
     sbCurrentSession = session;
-    renderSbSessionsList(); // re-render to highlight active
-    $('sb-analysis-empty').style.display = 'none';
-    $('sb-analysis').style.display = 'block';
-
-    const totalScans = session.entries.reduce((sum, e) => sum + e.scans, 0);
-    const totalSealQty = totalScans * 5; // each scan gives 5 of that seal
-    const totalCost = totalScans * SCAN_FEE_B; // scan fee only (box cost not tracked here)
-
-    // Render stat grid
-    const sg = $('sb-stat-grid');
-    sg.innerHTML = `
-      <div class="sb-stat"><div class="sb-stat-lbl">Total Scans</div><div class="sb-stat-val">${totalScans.toLocaleString()}</div><div class="sb-stat-sub">100[B] each</div></div>
-      <div class="sb-stat"><div class="sb-stat-lbl">Scan Cost</div><div class="sb-stat-val" style="color:var(--red)">${fmtRaw(totalCost)}</div><div class="sb-stat-sub">total fee paid</div></div>
-      <div class="sb-stat"><div class="sb-stat-lbl">Total Seals Got</div><div class="sb-stat-val">${totalSealQty.toLocaleString()}</div><div class="sb-stat-sub">5 per scan</div></div>
-      <div class="sb-stat"><div class="sb-stat-lbl">Seal Types</div><div class="sb-stat-val">${session.entries.length}</div><div class="sb-stat-sub">unique seals</div></div>`;
-
-    // Render table immediately with loading prices
-    renderSbResultTable(session, totalScans, {});
-    $('sb-verdict').className = 'sb-verdict neutral'; $('sb-verdict').textContent = '⏳ Fetching seal prices…';
-    $('sb-price-note').textContent = '';
-
-    // Fetch box sell price + seal prices
+    renderSbSessionsList();
+    $('sb-analysis-empty').style.display='none';
+    $('sb-analysis').style.display='block';
+    const totalQty   = session.entries.reduce((s,e)=>s+(e.qty||e.scans*5||0),0);
+    const totalScans = session.entries.reduce((s,e)=>s+(e.scans||Math.floor((e.qty||0)/5)),0);
+    const totalBoxes = session.totalBoxes || Math.floor(totalQty/5);
+    const totalCost  = totalScans * SCAN_FEE_B;
+    const dbRates = session.boxKey ? computeDbRates(session.boxKey) : {};
+    $('sb-stat-grid').innerHTML=`
+      <div class="sb-stat"><div class="sb-stat-lbl">Boxes Scanned</div><div class="sb-stat-val">${totalBoxes.toLocaleString()}</div><div class="sb-stat-sub">total</div></div>
+      <div class="sb-stat"><div class="sb-stat-lbl">Seals Received</div><div class="sb-stat-val">${totalQty.toLocaleString()}</div><div class="sb-stat-sub">${totalScans} scans</div></div>
+      <div class="sb-stat"><div class="sb-stat-lbl">Scan Cost</div><div class="sb-stat-val" style="color:var(--red)">${fmtRaw(totalCost)}</div><div class="sb-stat-sub">100[B]/scan</div></div>
+      <div class="sb-stat"><div class="sb-stat-lbl">DB Samples</div><div class="sb-stat-val" style="color:var(--purple)">${session.boxKey?((getSealDropDb()[session.boxKey]||[]).length):'—'}</div><div class="sb-stat-sub">for this box type</div></div>`;
+    renderSbResultTable(session, totalScans, totalQty, {}, dbRates);
+    $('sb-verdict').className='sb-verdict neutral'; $('sb-verdict').textContent='⏳ Fetching prices…';
+    $('sb-price-note').textContent='';
     if (!sbPriceFetching) {
-      sbPriceFetching = true;
+      sbPriceFetching=true;
       try {
-        // Fetch box price
-        let boxPrice = null;
-        try {
-          const res = await marketGet(`/api/market/listings?item=${session.boxId}&side=sell&limit=1`);
-          if (res && res.ok) { const d = await res.json(); boxPrice = d?.listings?.[0]?.price ?? null; }
-        } catch(e) {}
-        sbSealPrices['__box__' + session.boxId] = boxPrice;
-
-        // Fetch each seal price
+        if (sbSealPrices['__box__'+session.boxId]===undefined) {
+          try {
+            const r=await marketGet(`/api/market/listings?item=${session.boxId}&side=sell&limit=1`);
+            if (r&&r.ok){const d=await r.json();sbSealPrices['__box__'+session.boxId]=d?.listings?.[0]?.price??null;}
+          } catch(e){}
+        }
         for (const e of session.entries) {
-          if (!e.sealId) continue;
-          if (sbSealPrices[e.sealId] !== undefined) continue;
+          if (!e.sealId||sbSealPrices[e.sealId]!==undefined) continue;
           await sleep(500);
           try {
-            const res = await marketGet(`/api/market/listings?item=${e.sealId}&side=sell&limit=1`);
-            if (res && res.ok) { const d = await res.json(); sbSealPrices[e.sealId] = d?.listings?.[0]?.price ?? null; }
-            else sbSealPrices[e.sealId] = null;
-          } catch(e2) { sbSealPrices[e.sealId] = null; }
+            const r=await marketGet(`/api/market/listings?item=${e.sealId}&side=sell&limit=1`);
+            if (r&&r.ok){const d=await r.json();sbSealPrices[e.sealId]=d?.listings?.[0]?.price??null;}
+            else sbSealPrices[e.sealId]=null;
+          } catch(e2){sbSealPrices[e.sealId]=null;}
         }
-      } finally { sbPriceFetching = false; }
+      } finally {sbPriceFetching=false;}
     }
-
-    renderSbAnalysis(session, totalScans, totalCost);
+    renderSbAnalysis(session, totalScans, totalQty, totalCost, dbRates);
   }
 
-  function renderSbAnalysis(session, totalScans, totalCost) {
-    renderSbResultTable(session, totalScans, sbSealPrices);
-
-    // Calculate total seal value
-    let totalSealValue = 0; let allPriced = true;
+  function renderSbAnalysis(session, totalScans, totalQty, totalCost, dbRates) {
+    renderSbResultTable(session, totalScans, totalQty, sbSealPrices, dbRates);
+    let totalSealValue=0, allPriced=true;
     for (const e of session.entries) {
-      const price = sbSealPrices[e.sealId] ?? null;
-      if (price == null) { allPriced = false; continue; }
-      totalSealValue += e.scans * 5 * price; // scans × 5 seals × price each
+      const qty = e.qty||e.scans*5||0;
+      const price=sbSealPrices[e.sealId]??null;
+      if (price==null){allPriced=false;continue;}
+      totalSealValue+=qty*price;
     }
-
-    // Box sell value = totalScans boxes × box price (what you could've gotten instead)
-    const boxPrice = sbSealPrices['__box__' + session.boxId] ?? null;
-    const boxSellValue = boxPrice != null ? totalScans * boxPrice : null;
-
-    // Verdict
-    const verdictEl = $('sb-verdict');
-    const noteEl = $('sb-price-note');
+    const boxPrice=sbSealPrices['__box__'+session.boxId]??null;
+    const totalBoxes=session.totalBoxes||Math.floor(totalQty/5);
+    const boxSellValue=boxPrice!=null?totalBoxes*boxPrice:null;
+    const verdictEl=$('sb-verdict'), noteEl=$('sb-price-note');
     if (!allPriced) {
-      verdictEl.className = 'sb-verdict neutral';
-      verdictEl.textContent = '⚠ Some seals have no market listing — partial calculation only.';
-      noteEl.textContent = '';
-    } else if (boxSellValue == null) {
-      verdictEl.className = 'sb-verdict neutral';
-      verdictEl.innerHTML = `Seal value from scanning: <strong>${fmtRaw(totalSealValue)}</strong> · Box market price not found (can't compare vs selling boxes)`;
-      noteEl.textContent = `Scan cost: ${fmtRaw(totalCost)} · Net from scanning: ${fmtRaw(totalSealValue - totalCost)}`;
+      verdictEl.className='sb-verdict neutral';
+      verdictEl.textContent='⚠ Some seals no listing — partial calc.';
+    } else if (boxSellValue==null) {
+      verdictEl.className='sb-verdict neutral';
+      verdictEl.innerHTML=`Seal value: <strong>${fmtRaw(totalSealValue)}</strong> · Box price unknown`;
+      noteEl.textContent=`Scan cost: ${fmtRaw(totalCost)} · Net: ${fmtRaw(totalSealValue-totalCost)}`;
     } else {
-      const scanProfit = totalSealValue - totalCost;
-      const boxProfit  = boxSellValue;
-      const diff = scanProfit - boxProfit;
-      if (diff > 0) {
-        verdictEl.className = 'sb-verdict profit';
-        verdictEl.innerHTML = `✓ Scanning better by ${fmtRaw(diff)} · Seal value: ${fmtRaw(totalSealValue)} vs Box sell: ${fmtRaw(boxSellValue)} (after ${fmtRaw(totalCost)} fee)`;
-      } else if (diff < 0) {
-        verdictEl.className = 'sb-verdict loss';
-        verdictEl.innerHTML = `✗ Selling boxes better by ${fmtRaw(-diff)} · Seal value: ${fmtRaw(totalSealValue)} vs Box sell: ${fmtRaw(boxSellValue)} (after ${fmtRaw(totalCost)} fee)`;
-      } else {
-        verdictEl.className = 'sb-verdict neutral';
-        verdictEl.textContent = 'Break even — scanning vs selling boxes equal.';
-      }
-      noteEl.textContent = `Scan fee paid: ${fmtRaw(totalCost)} · Box price each: ${fmtRaw(boxPrice)}`;
+      const scanNet=totalSealValue-totalCost, diff=scanNet-boxSellValue;
+      if (diff>0){verdictEl.className='sb-verdict profit';verdictEl.innerHTML=`✓ Scanning better by ${fmtRaw(diff)} · Seals: ${fmtRaw(totalSealValue)} vs Sell boxes: ${fmtRaw(boxSellValue)}`;}
+      else if (diff<0){verdictEl.className='sb-verdict loss';verdictEl.innerHTML=`✗ Selling boxes better by ${fmtRaw(-diff)} · Seals: ${fmtRaw(totalSealValue)} vs Sell boxes: ${fmtRaw(boxSellValue)}`;}
+      else{verdictEl.className='sb-verdict neutral';verdictEl.textContent='Break even.';}
+      noteEl.textContent=`Scan fee: ${fmtRaw(totalCost)} · Box price: ${fmtRaw(boxPrice)} each`;
     }
   }
 
-  function renderSbResultTable(session, totalScans, priceMap) {
-    const tbody = $('sb-result-tbody'); tbody.innerHTML = '';
-    session.entries.forEach(e => {
-      const scans = e.scans;
-      const qty = scans * 5;
-      const rate = totalScans > 0 ? ((scans / totalScans) * 100).toFixed(1) : '—';
-      const price = priceMap[e.sealId] ?? null;
-      const totalVal = price != null ? scans * 5 * price : null;
-      const tr = document.createElement('tr');
-      const iconHtml = e.sealIcon ? `<img class="sb-tbl-icon" src="${itemIconUrl(e.sealIcon)}" alt="" onerror="this.style.display='none'">` : '';
-      tr.innerHTML = `
+  function renderSbResultTable(session, totalScans, totalQty, priceMap, dbRates) {
+    const tbody=$('sb-result-tbody'); tbody.innerHTML='';
+    session.entries.forEach(e=>{
+      const qty   = e.qty||e.scans*5||0;
+      const scans = e.scans||Math.floor(qty/5);
+      const actPct = totalScans>0 ? (scans/totalScans*100).toFixed(1)+'%' : '—';
+      const dbPct  = dbRates[e.sealName]!=null ? (dbRates[e.sealName]*100).toFixed(1)+'%' : '—';
+      const devBig = (dbRates[e.sealName]!=null&&totalScans>0) && Math.abs(scans/totalScans-dbRates[e.sealName])>0.05;
+      const actColor = devBig?'var(--amber)':'var(--green)';
+      const price=priceMap[e.sealId]??null;
+      const totalVal=price!=null?qty*price:null;
+      const iconHtml=e.sealIcon?`<img class="sb-tbl-icon" src="${itemIconUrl(e.sealIcon)}" alt="" onerror="this.style.display='none'">`:'' ;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
         <td><div class="sb-tbl-name">${iconHtml}${e.sealName||'—'}</div></td>
+        <td class="sb-tbl-qty">${qty.toLocaleString()}</td>
         <td class="sb-tbl-scans">${scans}</td>
-        <td class="sb-tbl-qty">${qty.toLocaleString()} seals</td>
-        <td class="sb-tbl-rate">${rate}%</td>
-        <td class="sb-tbl-price">${price!=null?fmt(price):'<span class="sb-price-loading">fetching…</span>'}</td>
-        <td class="sb-tbl-val">${totalVal!=null?fmt(totalVal):'<span class="sb-price-loading">—</span>'}</td>`;
+        <td class="sb-tbl-rate" style="color:${actColor}">${actPct}</td>
+        <td class="sb-tbl-rate">${dbPct}</td>
+        <td class="sb-tbl-price">${price!=null?fmt(price):'<span style="color:var(--dim3)">fetching…</span>'}</td>
+        <td class="sb-tbl-val">${totalVal!=null?fmt(totalVal):'<span style="color:var(--dim3)">—</span>'}</td>`;
       tbody.appendChild(tr);
     });
   }
@@ -2484,6 +2644,65 @@ if ('serviceWorker' in navigator) {
       });
     }
     $('adm-last-refresh').textContent = 'refreshed ' + fmtAgo(now);
+  }
+
+  /* ── Admin seal DB ── */
+  function initAdminSealDb() {
+    const section = $('adm-sealdb-section'); if (!section) return;
+    section.style.display = 'block';
+    renderAdminSealDbSummary();
+    $('adm-db-boxkey').addEventListener('change', renderAdminSealDbInputs);
+    $('adm-db-add-btn').addEventListener('click', submitAdminSealSample);
+    $('adm-db-clear-btn').addEventListener('click', ()=>{
+      if (!confirm('Clear all user-added seal DB samples?')) return;
+      localStorage.removeItem(SB_USER_DB_KEY);
+      renderAdminSealDbSummary(); renderAdminSealDbInputs();
+    });
+    renderAdminSealDbInputs();
+  }
+  function renderAdminSealDbInputs() {
+    const boxKey = $('adm-db-boxkey')?.value || 'Hp';
+    const sealList = SEAL_BOX_CONTENTS[boxKey] || [];
+    const con = $('adm-db-seal-inputs'); if (!con) return;
+    con.innerHTML = '';
+    sealList.forEach(name => {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;align-items:center;gap:6px';
+      const lbl = document.createElement('label');
+      lbl.style.cssText = 'flex:1;font-size:11px;color:var(--text)'; lbl.textContent = name;
+      const inp = document.createElement('input');
+      inp.className='adm-inp'; inp.type='number'; inp.min='0'; inp.placeholder='0';
+      inp.style.cssText='flex:0 0 80px;padding:4px 8px;font-size:11px';
+      inp.dataset.sealName = name;
+      wrap.appendChild(lbl); wrap.appendChild(inp); con.appendChild(wrap);
+    });
+  }
+  function submitAdminSealSample() {
+    const boxKey = $('adm-db-boxkey')?.value;
+    const boxes  = parseInt($('adm-db-boxes')?.value)||0;
+    if (!boxKey||boxes<=0){alert('Select box type and enter # boxes scanned.');return;}
+    const inputs = $('adm-db-seal-inputs')?.querySelectorAll('input[data-seal-name]')||[];
+    const data={};
+    for (const inp of inputs){const v=parseInt(inp.value)||0;if(v>0)data[inp.dataset.sealName]=v;}
+    if (!Object.keys(data).length){alert('Enter at least one seal qty.');return;}
+    const sumQty=Object.values(data).reduce((s,v)=>s+v,0);
+    const expected=boxes*5;
+    if (sumQty!==expected&&!confirm(`⚠ Sum ${sumQty} ≠ ${boxes}×5=${expected}. Add anyway?`)) return;
+    addSealDbSample(boxKey,boxes,data);
+    $('adm-db-boxes').value='';
+    $('adm-db-seal-inputs')?.querySelectorAll('input').forEach(i=>i.value='');
+    renderAdminSealDbSummary();
+    alert(`✓ Sample added (${boxes} boxes, ${Object.keys(data).length} seal types).`);
+  }
+  function renderAdminSealDbSummary() {
+    const con=$('adm-db-summary'); if (!con) return;
+    const db=getSealDropDb(); const lines=[];
+    for (const [key,samples] of Object.entries(db)){
+      const totalBoxes=samples.reduce((s,x)=>s+x.boxes,0);
+      const userSamples=(JSON.parse(localStorage.getItem(SB_USER_DB_KEY)||'{}')||{})[key]?.length||0;
+      lines.push(`<strong style="color:var(--amber)">${key}</strong>: ${samples.length} samples (${userSamples} user-added) · ${totalBoxes.toLocaleString()} total boxes`);
+    }
+    con.innerHTML = lines.length ? lines.join('<br>') : '<span style="color:var(--dim3)">No DB data yet.</span>';
   }
 
   /* ── Auto-run on warm cache ── */
