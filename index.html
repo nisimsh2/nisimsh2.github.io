@@ -101,7 +101,9 @@
   .r1 { color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,.45); }
   .r2 { color:#bbb; } .r3 { color:#c47f32; } .rn { color:var(--dim3); }
   .dname { font-size:13px; font-weight:600; color:#e8f4ff; margin-bottom:3px; }
-  .dname-wrap { display:flex; align-items:center; gap:6px; }
+  .dname-wrap { display:flex; align-items:center; gap:8px; }
+  .dung-thumb { width:36px; height:36px; object-fit:contain; image-rendering:pixelated;
+    border:1px solid var(--border); background:var(--bg3); flex-shrink:0; border-radius:2px; opacity:.85; }
   .dname-bl-btn { font-size:9px; color:var(--dim3); background:none; border:1px solid var(--border2);
     cursor:pointer; padding:1px 5px; opacity:0; transition:opacity .15s; white-space:nowrap; }
   table.tbl tbody tr:hover .dname-bl-btn { opacity:1; }
@@ -136,13 +138,14 @@
   .bar-cell { width:90px; }
   .ev-bar { height:4px; background:var(--border2); border-radius:3px; overflow:hidden; }
   .ev-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#7a5000,var(--yellow)); }
-  .drops { display:flex; flex-wrap:wrap; gap:4px; max-width:360px; }
+  .drops { display:flex; flex-wrap:wrap; gap:4px; max-width:380px; }
   .chip { display:inline-flex; align-items:center; gap:5px; padding:3px 7px;
     background:#0c1e2e; border:1px solid var(--border); font-size:11px; color:var(--blue);
     cursor:default; white-space:nowrap; transition:border-color .12s; }
   .chip:hover { border-color:#005a78; }
   .chip.rank-reward { border-style:dashed; }
   .chip.blacklisted { border-color:var(--red); color:var(--red); opacity:.6; }
+  .chip-icon { width:18px; height:18px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; border-radius:1px; }
   .chip-pct { color:var(--green); font-weight:600; font-family:'JetBrains Mono',monospace; }
   .chip-price { color:var(--yellow); font-family:'JetBrains Mono',monospace; }
   .chip-na { color:var(--dim3); font-style:italic; }
@@ -369,6 +372,95 @@
   .adm-danger { border-color:#3a1010; }
   .adm-danger .adm-section-head { background:#0c0808; }
   .adm-danger .adm-section-title { color:var(--red); }
+
+  /* ══ SEAL BOX ══ */
+  #sealbox-view { display:none; }
+  .sb-layout { display:grid; grid-template-columns:300px 1fr; gap:16px; }
+  @media (max-width:860px) { .sb-layout { grid-template-columns:1fr; } }
+  .sb-panel { background:var(--bg2); border:1px solid var(--border); }
+  .sb-panel-head { padding:9px 14px; border-bottom:1px solid var(--border); background:var(--bg3);
+    display:flex; align-items:center; gap:8px; }
+  .sb-panel-title { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700;
+    color:var(--amber); letter-spacing:.14em; }
+  .sb-panel-body { padding:14px; }
+  .sb-field { margin-bottom:12px; }
+  .sb-label { font-size:10px; font-weight:600; letter-spacing:.12em; color:var(--dim2);
+    text-transform:uppercase; margin-bottom:5px; display:block; }
+  .sb-select { width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:'Inter',sans-serif; font-size:12px; padding:6px 10px; outline:none; cursor:pointer; }
+  .sb-select:focus { border-color:var(--amber); }
+  .sb-inp { width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:'Inter',sans-serif; font-size:12px; padding:6px 10px; outline:none; }
+  .sb-inp:focus { border-color:var(--amber); }
+  .sb-seal-entry { display:grid; grid-template-columns:1fr 70px auto; gap:6px; align-items:center; margin-bottom:6px; }
+  .sb-seal-ac { position:relative; }
+  .sb-seal-inp { width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:'Inter',sans-serif; font-size:11px; padding:5px 8px; outline:none; }
+  .sb-seal-inp:focus { border-color:var(--amber); }
+  .sb-qty-inp { width:70px; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:'JetBrains Mono',monospace; font-size:12px; padding:5px 7px; outline:none; text-align:right; }
+  .sb-qty-inp:focus { border-color:var(--amber); }
+  .sb-ac-list { display:none; position:absolute; top:100%; left:0; right:0; z-index:500;
+    background:var(--bg1); border:1px solid var(--border); max-height:160px; overflow-y:auto; }
+  .sb-ac-list.open { display:block; }
+  .sb-ac-item { padding:6px 10px; font-size:11px; cursor:pointer; color:var(--text);
+    display:flex; align-items:center; gap:7px; }
+  .sb-ac-item:hover { background:rgba(255,179,71,.07); color:var(--amber); }
+  .sb-ac-icon { width:16px; height:16px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+  .sb-rm-btn { background:none; border:1px solid var(--border2); color:var(--dim3);
+    cursor:pointer; padding:4px 7px; font-size:11px; transition:all .12s; white-space:nowrap; }
+  .sb-rm-btn:hover { border-color:var(--red); color:var(--red); }
+  .sb-add-seal-btn { width:100%; padding:6px; background:none; border:1px dashed var(--border);
+    color:var(--dim2); cursor:pointer; font-size:11px; transition:all .12s; margin-bottom:10px; }
+  .sb-add-seal-btn:hover { border-color:var(--amber); color:var(--amber); }
+  .sb-box-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; padding:10px 14px;
+    background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--amber); }
+  .sb-box-icon { width:40px; height:40px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+  .sb-box-name { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; color:var(--amber); }
+  .sb-box-meta { font-size:11px; color:var(--dim); margin-top:2px; }
+  .sb-summary { background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--amber);
+    padding:12px 14px; margin-bottom:14px; }
+  .sb-summary-title { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--amber);
+    letter-spacing:.12em; margin-bottom:10px; }
+  .sb-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:12px; }
+  .sb-stat { background:var(--bg2); border:1px solid var(--border2); padding:9px 12px; }
+  .sb-stat-lbl { font-size:9px; color:var(--dim3); letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
+  .sb-stat-val { font-family:'Orbitron',sans-serif; font-size:16px; font-weight:700; color:var(--cyan); }
+  .sb-stat-sub { font-size:10px; color:var(--dim); margin-top:2px; }
+  .sb-verdict { padding:10px 14px; border:1px solid; font-size:12px; font-weight:600;
+    display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .sb-verdict.profit  { border-color:var(--green); color:var(--green); background:rgba(61,214,140,.07); }
+  .sb-verdict.loss    { border-color:var(--red);   color:var(--red);   background:rgba(255,77,106,.07); }
+  .sb-verdict.neutral { border-color:var(--border); color:var(--dim);  background:transparent; }
+  table.sb-tbl { width:100%; border-collapse:collapse; }
+  table.sb-tbl thead th { padding:7px 12px; text-align:left; font-family:'Orbitron',sans-serif;
+    font-size:8px; letter-spacing:.14em; color:var(--dim2); border-bottom:1px solid var(--border); white-space:nowrap; }
+  table.sb-tbl tbody tr { border-bottom:1px solid var(--border2); }
+  table.sb-tbl tbody tr:hover { background:rgba(255,179,71,.03); }
+  table.sb-tbl td { padding:8px 12px; vertical-align:middle; font-size:12px; }
+  .sb-tbl-name { font-weight:600; color:#e8f4ff; display:flex; align-items:center; gap:7px; }
+  .sb-tbl-icon { width:20px; height:20px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+  .sb-tbl-scans { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--blue); }
+  .sb-tbl-qty   { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--purple); }
+  .sb-tbl-rate  { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--green); }
+  .sb-tbl-price { font-family:'Orbitron',sans-serif; font-size:12px; color:var(--yellow); }
+  .sb-tbl-val   { font-family:'Orbitron',sans-serif; font-size:12px; color:var(--amber); font-weight:700; }
+  .sb-hint { font-size:11px; color:var(--dim3); margin-bottom:12px; line-height:1.7; padding:8px 12px;
+    background:var(--bg3); border:1px solid var(--border2); border-left:2px solid var(--dim4); }
+  .sb-sessions-title { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--dim2);
+    letter-spacing:.12em; margin:16px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+  .sb-session-item { background:var(--bg2); border:1px solid var(--border2); padding:8px 12px;
+    margin-bottom:6px; display:flex; align-items:center; gap:10px; font-size:11px; cursor:pointer; transition:border-color .12s; }
+  .sb-session-item:hover { border-color:var(--border); }
+  .sb-session-item.active-session { border-color:var(--amber); }
+  .sb-session-date { color:var(--dim3); font-size:10px; font-family:'JetBrains Mono',monospace; flex-shrink:0; }
+  .sb-session-info { flex:1; color:var(--dim); }
+  .sb-session-name { font-weight:600; color:var(--blue); }
+  .sb-session-rm { background:none; border:none; color:var(--dim3); cursor:pointer; font-size:12px; padding:0 4px; }
+  .sb-session-rm:hover { color:var(--red); }
+  .sb-no-data { text-align:center; padding:30px 20px; color:var(--dim3); font-size:12px; }
+  .sb-price-note { font-size:10px; color:var(--dim3); margin-top:6px; }
+  .sb-price-loading { color:var(--dim3); font-style:italic; font-size:11px; }
 </style>
 </head>
 <body>
@@ -400,7 +492,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.8</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.9</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -414,7 +506,7 @@
         </div>
       </div>
       <button class="btn green" id="btn-times" style="display:none">⏱ My Times</button>
-      <button class="btn purple" id="btn-speedtimes" style="display:none" title="Fetch top-50 all-time speed records for dungeons without a personal best">⚡ Speed Times</button>
+      <button class="btn purple" id="btn-speedtimes" style="display:none" title="Fetch top-50 all-time speed records">⚡ Speed Times</button>
       <button class="btn muted" id="btn-clearcache" title="Re-fetch all dungeon drop tables">↺ Clear Cache</button>
       <div class="sep"></div>
       <button class="btn muted" id="btn-settings">⚙ Settings</button>
@@ -432,6 +524,7 @@
     <button class="main-tab" data-view="blacklist">BLACKLIST</button>
     <button class="main-tab" data-view="drp">DRP RANKINGS</button>
     <button class="main-tab" data-view="listings">MY LISTINGS</button>
+    <button class="main-tab" data-view="sealbox" style="color:var(--amber)">📦 SEAL BOX</button>
   </div>
   <div id="sort-tabs">
     <button class="sort-tab active" data-sort="ev">EV / Run</button>
@@ -567,6 +660,87 @@
         </div>
       </div>
     </div>
+
+    <!-- ══ SEAL BOX VIEW ══ -->
+    <div id="sealbox-view">
+      <div class="sb-hint">
+        📦 Track seal box scanning sessions. <strong>1 scan = 5 of one specific seal.</strong> Enter how many scans you did per seal type.
+        Cost per scan = 100[B] (the scan fee). Compares scanning profit vs just selling the boxes.
+      </div>
+      <div class="sb-layout">
+        <!-- LEFT: Input panel -->
+        <div>
+          <div class="sb-panel">
+            <div class="sb-panel-head">
+              <div class="sb-panel-title">// NEW SESSION</div>
+            </div>
+            <div class="sb-panel-body">
+              <div class="sb-field">
+                <label class="sb-label">Seal Box Type</label>
+                <select class="sb-select" id="sb-box-select">
+                  <option value="">Loading seal boxes…</option>
+                </select>
+              </div>
+              <div id="sb-box-preview" style="display:none" class="sb-box-header">
+                <img class="sb-box-icon" id="sb-box-icon-img" src="" alt="">
+                <div>
+                  <div class="sb-box-name" id="sb-box-icon-name"></div>
+                  <div class="sb-box-meta">100[B] per scan · 5 seals per scan</div>
+                </div>
+              </div>
+              <div class="sb-field">
+                <label class="sb-label">Session Name (optional)</label>
+                <input class="sb-inp" id="sb-session-name" placeholder="e.g. Day 1 grind">
+              </div>
+              <div class="sb-field">
+                <label class="sb-label">Seals Obtained (scans × seal type)</label>
+                <div id="sb-seal-entries"></div>
+                <button class="sb-add-seal-btn" id="sb-add-seal-btn">+ Add Seal Type</button>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn amber" id="sb-save-btn" style="flex:1">💾 Save Session</button>
+                <button class="btn muted" id="sb-clear-btn">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Saved sessions list -->
+          <div style="margin-top:16px;">
+            <div class="sb-sessions-title">// SAVED SESSIONS</div>
+            <div id="sb-sessions-list"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Analysis panel -->
+        <div>
+          <div id="sb-analysis-empty" class="sb-no-data">
+            Select a box type and add seal data on the left, then save or select a session to see analysis.
+          </div>
+          <div id="sb-analysis" style="display:none">
+            <div class="sb-summary">
+              <div class="sb-summary-title">// SESSION SUMMARY</div>
+              <div class="sb-stat-grid" id="sb-stat-grid"></div>
+              <div id="sb-verdict" class="sb-verdict neutral">…</div>
+              <div id="sb-price-note" class="sb-price-note"></div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="sb-tbl">
+                <thead><tr>
+                  <th>Seal</th>
+                  <th>Scans</th>
+                  <th>Total Seals (×5)</th>
+                  <th>Drop Rate</th>
+                  <th>Market Price</th>
+                  <th>Total Value</th>
+                </tr></thead>
+                <tbody id="sb-result-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="admin-view">
       <div class="adm-section" style="margin-bottom:16px">
         <div class="adm-section-head">
@@ -612,6 +786,7 @@
         </div>
       </div>
     </div>
+
     <div id="empty">
       <div class="ico">⚔</div>
       <p>Hit <strong style="color:var(--cyan)">Run Analysis</strong> to fetch dungeon drop tables<br>and calculate live expected value from market prices.</p>
@@ -632,12 +807,14 @@ if ('serviceWorker' in navigator) {
 }
 (function () {
   'use strict';
-  console.log('%c[FarmOpt v4.8] Loaded', 'color:#00e5ff;font-weight:bold');
+  console.log('%c[FarmOpt v4.9] Loaded', 'color:#00e5ff;font-weight:bold');
 
   const CFG_KEY    = 'fo_v43_config';
   const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
   const ADMIN_NS   = 'fo_admin_token';
   const MY_NAME    = 'odyssey';
+  const ICON_BASE_ITEM = 'https://thedigitalodyssey.com/game_icons/items/';
+  const ICON_BASE_DUNG = 'https://thedigitalodyssey.com/web_assets/dgs/';
 
   let cfg = { cookie: '' };
   try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r) }; } catch(e) {}
@@ -748,6 +925,8 @@ if ('serviceWorker' in navigator) {
   let prices            = {};
   let allItemsSeen      = new Map();
   let cachedDetails     = [];
+  // Map: dungeonName -> image filename (for thumbnails)
+  let dungeonImageMap   = {};
   let itemIndex         = {};
   let currentView       = 'rankings';
   let isRunning         = false;
@@ -767,7 +946,7 @@ if ('serviceWorker' in navigator) {
   const itemFinder = $('item-finder'), ifInput = $('if-input'), tooltipEl = $('tooltip');
   const noticeEl = $('notice'), blacklistView = $('blacklist-view');
   const drpView = $('drp-view'), listingsView = $('listings-view');
-  const adminView = $('admin-view');
+  const adminView = $('admin-view'), sealboxView = $('sealbox-view');
 
   /* ══ ADMIN ══ */
   function maybeMakeAdmin(tamerName) {
@@ -918,6 +1097,7 @@ if ('serviceWorker' in navigator) {
     drpView.style.display       = view === 'drp'        ? 'block' : 'none';
     listingsView.style.display  = view === 'listings'   ? 'block' : 'none';
     adminView.style.display     = view === 'admin'      ? 'block' : 'none';
+    sealboxView.style.display   = view === 'sealbox'    ? 'block' : 'none';
     sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
     searchEl.style.display      = view === 'rankings'   ? '' : 'none';
@@ -925,6 +1105,7 @@ if ('serviceWorker' in navigator) {
     if (view === 'blacklist')  renderBlacklistView();
     if (view === 'drp' && !drpLoaded) loadDrpRankings();
     if (view === 'listings' && !listingsLoaded && !isRunning) loadMyListings();
+    if (view === 'sealbox') initSealBox();
   }
 
   /* ══ HELPERS ══ */
@@ -942,6 +1123,12 @@ if ('serviceWorker' in navigator) {
     if (n >= 1000000) return (n/1000000).toFixed(2) + ' <span style="color:var(--red);font-weight:700">[T]</span>';
     if (n >= 1000)    return (n/1000).toFixed(2)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
     return Math.round(n) + ' <span style="color:#888;font-weight:700">[B]</span>';
+  }
+  function fmtRaw(n) {
+    if (n == null || isNaN(n)) return '—';
+    if (n >= 1000000) return (n/1000000).toFixed(2) + '[T]';
+    if (n >= 1000)    return (n/1000).toFixed(2) + '[M]';
+    return Math.round(n) + '[B]';
   }
   function fmtTime(ms) {
     if (!ms || ms <= 0) return null;
@@ -970,6 +1157,8 @@ if ('serviceWorker' in navigator) {
     if (hours>0) return `${hours}h ${mins}m left`;
     return `${mins}m left`;
   }
+  function itemIconUrl(iconId) { return iconId ? ICON_BASE_ITEM + iconId + '.png' : ''; }
+  function dungeonThumbUrl(image) { return image ? ICON_BASE_DUNG + image : ''; }
 
   /* ══ RATE LIMITER ══ */
   async function rateGate() {
@@ -1052,11 +1241,14 @@ if ('serviceWorker' in navigator) {
     for (const diff of (d.difficulties || [])) {
       for (const obj of (diff.objectives || []))
         for (const rk of (obj.raid_rankings || []))
-          for (const r of (rk.rewards || [])) if (r.item_id) items.set(r.item_id, r.item_name);
-      for (const r of (diff.rewards || [])) if (r.item_id) items.set(r.item_id, r.item_name);
+          for (const r of (rk.rewards || [])) if (r.item_id) items.set(r.item_id, { name: r.item_name, icon: r.item_icon_id });
+      for (const r of (diff.rewards || [])) if (r.item_id) items.set(r.item_id, { name: r.item_name, icon: r.item_icon_id });
     }
     return items;
   }
+
+  // Store item icon map globally
+  let itemIconMap = {}; // itemId -> icon_id
 
   /* ══ SHARED RANK DUNGEONS ══ */
   async function getRankDungeons() {
@@ -1099,9 +1291,13 @@ if ('serviceWorker' in navigator) {
           catch(e) { log(`SKIP ${dungeons[i].name}: ${e.message}`, 'err'); continue; }
         }
         details.push(detail); setBar(i + 1, total);
-        for (const [id, name] of extractItems(detail)) {
-          itemNameMap.set(id, name); allItemsSeen.set(id, name);
-          const nk = 'name:' + name.toLowerCase(); if (blacklist[nk]) addToBlacklist(id, name);
+        // Store dungeon image
+        if (detail.image) dungeonImageMap[detail.name] = detail.image;
+        for (const [id, info] of extractItems(detail)) {
+          itemNameMap.set(id, info.name);
+          allItemsSeen.set(id, info.name);
+          if (info.icon) itemIconMap[id] = info.icon;
+          const nk = 'name:' + info.name.toLowerCase(); if (blacklist[nk]) addToBlacklist(id, info.name);
         }
       }
       log(`${details.length} dungeons loaded.`, 'ok'); cachedDetails = details;
@@ -1145,7 +1341,6 @@ if ('serviceWorker' in navigator) {
       setBar(1, 1); showResultsUI(); renderCards(allResults); applyFilters();
       log(`Table ready — ${allResults.length} combos. Fetching buy orders…`, 'ok');
 
-      // Auto-load my times immediately
       if (cfg.cookie) loadMyTimes().catch(() => {});
       if (!listingsLoaded && cfg.cookie) setTimeout(() => loadMyListings(), 500);
 
@@ -1227,8 +1422,8 @@ if ('serviceWorker' in navigator) {
               const avg = (r.min + r.max) / 2;
               const ev = bl ? 0 : prob * avg * (mkt?.price || 0);
               if (!bl) evRaid += ev;
-              drops.push({ item_id:r.item_id, name:r.item_name, prob, avg,
-                price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
+              drops.push({ item_id:r.item_id, name:r.item_name, icon_id:r.item_icon_id||itemIconMap[r.item_id]||null,
+                prob, avg, price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
                 medianPrice:mkt?.medianPrice??null, velocity:mkt?.velocity??null, isOutlier:mkt?.isOutlier??false,
                 ev, type:'raid', blacklisted:bl });
             }
@@ -1244,24 +1439,24 @@ if ('serviceWorker' in navigator) {
         for (const group of rewardGroups) {
           const base = group[0];
           const srank = group.find(r => r.rank === 7) || (group.length > 1 ? group[group.length-1] : null);
-          const addDrop = (id, name, avg, src, bRank) => {
+          const addDrop = (id, name, iconId, avg, src, bRank) => {
             const bl = isBlacklisted(id, name); const mkt = prices[id];
             const ev = bl ? 0 : avg * (mkt?.price || 0); if (!bl) evComp += ev;
-            drops.push({ item_id:id, name, prob:null, avg, baseQty:0, bestQty:avg, bestRank:bRank,
+            drops.push({ item_id:id, name, icon_id:iconId||itemIconMap[id]||null, prob:null, avg, baseQty:0, bestQty:avg, bestRank:bRank,
               price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
               medianPrice:mkt?.medianPrice??null, isOutlier:mkt?.isOutlier??false,
               ev, type:'rank', rewardSource:src, rankNum:0, blacklisted:bl });
           };
           if (srank && srank.rank > 0 && srank.item_id !== base.item_id) {
-            addDrop(base.item_id, base.item_name, base.item_count, 'base', 0);
-            addDrop(srank.item_id, srank.item_name, srank.item_count, 's', srank.rank);
+            addDrop(base.item_id, base.item_name, base.item_icon_id, base.item_count, 'base', 0);
+            addDrop(srank.item_id, srank.item_name, srank.item_icon_id, srank.item_count, 's', srank.rank);
           } else {
             const bestQty = (srank && srank.rank > 0) ? srank.item_count : 0;
             const total = base.item_count + bestQty;
             const bl = isBlacklisted(base.item_id, base.item_name); const mkt = prices[base.item_id];
             const ev = bl ? 0 : total * (mkt?.price || 0); if (!bl) evComp += ev;
-            drops.push({ item_id:base.item_id, name:base.item_name, prob:null, avg:total,
-              baseQty:base.item_count, bestQty, bestRank:srank?.rank??0,
+            drops.push({ item_id:base.item_id, name:base.item_name, icon_id:base.item_icon_id||itemIconMap[base.item_id]||null,
+              prob:null, avg:total, baseQty:base.item_count, bestQty, bestRank:srank?.rank??0,
               price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
               medianPrice:mkt?.medianPrice??null, isOutlier:mkt?.isOutlier??false, ev, type:'rank',
               rewardSource:bestQty>0?'base+s':'base', rankNum:0, blacklisted:bl });
@@ -1280,7 +1475,7 @@ if ('serviceWorker' in navigator) {
           if (mkt?.medianPrice) evMedian  += qty * mkt.medianPrice;
         }
         const ev = evRaid + evComp;
-        results.push({ key, name:d.name, difficulty:diff.difficulty,
+        results.push({ key, name:d.name, difficulty:diff.difficulty, dungImage:d.image||null,
           ev, evRaid, evComp, evInstant:evInstant||null, evMedian:evMedian||null,
           drops:[...raidDrops,...rankDrops], clearMs, timeSource,
           evhr:clearMs?(ev/clearMs)*3600000:null });
@@ -1306,14 +1501,14 @@ if ('serviceWorker' in navigator) {
   const DIFF_MAP    = { 1:'Story', 2:'Normal', 3:'Hard', 4:'Extreme' };
   const DIFF_TO_NUM = { Story:1, Normal:2, Hard:3, Extreme:4 };
 
-  /* ══ APPLY TIME (with source) ══ */
+  /* ══ APPLY TIME ══ */
   function applyTimeSilently(key, ms, source = 'mine') {
     const existingSource = timeSources[key];
     if (source === 'mine') {
       if (customTimes[key] && ms >= customTimes[key] && existingSource === 'mine') return;
       customTimes[key] = ms; timeSources[key] = 'mine';
     } else {
-      if (existingSource === 'mine') return; // never overwrite personal best
+      if (existingSource === 'mine') return;
       customTimes[key] = ms; timeSources[key] = source;
     }
     saveTimes(); saveTimeSources();
@@ -1425,7 +1620,6 @@ if ('serviceWorker' in navigator) {
       const rankDungeons = await getRankDungeons();
       const rdMap = new Map();
       for (const e of (rankDungeons || [])) rdMap.set(`${e.dungeon_name}|||${e.difficulty}`, e.dungeon_id);
-
       const toFetch = [];
       for (const r of allResults) {
         if (isDungeonBlacklisted(r.key, r.name)) continue;
@@ -1445,13 +1639,11 @@ if ('serviceWorker' in navigator) {
         if (!dungeonId) continue;
         toFetch.push({ r, dungeonId, diffNum });
       }
-
       if (!toFetch.length) {
         log('Speed times: all up to date.', 'ok');
         setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
         if (btn) btn.disabled = false; return;
       }
-
       log(`Speed times: fetching for ${toFetch.length} dungeons…`); setBar(0, toFetch.length);
       let fetched = 0;
       for (let i = 0; i < toFetch.length; i++) {
@@ -1553,6 +1745,17 @@ if ('serviceWorker' in navigator) {
     const wrap = document.createElement('div'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:0';
     const span = document.createElement('span');
     span.className = 'chip'+(d.type==='rank'?' rank-reward':'')+(d.blacklisted?' blacklisted':'');
+
+    // Item icon
+    if (d.icon_id) {
+      const ico = document.createElement('img');
+      ico.className = 'chip-icon';
+      ico.src = itemIconUrl(d.icon_id);
+      ico.alt = '';
+      ico.onerror = () => ico.style.display = 'none';
+      span.appendChild(ico);
+    }
+
     const nameSpan = document.createElement('span'); nameSpan.textContent = (d.blacklisted?'🚫 ':'')+d.name; span.appendChild(nameSpan);
     if (d.type === 'raid') {
       const pct = document.createElement('span'); pct.className = 'chip-pct'; pct.textContent = Math.round(d.prob*100)+'%'; span.appendChild(pct);
@@ -1630,14 +1833,25 @@ if ('serviceWorker' in navigator) {
       const srcBadge  = makeTimeSrcBadge(row.timeSource);
       const tr = document.createElement('tr');
       const tdR = document.createElement('td'); tdR.className='fo-rank '+rankClass; tdR.textContent=i+1; tr.appendChild(tdR);
+
+      // Dungeon name cell with thumbnail
       const tdN = document.createElement('td');
       const nameWrap = document.createElement('div'); nameWrap.className='dname-wrap';
+      if (row.dungImage) {
+        const thumb = document.createElement('img');
+        thumb.className = 'dung-thumb';
+        thumb.src = dungeonThumbUrl(row.dungImage);
+        thumb.alt = '';
+        thumb.onerror = () => thumb.style.display = 'none';
+        nameWrap.appendChild(thumb);
+      }
       const nameSpan = document.createElement('span'); nameSpan.className='dname'; nameSpan.textContent=row.name;
       const blBtn = document.createElement('button'); blBtn.className='dname-bl-btn'; blBtn.textContent='🚫 hide';
       blBtn.addEventListener('click',()=>{ addDungeonToBlacklist(row.key); allResults=buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters(); });
       nameWrap.appendChild(nameSpan); nameWrap.appendChild(blBtn); tdN.appendChild(nameWrap);
       tdN.insertAdjacentHTML('beforeend',`<span class="badge badge-${row.difficulty}">${row.difficulty||'?'}</span>`);
       tr.appendChild(tdN);
+
       const tdE = document.createElement('td'); tdE.className='ev';
       tdE.innerHTML=`<span class="ev-val">${fmt(row.ev)}</span><span class="ev-sub">/ run</span>`; tr.appendChild(tdE);
       if (showEvhr) {
@@ -1773,7 +1987,7 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ══ MY LISTINGS ══ */
-  const ICON_BASE = 'https://thedigitalodyssey.com/static/icons/';
+  const ICON_BASE = 'https://thedigitalodyssey.com/game_icons/items/';
   function makeLstItemCell(l) {
     return `<div class="lst-item-cell">
       <img class="lst-item-icon" src="${ICON_BASE}${l.icon}.png" alt="" onerror="this.style.display='none'">
@@ -1843,6 +2057,330 @@ if ('serviceWorker' in navigator) {
       $('lst-note').textContent=`${listings.length} listings — last refreshed just now.`;
     } catch(err) { $('lst-note').textContent='Error: '+err.message; }
     finally { isListingsRunning=false; $('btn-lst-load').disabled=false; }
+  }
+
+  /* ══════════════════════════════════════════════════
+     SEAL BOX TRACKER
+     Logic: 1 scan = 5 of ONE specific seal type.
+     Track scans per seal type.
+     Odds = (scans for seal X) / (total scans).
+     Cost = total scans × 100[B] scan fee.
+  ═══════════════════════════════════════════════════ */
+  const SB_SESSIONS_KEY = 'fo_v49_sb_sessions';
+  const SB_SEALS_KEY    = 'fo_v49_sb_seals';   // cached seal item list
+  const SCAN_FEE_B = 100; // 100[B] per scan
+
+  let sbSessions = [];
+  let sbSealItems = []; // { id, name, icon_id }
+  let sbBoxItems  = []; // seal box items from wiki
+  let sbCurrentSession = null; // session being viewed/edited
+  let sbSealPrices = {}; // itemId -> price (fetched lazily)
+  let sbPriceFetching = false;
+
+  function loadSbSessions() {
+    try { const r = localStorage.getItem(SB_SESSIONS_KEY); if (r) sbSessions = JSON.parse(r); } catch(e) { sbSessions = []; }
+  }
+  function saveSbSessions() {
+    try { localStorage.setItem(SB_SESSIONS_KEY, JSON.stringify(sbSessions)); } catch(e) {}
+  }
+  loadSbSessions();
+
+  let sbInited = false;
+
+  async function initSealBox() {
+    if (sbInited) { renderSbSessionsList(); return; }
+    sbInited = true;
+
+    // Load seal items from cache or API
+    const cached = cacheGet('sb_seals', 6 * 3600000);
+    if (cached) {
+      sbSealItems = cached.seals || [];
+      sbBoxItems  = cached.boxes || [];
+    } else {
+      await fetchSbItems();
+    }
+
+    populateSbBoxSelect();
+    renderSbSealEntries();
+    renderSbSessionsList();
+
+    $('sb-box-select').addEventListener('change', onSbBoxChange);
+    $('sb-add-seal-btn').addEventListener('click', addSbSealEntry);
+    $('sb-save-btn').addEventListener('click', saveSbSession);
+    $('sb-clear-btn').addEventListener('click', clearSbForm);
+  }
+
+  async function fetchSbItems() {
+    try {
+      // Fetch seal items (type_name=Seal Item)
+      const data = await apiFetch('/api/wiki/items?page=1&per_page=1000&type_name=Seal%20Item');
+      sbSealItems = (data.data || []).map(x => ({ id: x.id, name: x.name, icon_id: x.icon_id }));
+
+      // Fetch seal box items (scan items that contain "Seal Box")
+      const boxData = await apiFetch('/api/wiki/items?page=1&per_page=500&type_name=Scan%20item');
+      sbBoxItems = (boxData.data || [])
+        .filter(x => x.name.toLowerCase().includes('seal box') || x.name.toLowerCase().includes('seal box'))
+        .map(x => ({ id: x.id, name: x.name, icon_id: x.icon_id }));
+
+      cacheSet('sb_seals', { seals: sbSealItems, boxes: sbBoxItems });
+    } catch(e) {
+      console.error('[SealBox] fetch failed', e);
+    }
+  }
+
+  function populateSbBoxSelect() {
+    const sel = $('sb-box-select');
+    if (!sbBoxItems.length) {
+      sel.innerHTML = '<option value="">No seal boxes found</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Select seal box type —</option>' +
+      sbBoxItems.map(b => `<option value="${b.id}" data-icon="${b.icon_id||''}" data-name="${b.name}">${b.name}</option>`).join('');
+  }
+
+  function onSbBoxChange() {
+    const sel = $('sb-box-select');
+    const opt = sel.options[sel.selectedIndex];
+    const preview = $('sb-box-preview');
+    if (!opt || !opt.value) { preview.style.display = 'none'; return; }
+    const iconId = opt.dataset.icon;
+    const name   = opt.dataset.name;
+    $('sb-box-icon-img').src = iconId ? itemIconUrl(iconId) : '';
+    $('sb-box-icon-name').textContent = name;
+    preview.style.display = 'flex';
+  }
+
+  // Seal entries state: array of { sealId, sealName, sealIcon, scans }
+  let sbEntries = [];
+
+  function addSbSealEntry(prefill = null) {
+    const entry = prefill || { sealId: '', sealName: '', sealIcon: '', scans: '' };
+    sbEntries.push(entry);
+    renderSbSealEntries();
+  }
+
+  function renderSbSealEntries() {
+    const con = $('sb-seal-entries'); con.innerHTML = '';
+    if (!sbEntries.length) {
+      addSbSealEntry();
+      return;
+    }
+    sbEntries.forEach((entry, idx) => {
+      const row = document.createElement('div'); row.className = 'sb-seal-entry';
+
+      // Autocomplete input
+      const acWrap = document.createElement('div'); acWrap.className = 'sb-seal-ac';
+      const inp = document.createElement('input');
+      inp.className = 'sb-seal-inp'; inp.type = 'text';
+      inp.placeholder = 'Seal name…'; inp.value = entry.sealName;
+      inp.autocomplete = 'off';
+      const acList = document.createElement('div'); acList.className = 'sb-ac-list';
+      acWrap.appendChild(inp); acWrap.appendChild(acList);
+
+      function updateAc() {
+        const q = inp.value.toLowerCase();
+        const matches = sbSealItems.filter(s => s.name.toLowerCase().includes(q)).slice(0, 20);
+        acList.innerHTML = '';
+        if (!q || !matches.length) { acList.classList.remove('open'); return; }
+        matches.forEach(s => {
+          const item = document.createElement('div'); item.className = 'sb-ac-item';
+          if (s.icon_id) {
+            const ico = document.createElement('img'); ico.className = 'sb-ac-icon';
+            ico.src = itemIconUrl(s.icon_id); ico.onerror = () => ico.style.display='none';
+            item.appendChild(ico);
+          }
+          item.appendChild(document.createTextNode(s.name));
+          item.addEventListener('mousedown', e => {
+            e.preventDefault();
+            sbEntries[idx].sealId = s.id; sbEntries[idx].sealName = s.name; sbEntries[idx].sealIcon = s.icon_id||'';
+            inp.value = s.name; acList.classList.remove('open');
+          });
+          acList.appendChild(item);
+        });
+        acList.classList.add('open');
+      }
+      inp.addEventListener('input', () => { sbEntries[idx].sealName = inp.value; sbEntries[idx].sealId = ''; updateAc(); });
+      inp.addEventListener('focus', updateAc);
+      inp.addEventListener('blur', () => setTimeout(() => acList.classList.remove('open'), 150));
+
+      // Scans input
+      const scansInp = document.createElement('input');
+      scansInp.className = 'sb-qty-inp'; scansInp.type = 'number'; scansInp.min = '1'; scansInp.placeholder = 'Scans';
+      scansInp.value = entry.scans || '';
+      scansInp.addEventListener('input', () => { sbEntries[idx].scans = parseInt(scansInp.value) || 0; });
+
+      // Remove btn
+      const rmBtn = document.createElement('button'); rmBtn.className = 'sb-rm-btn'; rmBtn.textContent = '✕';
+      rmBtn.addEventListener('click', () => { sbEntries.splice(idx, 1); renderSbSealEntries(); });
+
+      row.appendChild(acWrap); row.appendChild(scansInp); row.appendChild(rmBtn);
+      con.appendChild(row);
+    });
+  }
+
+  function saveSbSession() {
+    const boxSel = $('sb-box-select');
+    if (!boxSel.value) { alert('Select a seal box type first.'); return; }
+    const validEntries = sbEntries.filter(e => e.sealName && e.scans > 0);
+    if (!validEntries.length) { alert('Add at least one seal with scans > 0.'); return; }
+    const session = {
+      id: Date.now(),
+      name: $('sb-session-name').value.trim() || new Date().toLocaleString('en-GB'),
+      boxId: boxSel.value,
+      boxName: boxSel.options[boxSel.selectedIndex].dataset.name,
+      boxIcon: boxSel.options[boxSel.selectedIndex].dataset.icon || '',
+      ts: Date.now(),
+      entries: validEntries.map(e => ({ sealId: e.sealId, sealName: e.sealName, sealIcon: e.sealIcon, scans: e.scans }))
+    };
+    sbSessions.unshift(session);
+    saveSbSessions();
+    clearSbForm();
+    renderSbSessionsList();
+    viewSbSession(session);
+  }
+
+  function clearSbForm() {
+    $('sb-box-select').value = '';
+    $('sb-session-name').value = '';
+    $('sb-box-preview').style.display = 'none';
+    sbEntries = [];
+    renderSbSealEntries();
+  }
+
+  function renderSbSessionsList() {
+    const con = $('sb-sessions-list'); con.innerHTML = '';
+    if (!sbSessions.length) { con.innerHTML = '<div style="color:var(--dim3);font-size:11px;padding:8px 0">No sessions yet.</div>'; return; }
+    sbSessions.forEach(s => {
+      const totalScans = s.entries.reduce((sum, e) => sum + e.scans, 0);
+      const item = document.createElement('div');
+      item.className = 'sb-session-item' + (sbCurrentSession?.id === s.id ? ' active-session' : '');
+      item.innerHTML = `
+        <div class="sb-session-date">${new Date(s.ts).toLocaleDateString('en-GB')}</div>
+        <div class="sb-session-info"><div class="sb-session-name">${s.name}</div><div style="font-size:10px;color:var(--dim3)">${s.boxName} · ${totalScans} scans · ${s.entries.length} seal types</div></div>`;
+      const rmBtn = document.createElement('button'); rmBtn.className = 'sb-session-rm'; rmBtn.textContent = '✕';
+      rmBtn.title = 'Delete session';
+      rmBtn.addEventListener('click', e => { e.stopPropagation(); sbSessions = sbSessions.filter(x => x.id !== s.id); saveSbSessions(); if (sbCurrentSession?.id === s.id) { sbCurrentSession = null; $('sb-analysis').style.display='none'; $('sb-analysis-empty').style.display='block'; } renderSbSessionsList(); });
+      item.appendChild(rmBtn);
+      item.addEventListener('click', () => viewSbSession(s));
+      con.appendChild(item);
+    });
+  }
+
+  async function viewSbSession(session) {
+    sbCurrentSession = session;
+    renderSbSessionsList(); // re-render to highlight active
+    $('sb-analysis-empty').style.display = 'none';
+    $('sb-analysis').style.display = 'block';
+
+    const totalScans = session.entries.reduce((sum, e) => sum + e.scans, 0);
+    const totalSealQty = totalScans * 5; // each scan gives 5 of that seal
+    const totalCost = totalScans * SCAN_FEE_B; // scan fee only (box cost not tracked here)
+
+    // Render stat grid
+    const sg = $('sb-stat-grid');
+    sg.innerHTML = `
+      <div class="sb-stat"><div class="sb-stat-lbl">Total Scans</div><div class="sb-stat-val">${totalScans.toLocaleString()}</div><div class="sb-stat-sub">100[B] each</div></div>
+      <div class="sb-stat"><div class="sb-stat-lbl">Scan Cost</div><div class="sb-stat-val" style="color:var(--red)">${fmtRaw(totalCost)}</div><div class="sb-stat-sub">total fee paid</div></div>
+      <div class="sb-stat"><div class="sb-stat-lbl">Total Seals Got</div><div class="sb-stat-val">${totalSealQty.toLocaleString()}</div><div class="sb-stat-sub">5 per scan</div></div>
+      <div class="sb-stat"><div class="sb-stat-lbl">Seal Types</div><div class="sb-stat-val">${session.entries.length}</div><div class="sb-stat-sub">unique seals</div></div>`;
+
+    // Render table immediately with loading prices
+    renderSbResultTable(session, totalScans, {});
+    $('sb-verdict').className = 'sb-verdict neutral'; $('sb-verdict').textContent = '⏳ Fetching seal prices…';
+    $('sb-price-note').textContent = '';
+
+    // Fetch box sell price + seal prices
+    if (!sbPriceFetching) {
+      sbPriceFetching = true;
+      try {
+        // Fetch box price
+        let boxPrice = null;
+        try {
+          const res = await marketGet(`/api/market/listings?item=${session.boxId}&side=sell&limit=1`);
+          if (res && res.ok) { const d = await res.json(); boxPrice = d?.listings?.[0]?.price ?? null; }
+        } catch(e) {}
+        sbSealPrices['__box__' + session.boxId] = boxPrice;
+
+        // Fetch each seal price
+        for (const e of session.entries) {
+          if (!e.sealId) continue;
+          if (sbSealPrices[e.sealId] !== undefined) continue;
+          await sleep(500);
+          try {
+            const res = await marketGet(`/api/market/listings?item=${e.sealId}&side=sell&limit=1`);
+            if (res && res.ok) { const d = await res.json(); sbSealPrices[e.sealId] = d?.listings?.[0]?.price ?? null; }
+            else sbSealPrices[e.sealId] = null;
+          } catch(e2) { sbSealPrices[e.sealId] = null; }
+        }
+      } finally { sbPriceFetching = false; }
+    }
+
+    renderSbAnalysis(session, totalScans, totalCost);
+  }
+
+  function renderSbAnalysis(session, totalScans, totalCost) {
+    renderSbResultTable(session, totalScans, sbSealPrices);
+
+    // Calculate total seal value
+    let totalSealValue = 0; let allPriced = true;
+    for (const e of session.entries) {
+      const price = sbSealPrices[e.sealId] ?? null;
+      if (price == null) { allPriced = false; continue; }
+      totalSealValue += e.scans * 5 * price; // scans × 5 seals × price each
+    }
+
+    // Box sell value = totalScans boxes × box price (what you could've gotten instead)
+    const boxPrice = sbSealPrices['__box__' + session.boxId] ?? null;
+    const boxSellValue = boxPrice != null ? totalScans * boxPrice : null;
+
+    // Verdict
+    const verdictEl = $('sb-verdict');
+    const noteEl = $('sb-price-note');
+    if (!allPriced) {
+      verdictEl.className = 'sb-verdict neutral';
+      verdictEl.textContent = '⚠ Some seals have no market listing — partial calculation only.';
+      noteEl.textContent = '';
+    } else if (boxSellValue == null) {
+      verdictEl.className = 'sb-verdict neutral';
+      verdictEl.innerHTML = `Seal value from scanning: <strong>${fmtRaw(totalSealValue)}</strong> · Box market price not found (can't compare vs selling boxes)`;
+      noteEl.textContent = `Scan cost: ${fmtRaw(totalCost)} · Net from scanning: ${fmtRaw(totalSealValue - totalCost)}`;
+    } else {
+      const scanProfit = totalSealValue - totalCost;
+      const boxProfit  = boxSellValue;
+      const diff = scanProfit - boxProfit;
+      if (diff > 0) {
+        verdictEl.className = 'sb-verdict profit';
+        verdictEl.innerHTML = `✓ Scanning better by ${fmtRaw(diff)} · Seal value: ${fmtRaw(totalSealValue)} vs Box sell: ${fmtRaw(boxSellValue)} (after ${fmtRaw(totalCost)} fee)`;
+      } else if (diff < 0) {
+        verdictEl.className = 'sb-verdict loss';
+        verdictEl.innerHTML = `✗ Selling boxes better by ${fmtRaw(-diff)} · Seal value: ${fmtRaw(totalSealValue)} vs Box sell: ${fmtRaw(boxSellValue)} (after ${fmtRaw(totalCost)} fee)`;
+      } else {
+        verdictEl.className = 'sb-verdict neutral';
+        verdictEl.textContent = 'Break even — scanning vs selling boxes equal.';
+      }
+      noteEl.textContent = `Scan fee paid: ${fmtRaw(totalCost)} · Box price each: ${fmtRaw(boxPrice)}`;
+    }
+  }
+
+  function renderSbResultTable(session, totalScans, priceMap) {
+    const tbody = $('sb-result-tbody'); tbody.innerHTML = '';
+    session.entries.forEach(e => {
+      const scans = e.scans;
+      const qty = scans * 5;
+      const rate = totalScans > 0 ? ((scans / totalScans) * 100).toFixed(1) : '—';
+      const price = priceMap[e.sealId] ?? null;
+      const totalVal = price != null ? scans * 5 * price : null;
+      const tr = document.createElement('tr');
+      const iconHtml = e.sealIcon ? `<img class="sb-tbl-icon" src="${itemIconUrl(e.sealIcon)}" alt="" onerror="this.style.display='none'">` : '';
+      tr.innerHTML = `
+        <td><div class="sb-tbl-name">${iconHtml}${e.sealName||'—'}</div></td>
+        <td class="sb-tbl-scans">${scans}</td>
+        <td class="sb-tbl-qty">${qty.toLocaleString()} seals</td>
+        <td class="sb-tbl-rate">${rate}%</td>
+        <td class="sb-tbl-price">${price!=null?fmt(price):'<span class="sb-price-loading">fetching…</span>'}</td>
+        <td class="sb-tbl-val">${totalVal!=null?fmt(totalVal):'<span class="sb-price-loading">—</span>'}</td>`;
+      tbody.appendChild(tr);
+    });
   }
 
   /* ══ ADMIN ══ */
