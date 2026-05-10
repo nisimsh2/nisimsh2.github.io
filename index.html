@@ -2106,7 +2106,7 @@ if ('serviceWorker' in navigator) {
   const SEAL_BOX_CONTENTS_BUILTIN = {
     'AT': ['Guilmon Seal','Devimon Seal','Patamon Seal','Giromon Seal','Tanemon Seal','Mushroomon Seal','Chrysalimon Seal','Garurumon(Black) Seal','Cherrymon Seal','Marin Devimon Seal'],
     'Hp': ['V-mon Seal','Soulmon Seal','Xuanwumon Seal','Tsunomon Seal','Keramon Seal','Gazimon Seal','Gardromon Seal','Centalmon Seal','SkullSatamon Seal','DexDoruGreymon Seal','Sinduramon Seal'],
-    'DS': ['Diabolomon Seal','Agumon Seal','Coredramon Green Seal','Zhuqiaomon Seal','DemiMeramon Seal','Candlemon Seal','Woodmon Seal','SkullGreymon Seal','Asuramon Seal','WereGarurumon Seal','Toy Agumon Seal'],
+    'DS': ['Diabolomon Seal','Agumon Seal','Coredramon (Green) Seal','Zhuqiaomon Seal','DemiMeramon Seal','Candlemon Seal','Woodmon Seal','SkullGreymon Seal','Asuramon Seal','WereGarurumon Seal','Toy Agumon Seal'],
     'CT': ['Sharmamon Seal','Koromon Seal','Kunemon Seal','Kyubimon Seal','Togemon Seal','Volcamon Seal','Nanomon Seal','SaberLeomon Seal'],
     'DE': ['Goblimon Seal','Leomon Seal','Upamon Seal','Renamon Seal','Elecmon Seal','Flymon Seal','Meramon Seal','Meteormon Seal','Chimairamon Seal','Warumonzaemon Seal'],
   };
@@ -2169,7 +2169,7 @@ if ('serviceWorker' in navigator) {
     const n = name.toLowerCase();
     if (n.includes('maxhp')||n.includes('max hp')||n.includes('[hp]')) return 'Hp';
     if (/\[at\]|\bat\b/.test(n)) return 'AT';
-    if (/\[ds\]|\bds\b/.test(n)) return 'DS';
+    if (n.includes('maxds') || /\[ds\]|\bds\b/.test(n)) return 'DS';
     if (/\[ct\]|\bct\b/.test(n)) return 'CT';
     if (/\[de\]|\bde\b/.test(n)) return 'DE';
     return null;
@@ -2195,41 +2195,15 @@ if ('serviceWorker' in navigator) {
   let serverSealDb = {}; // loaded from KV
 
   async function loadServerSealDb() {
-    // 1. Get the token from your local storage or define it here
-    const token = localStorage.getItem('fo_admin_token') || adminToken || '';
-    if (!token) return;
-    
     try {
-        const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
-            method: 'GET',
-            headers: {
-                // This is the specific part that prevents the 403 error
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (res.status === 403) {
-            console.error("Access Forbidden: Blah Blah Dev Stuff");
-            return;
-        }
-
-        if (res.ok) {
-          serverSealDb = await res.json();
-          console.log("Seal DB loaded.");
-        }
-        // also load box contents overrides
-        const resC = await fetch(WORKER_URL + '/fo-admin/sealboxcontents', {
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-        });
-        if (resC.ok) {
-          const overrides = await resC.json();
-          Object.assign(SEAL_BOX_CONTENTS_OVERRIDE, overrides);
-        }
-    } catch(e) {
-        console.warn('[SealBox] KV DB load failed', e);
-    }
-}
+      const [resDb, resC] = await Promise.all([
+        fetch(WORKER_URL + '/fo-admin/sealdb',          { headers: { 'Content-Type': 'application/json' } }),
+        fetch(WORKER_URL + '/fo-admin/sealboxcontents', { headers: { 'Content-Type': 'application/json' } }),
+      ]);
+      if (resDb.ok) serverSealDb = await resDb.json();
+      if (resC.ok)  Object.assign(SEAL_BOX_CONTENTS_OVERRIDE, await resC.json());
+    } catch(e) { console.warn('[SealBox] server DB load failed', e); }
+  }
 
   async function initSealBox() {
     if (sbInited) { renderSbSessionsList(); return; }
@@ -2745,13 +2719,13 @@ if ('serviceWorker' in navigator) {
     renderAdminSealDbFull();
   }
 
-  async function adminSealDbPush(boxKey, boxes, data) {
+    async function adminSealDbPush(boxKey, boxes, data, label='') {
     const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
     try {
       await fetch(WORKER_URL + '/fo-admin/sealdb', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ boxKey, boxes, data })
+        body: JSON.stringify({ boxKey, boxes, data, name: label })
       });
       // Reload server DB
       const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
@@ -2810,7 +2784,8 @@ if ('serviceWorker' in navigator) {
           <select class="adm-inp" id="adm-db-boxkey2" style="flex:0 0 140px">
             ${allBoxKeys.map(k=>`<option value="${k}">${k}</option>`).join('')}
           </select>
-          <input class="adm-inp" id="adm-db-boxes2" type="number" min="1" placeholder="# boxes scanned" style="flex:0 0 160px">
+          <input class="adm-inp" id="adm-db-boxes2" type="number" min="1" placeholder="# boxes scanned" style="flex:0 0 150px">
+          <input class="adm-inp" id="adm-db-label2" placeholder="Label (e.g. 2025-05 odyssey)" style="flex:1;min-width:160px">
           <button class="btn amber" id="adm-db-add-btn2">+ Add Sample</button>
         </div>
         <div id="adm-db-seal-inputs2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-bottom:10px"></div>
@@ -2958,8 +2933,10 @@ if ('serviceWorker' in navigator) {
     const sumQty=Object.values(data).reduce((s,v)=>s+v,0);
     const expected=boxes*5;
     if (sumQty!==expected&&!confirm(`⚠ Sum ${sumQty} ≠ ${boxes}×5=${expected}. Add anyway?`)) return;
-    await adminSealDbPush(boxKey, boxes, data);
+    const label = $('adm-db-label2')?.value.trim() || '';
+    await adminSealDbPush(boxKey, boxes, data, label);
     $('adm-db-boxes2').value='';
+    $('adm-db-label2').value='';
     $('adm-db-seal-inputs2')?.querySelectorAll('input').forEach(i=>i.value='');
     $('adm-db-validation').textContent='';
     renderAdminSealDbFull();
@@ -2980,19 +2957,68 @@ if ('serviceWorker' in navigator) {
       block.style.cssText = 'margin-bottom:12px';
       block.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:6px">${key} — ${samples.length} samples (${builtinCount} builtin + ${serverSamples.length} server) · ${totalBoxes.toLocaleString()} boxes total</div>`;
       serverSamples.forEach(s => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);padding:6px 10px;margin-bottom:4px;font-size:11px';
         const date = new Date(s.ts).toLocaleString('en-GB');
-        const sealsCount = Object.keys(s.data).length;
-        row.innerHTML = `<span style="color:var(--dim3);font-family:'JetBrains Mono',monospace;font-size:10px">${date}</span>
-          <span style="flex:1;color:var(--text)">${s.boxes} boxes · ${sealsCount} seal types</span>
-          <button class="btn red" style="font-size:8px;padding:3px 8px">✕</button>`;
-        row.querySelector('button').addEventListener('click', async () => {
-          if (!confirm(`Delete this sample (${s.boxes} boxes, ${date})?`)) return;
+        const sealsCount = Object.keys(s.data||{}).length;
+        const label = s.name || date;
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'background:var(--bg2);border:1px solid var(--border2);margin-bottom:6px';
+
+        // Header row
+        const header = document.createElement('div');
+        header.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer';
+        header.innerHTML = `
+          <span style="font-size:10px;color:var(--amber);font-weight:600;flex:1">${label}</span>
+          <span style="font-size:10px;color:var(--dim3);font-family:'JetBrains Mono',monospace">${s.boxes} boxes · ${sealsCount} seals</span>
+          <span style="font-size:10px;color:var(--dim3)">${date}</span>
+          <button class="btn muted" style="font-size:8px;padding:2px 7px" data-toggle>▶ Details</button>
+          <button class="btn red"   style="font-size:8px;padding:2px 7px" data-del>✕</button>`;
+
+        // Details panel (hidden by default)
+        const details = document.createElement('div');
+        details.style.cssText = 'display:none;padding:8px 10px;border-top:1px solid var(--border2)';
+        const sealEntries = Object.entries(s.data||{}).sort((a,b)=>b[1]-a[1]);
+        details.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px">
+          ${sealEntries.map(([name, qty]) => {
+            const rate = s.boxes>0 ? ((qty/5/s.boxes)*100).toFixed(1) : '—';
+            return `<div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);padding:5px 8px">
+              <input type="number" value="${qty}" min="0" style="width:55px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:10px;padding:2px 5px;font-family:'JetBrains Mono',monospace;text-align:right" data-edit-seal="${name}">
+              <span style="flex:1;font-size:10px;color:var(--text)">${name}</span>
+              <span style="font-size:9px;color:var(--dim3)">${rate}%</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+          <input type="number" value="${s.boxes}" min="1" style="width:110px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 8px" data-edit-boxes>
+          <button class="btn green" style="font-size:8px;padding:4px 10px" data-save-edits>💾 Save</button>
+          <span style="font-size:10px;color:var(--dim3)" data-edit-status></span>
+        </div>`;
+
+        // Wire buttons
+        header.querySelector('[data-toggle]').addEventListener('click', () => {
+          const open = details.style.display !== 'none';
+          details.style.display = open ? 'none' : 'block';
+          header.querySelector('[data-toggle]').textContent = open ? '▶ Details' : '▼ Details';
+        });
+        header.querySelector('[data-del]').addEventListener('click', async () => {
+          if (!confirm(`Delete "${label}" (${s.boxes} boxes)?`)) return;
           await adminSealDbDelete(key, s.ts);
           renderAdminSamplesList(con);
         });
-        block.appendChild(row);
+        details.querySelector('[data-save-edits]').addEventListener('click', async () => {
+          const newBoxes = parseInt(details.querySelector('[data-edit-boxes]').value)||0;
+          const newData = {};
+          details.querySelectorAll('[data-edit-seal]').forEach(inp => { newData[inp.dataset.editSeal] = parseInt(inp.value)||0; });
+          const statusEl = details.querySelector('[data-edit-status]');
+          statusEl.textContent = 'Saving…';
+          // Delete old, push new
+          await adminSealDbDelete(key, s.ts);
+          await adminSealDbPush(key, newBoxes, newData, s.name||'');
+          statusEl.textContent = '✓ Saved';
+          setTimeout(() => renderAdminSamplesList(con), 600);
+        });
+
+        wrap.appendChild(header); wrap.appendChild(details);
+        block.appendChild(wrap);
       });
       if (!serverSamples.length) block.insertAdjacentHTML('beforeend','<div style="font-size:10px;color:var(--dim3);padding:4px 0">No server samples yet — only builtin data.</div>');
       con.appendChild(block);
