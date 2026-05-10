@@ -492,7 +492,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v4.9</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v5.0</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -834,7 +834,7 @@ if ('serviceWorker' in navigator) {
 }
 (function () {
   'use strict';
-  console.log('%c[FarmOpt v4.9] Loaded', 'color:#00e5ff;font-weight:bold');
+  console.log('%c[FarmOpt v5.0] Loaded', 'color:#00e5ff;font-weight:bold');
 
   const CFG_KEY    = 'fo_v43_config';
   const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
@@ -2121,7 +2121,7 @@ if ('serviceWorker' in navigator) {
     'Marin Devimon Seal':  'i10bmshs',
     'Garurumon(Black) Seal':'i8ufbbz', 
     'Koromon Seal':        'ix3iizt',  
-    'Upamon Seal':         'i1jbjdij',    // replace with real ID
+    'Upamon Seal':         'i1jbjdij',
   };
   /* Hardcoded sample DB — HP box (3 live samples) */
   const SEAL_DROP_DB_BUILTIN = {
@@ -2196,7 +2196,8 @@ if ('serviceWorker' in navigator) {
 
   async function loadServerSealDb() {
     // 1. Get the token from your local storage or define it here
-    const token = localStorage.getItem('fo_admin_token') || 'YOUR_SECRET_TOKEN_HERE'; 
+    const token = localStorage.getItem('fo_admin_token') || adminToken || '';
+    if (!token) return;
     
     try {
         const res = await fetch(WORKER_URL + '/fo-admin/sealdb', {
@@ -2214,8 +2215,16 @@ if ('serviceWorker' in navigator) {
         }
 
         if (res.ok) {
-            serverSealDb = await res.json();
-            console.log("Seal Database loaded successfully.");
+          serverSealDb = await res.json();
+          console.log("Seal DB loaded.");
+        }
+        // also load box contents overrides
+        const resC = await fetch(WORKER_URL + '/fo-admin/sealboxcontents', {
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        if (resC.ok) {
+          const overrides = await resC.json();
+          Object.assign(SEAL_BOX_CONTENTS_OVERRIDE, overrides);
         }
     } catch(e) {
         console.warn('[SealBox] KV DB load failed', e);
