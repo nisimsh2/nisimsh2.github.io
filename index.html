@@ -3465,7 +3465,7 @@ if ('serviceWorker' in navigator) {
   async function loadWbBosses() {
     try {
       const res = await fetch(WORKER_URL + '/fo-admin/worldbosses', { headers: { 'Content-Type': 'application/json' } });
-      if (res.ok) wbBosses = await res.json();
+      if (res.ok) { const d = await res.json(); wbBosses = Array.isArray(d) ? d : []; }
     } catch(e) { console.warn('[WB] load failed', e); }
     // Fetch prices for all drops
     const allItemIds = [...new Set(wbBosses.flatMap(b => (b.drops||[]).map(d => d.itemId).filter(Boolean)))];
@@ -3489,6 +3489,7 @@ if ('serviceWorker' in navigator) {
   }
 
   function wbTick() {
+    if (!Array.isArray(wbBosses) || !wbBosses.length) return;
     const now = Date.now();
     for (const boss of wbBosses) {
       const next = wbGetNextSpawn(boss);
