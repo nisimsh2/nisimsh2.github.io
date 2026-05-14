@@ -461,6 +461,42 @@
   .sb-no-data { text-align:center; padding:30px 20px; color:var(--dim3); font-size:12px; }
   .sb-price-note { font-size:10px; color:var(--dim3); margin-top:6px; }
   .sb-price-loading { color:var(--dim3); font-style:italic; font-size:11px; }
+/* ══ SEAL EXCHANGE ══ */
+  #seal-exchange-view { display:none; }
+  .se-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .se-ticket-card { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--purple); padding:10px 16px; display:flex; align-items:center; gap:12px; flex:1; min-width:220px; }
+  .se-ticket-icon { width:36px; height:36px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+  .se-ticket-name { font-family:'Orbitron',sans-serif; font-size:10px; color:var(--purple); letter-spacing:.1em; }
+  .se-ticket-price { font-family:'Orbitron',sans-serif; font-size:16px; font-weight:700; color:var(--yellow); }
+  .se-qty-wrap { display:flex; align-items:center; gap:8px; background:var(--bg2); border:1px solid var(--border); padding:8px 14px; }
+  .se-qty-lbl { font-size:11px; color:var(--dim2); white-space:nowrap; }
+  .se-qty-inp { width:70px; background:var(--bg3); border:1px solid var(--border); color:var(--text); font-family:'JetBrains Mono',monospace; font-size:14px; padding:5px 8px; outline:none; text-align:right; }
+  .se-qty-inp:focus { border-color:var(--purple); }
+  .se-compare { background:var(--bg3); border:1px solid var(--border2); border-left:2px solid var(--dim4); padding:9px 14px; margin-bottom:10px; font-size:12px; color:var(--dim); }
+  .se-verdict { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--green); padding:9px 14px; margin-bottom:12px; font-size:12px; display:none; }
+  .se-verdict-title { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--green); letter-spacing:.12em; margin-bottom:4px; }
+  table.se-tbl { width:100%; border-collapse:collapse; }
+  table.se-tbl thead th { padding:8px 12px; text-align:left; font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:.16em; color:var(--dim2); border-bottom:1px solid var(--border); white-space:nowrap; cursor:pointer; user-select:none; }
+  table.se-tbl thead th:hover { color:var(--blue2); }
+  table.se-tbl thead th.se-sorted { color:var(--yellow); }
+  table.se-tbl tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
+  table.se-tbl tbody tr:hover { background:rgba(0,229,255,.03); }
+  table.se-tbl tbody tr.se-best { background:rgba(61,214,140,.04); border-left:2px solid var(--green); }
+  table.se-tbl td { padding:9px 12px; vertical-align:middle; font-size:12px; }
+  .se-seal-name { font-weight:600; color:#e8f4ff; display:flex; align-items:center; gap:7px; }
+  .se-seal-icon { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+  .se-qty-badge { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; border:1px solid; flex-shrink:0; }
+  .se-qty-10 { border-color:#005a78; color:#009ec4; background:rgba(0,90,120,.15); }
+  .se-qty-5  { border-color:#3a3a7a; color:var(--purple); background:rgba(58,58,122,.15); }
+  .se-qty-1  { border-color:#7a5000; color:var(--amber); background:rgba(122,80,0,.15); }
+  .se-price  { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--blue2); }
+  .se-total  { font-family:'Orbitron',sans-serif; font-size:14px; font-weight:700; color:var(--yellow); }
+  .se-mytotal { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--green); }
+  .se-na { color:var(--dim3); font-style:italic; font-size:11px; }
+  .se-bar-wrap { width:80px; }
+  .se-bar { height:4px; background:var(--border2); border-radius:3px; overflow:hidden; }
+  .se-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#3a5a00,var(--green)); }
+  .se-note { font-size:11px; color:var(--dim3); margin-bottom:12px; font-style:italic; }
 </style>
 </head>
 <body>
@@ -525,6 +561,7 @@
     <button class="main-tab" data-view="drp">DRP RANKINGS</button>
     <button class="main-tab" data-view="listings">MY LISTINGS</button>
     <button class="main-tab" data-view="sealbox" style="color:var(--amber)">📦 SEAL BOX</button>
+    <button class="main-tab" data-view="sealexchange" style="color:var(--purple)">🔁 SEAL EXCHANGE</button>
   </div>
   <div id="sort-tabs">
     <button class="sort-tab active" data-sort="ev">EV / Run</button>
@@ -661,6 +698,44 @@
       </div>
     </div>
 
+    <!-- ══ SEAL EXCHANGE VIEW ══ -->
+    <div id="seal-exchange-view">
+      <div class="se-header">
+        <div class="se-ticket-card">
+          <img class="se-ticket-icon" id="se-ticket-icon" src="" alt="" onerror="this.style.display='none'">
+          <div>
+            <div class="se-ticket-name">SEAL EXCHANGE TICKET</div>
+            <div class="se-ticket-price" id="se-ticket-price">—</div>
+          </div>
+        </div>
+        <div class="se-qty-wrap">
+          <div class="se-qty-lbl">Tickets I have:</div>
+          <input class="se-qty-inp" id="se-ticket-qty" type="number" min="0" placeholder="0">
+        </div>
+        <button class="btn purple" id="se-fetch-btn">↻ Fetch Prices</button>
+      </div>
+      <div class="se-compare" id="se-compare" style="display:none"></div>
+      <div class="se-verdict" id="se-verdict">
+        <div class="se-verdict-title">// BEST DEAL</div>
+        <div id="se-verdict-body"></div>
+      </div>
+      <div class="se-note" id="se-note">Click Fetch Prices to load market data.</div>
+      <div style="overflow-x:auto">
+        <table class="se-tbl">
+          <thead><tr>
+            <th style="width:36px">#</th>
+            <th>Seal</th>
+            <th style="width:80px">Qty/Ticket</th>
+            <th class="se-sorted" id="se-th-total">Total Value ▼</th>
+            <th>Price / Seal</th>
+            <th id="se-th-mytotal" style="display:none">My Total ▼</th>
+            <th style="width:90px">Bar</th>
+          </tr></thead>
+          <tbody id="se-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ══ SEAL BOX VIEW ══ -->
     <div id="sealbox-view">
       <div class="sb-layout">
@@ -746,6 +821,25 @@
     </div>
 
     <div id="admin-view">
+      <div class="adm-section" style="margin-bottom:16px;border-left-color:var(--red)">
+        <div class="adm-section-head" style="background:rgba(255,77,106,.04)">
+          <div class="adm-section-title" style="color:var(--red)">// PER-DUNGEON ITEM BLACKLIST</div>
+          <div style="font-size:10px;color:var(--dim3);margin-left:auto">global · all users · overrides personal blacklist</div>
+        </div>
+        <div class="adm-section-body">
+          <div class="adm-hint" style="margin-bottom:10px">Block items only in specific dungeon+difficulty. Example: Normal version drops CB item, Hard version drops tradeable version → blacklist in Normal only.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+            <input class="adm-inp" id="adm-dbl-dungeon" placeholder="Dungeon name (exact)" style="flex:1;min-width:160px">
+            <select class="adm-inp" id="adm-dbl-diff" style="flex:0 0 110px">
+              <option>Normal</option><option>Hard</option><option>Extreme</option><option>Story</option>
+            </select>
+            <input class="adm-inp" id="adm-dbl-itemid" placeholder="Item ID (e.g. iabc123)" style="flex:0 0 140px">
+            <input class="adm-inp" id="adm-dbl-itemname" placeholder="Display name" style="flex:1;min-width:120px">
+            <button class="btn red" id="adm-dbl-add-btn">+ Add Rule</button>
+          </div>
+          <div id="adm-dbl-list" style="font-size:11px;color:var(--dim3)">Load admin data to see rules.</div>
+        </div>
+      </div>
       <div class="adm-section" style="margin-bottom:16px">
         <div class="adm-section-head">
           <div class="adm-section-title">// ADMIN TOKEN</div>
@@ -842,6 +936,40 @@ if ('serviceWorker' in navigator) {
   const MY_NAME    = 'odyssey';
   const ICON_BASE_ITEM = 'https://thedigitalodyssey.com/game_icons/items/';
   const ICON_BASE_DUNG = 'https://thedigitalodyssey.com/web_assets/dgs/';
+
+  const SEAL_TICKET_ID = 'i1m8n4jz';
+  const SEAL_EXCHANGE_DATA = [
+    { qty:10, name:'Tsunomon Seal',          id:'i7l7zdx'  },
+    { qty:10, name:'Upamon Seal',            id:'i1jbjdij' },
+    { qty:10, name:'Koromon Seal',           id:'ix3iizt'  },
+    { qty:10, name:'Tanemon Seal',           id:'ihyzrpg'  },
+    { qty:10, name:'Agumon Seal',            id:'i3auhxm'  },
+    { qty:10, name:'FanBeemon Seal',         id:'ioshepe'  },
+    { qty:10, name:'Sharmamon Seal',         id:'i1bay7qx' },
+    { qty:10, name:'Impmon Seal',            id:'i1bnlnpd' },
+    { qty:10, name:'Kunemon Seal',           id:'i1u9s47q' },
+    { qty:10, name:'Armadimon Seal',         id:'idufrkl'  },
+    { qty:10, name:'Elecmon Seal',           id:'i15t00r2' },
+    { qty:10, name:'Candlemon Seal',         id:'i16yp3ji' },
+    { qty:10, name:'Toy Agumon Seal',        id:'i1wfwrm3' },
+    { qty: 5, name:'Dorugamon Seal',         id:'i199203l' },
+    { qty: 5, name:'Soulmon Seal',           id:'if8fyak'  },
+    { qty: 5, name:'Togemon Seal',           id:'ilyjqv7'  },
+    { qty: 5, name:'Garurumon(Black) Seal',  id:'i8ufbbz'  },
+    { qty: 5, name:'Chrysalimon Seal',       id:'i15oceyp' },
+    { qty: 5, name:'Coredramon (Blue) Seal', id:'i5mm8al'  },
+    { qty: 5, name:'Gardromon Seal',         id:'i18yimj5' },
+    { qty: 5, name:'Digmon Seal',            id:'i1udty6r' },
+    { qty: 1, name:'Volcamon Seal',          id:'i9oq41a'  },
+    { qty: 1, name:'Meteormon Seal',         id:'iqytyp4'  },
+    { qty: 1, name:'MegaSeadramon Seal',     id:'i10xp6n1' },
+    { qty: 1, name:'Lillymon Seal',          id:'i1jidvx'  },
+    { qty: 1, name:'Skullsatamon Seal',      id:'i6lwaxe'  },
+    { qty: 1, name:'Mystimon Seal',          id:'ikj14se'  },
+    { qty: 1, name:'Vikaralamon Seal',       id:'i9s2yzp'  },
+    { qty: 1, name:'Asuramon Seal',          id:'i1dle3wu' },
+    { qty: 1, name:'Garudamon Seal',         id:'i1bgc9qz' },
+  ];
 
   let cfg = { cookie: '' };
   try { const r = localStorage.getItem(CFG_KEY); if (r) cfg = { ...cfg, ...JSON.parse(r) }; } catch(e) {}
@@ -943,6 +1071,7 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ══ STATE ══ */
+  let serverDungeonItemBlacklist = {}; // { "DungeonName_Diff": { itemId: displayName } }
   let allResults        = [];
   let sortCol           = 'ev';
   let sortAsc           = false;
@@ -1125,7 +1254,8 @@ if ('serviceWorker' in navigator) {
     drpView.style.display       = view === 'drp'        ? 'block' : 'none';
     listingsView.style.display  = view === 'listings'   ? 'block' : 'none';
     adminView.style.display     = view === 'admin'      ? 'block' : 'none';
-    sealboxView.style.display   = view === 'sealbox'    ? 'block' : 'none';
+    sealboxView.style.display                      = view === 'sealbox'       ? 'block' : 'none';
+    $('seal-exchange-view').style.display          = view === 'sealexchange'  ? 'block' : 'none';
     sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
     searchEl.style.display      = view === 'rankings'   ? '' : 'none';
@@ -1133,7 +1263,8 @@ if ('serviceWorker' in navigator) {
     if (view === 'blacklist')  renderBlacklistView();
     if (view === 'drp' && !drpLoaded) loadDrpRankings();
     if (view === 'listings' && !listingsLoaded && !isRunning) loadMyListings();
-    if (view === 'sealbox') initSealBox();
+    if (view === 'sealbox')     initSealBox();
+    if (view === 'sealexchange') initSealExchange();
   }
 
   /* ══ HELPERS ══ */
@@ -1146,16 +1277,17 @@ if ('serviceWorker' in navigator) {
   function setBar(v, max) { pbarEl.style.width = ((v / max) * 100).toFixed(1) + '%'; }
   function showNotice(html) { noticeEl.innerHTML = html; noticeEl.style.display = 'block'; }
   function hideNotice() { noticeEl.style.display = 'none'; }
+  function _ex(n, d) { return parseFloat(n.toFixed(d)).toString(); }
   function fmt(n) {
     if (n == null || isNaN(n)) return '—';
-    if (n >= 1000000) return (n/1000000).toFixed(2) + ' <span style="color:var(--red);font-weight:700">[T]</span>';
-    if (n >= 1000)    return (n/1000).toFixed(2)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
+    if (n >= 1000000) return _ex(n/1000000,6) + ' <span style="color:var(--red);font-weight:700">[T]</span>';
+    if (n >= 1000)    return _ex(n/1000,3)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
     return Math.round(n) + ' <span style="color:#888;font-weight:700">[B]</span>';
   }
   function fmtRaw(n) {
     if (n == null || isNaN(n)) return '—';
-    if (n >= 1000000) return (n/1000000).toFixed(2) + '[T]';
-    if (n >= 1000)    return (n/1000).toFixed(2) + '[M]';
+    if (n >= 1000000) return _ex(n/1000000,6) + '[T]';
+    if (n >= 1000)    return _ex(n/1000,3) + '[M]';
     return Math.round(n) + '[B]';
   }
   function fmtTime(ms) {
@@ -1298,6 +1430,12 @@ if ('serviceWorker' in navigator) {
     progressEl.style.display = 'block'; emptyEl.style.display = 'none';
     logEl.innerHTML = ''; setBar(0, 1); ratePausedUntil = 0;
     try {
+      if (!Object.keys(serverDungeonItemBlacklist).length) {
+        try {
+          const r = await fetch(WORKER_URL + '/fo-admin/dungeonblacklist', { headers: { 'Content-Type': 'application/json' } });
+          if (r.ok) serverDungeonItemBlacklist = await r.json();
+        } catch(e) {}
+      }
       log('Loading dungeon list…');
       let dungeons;
       const cachedList = cacheGet('dungeon_list', TTL_FOREVER);
@@ -1444,7 +1582,7 @@ if ('serviceWorker' in navigator) {
         for (const obj of (diff.objectives || [])) {
           for (const rk of (obj.raid_rankings || [])) {
             for (const r of (rk.rewards || [])) {
-              const bl = isBlacklisted(r.item_id, r.item_name);
+              const bl = isBlacklisted(r.item_id, r.item_name) || (r.item_id in (serverDungeonItemBlacklist[key] || {}));
               const mkt = prices[r.item_id];
               const prob = r.rate_permil / 10000;
               const avg = (r.min + r.max) / 2;
@@ -1468,7 +1606,7 @@ if ('serviceWorker' in navigator) {
           const base = group[0];
           const srank = group.find(r => r.rank === 7) || (group.length > 1 ? group[group.length-1] : null);
           const addDrop = (id, name, iconId, avg, src, bRank) => {
-            const bl = isBlacklisted(id, name); const mkt = prices[id];
+            const bl = isBlacklisted(id, name) || (id in (serverDungeonItemBlacklist[key] || {})); const mkt = prices[id];
             const ev = bl ? 0 : avg * (mkt?.price || 0); if (!bl) evComp += ev;
             drops.push({ item_id:id, name, icon_id:iconId||itemIconMap[id]||null, prob:null, avg, baseQty:0, bestQty:avg, bestRank:bRank,
               price:mkt?.price??null, listPrice:mkt?.listPrice??null, buyPrice:mkt?.buyPrice??null,
@@ -1481,7 +1619,7 @@ if ('serviceWorker' in navigator) {
           } else {
             const bestQty = (srank && srank.rank > 0) ? srank.item_count : 0;
             const total = base.item_count + bestQty;
-            const bl = isBlacklisted(base.item_id, base.item_name); const mkt = prices[base.item_id];
+            const bl = isBlacklisted(base.item_id, base.item_name) || (base.item_id in (serverDungeonItemBlacklist[key] || {})); const mkt = prices[base.item_id];
             const ev = bl ? 0 : total * (mkt?.price || 0); if (!bl) evComp += ev;
             drops.push({ item_id:base.item_id, name:base.item_name, icon_id:base.item_icon_id||itemIconMap[base.item_id]||null,
               prob:null, avg:total, baseQty:base.item_count, bestQty, bestRank:srank?.rank??0,
@@ -2197,12 +2335,14 @@ if ('serviceWorker' in navigator) {
 
   async function loadServerSealDb() {
     try {
-      const [resDb, resC] = await Promise.all([
-        fetch(WORKER_URL + '/fo-admin/sealdb',          { headers: { 'Content-Type': 'application/json' } }),
-        fetch(WORKER_URL + '/fo-admin/sealboxcontents', { headers: { 'Content-Type': 'application/json' } }),
+      const [resDb, resC, resDbl] = await Promise.all([
+        fetch(WORKER_URL + '/fo-admin/sealdb',           { headers: { 'Content-Type': 'application/json' } }),
+        fetch(WORKER_URL + '/fo-admin/sealboxcontents',  { headers: { 'Content-Type': 'application/json' } }),
+        fetch(WORKER_URL + '/fo-admin/dungeonblacklist', { headers: { 'Content-Type': 'application/json' } }),
       ]);
-      if (resDb.ok) serverSealDb = await resDb.json();
-      if (resC.ok)  Object.assign(SEAL_BOX_CONTENTS_OVERRIDE, await resC.json());
+      if (resDb.ok)  serverSealDb = await resDb.json();
+      if (resC.ok)   Object.assign(SEAL_BOX_CONTENTS_OVERRIDE, await resC.json());
+      if (resDbl.ok) serverDungeonItemBlacklist = await resDbl.json();
     } catch(e) { console.warn('[SealBox] server DB load failed', e); }
   }
 
@@ -2711,6 +2851,7 @@ if ('serviceWorker' in navigator) {
       });
     }
     $('adm-last-refresh').textContent = 'refreshed ' + fmtAgo(now);
+    renderDungeonBlacklistAdmin();
   }
 
   /* ── Admin seal DB (v2) ── */
@@ -3024,6 +3165,217 @@ if ('serviceWorker' in navigator) {
       if (!serverSamples.length) block.insertAdjacentHTML('beforeend','<div style="font-size:10px;color:var(--dim3);padding:4px 0">No server samples yet — only builtin data.</div>');
       con.appendChild(block);
     });
+  }
+
+  /* ══ SEAL EXCHANGE ══ */
+  let seInited = false;
+  let sePrices = {};
+  let seTicketPrice = null;
+  let seSortCol = 'totalVal';
+  let seSortAsc = false;
+
+  async function initSealExchange() {
+    if (!seInited) {
+      seInited = true;
+      $('se-fetch-btn').addEventListener('click', () => fetchSealExchangePrices(true));
+      $('se-ticket-qty').addEventListener('input', renderSealExchangeTable);
+      $('se-th-total').addEventListener('click', () => {
+        seSortAsc = seSortCol === 'totalVal' ? !seSortAsc : false;
+        seSortCol = 'totalVal'; renderSealExchangeTable();
+      });
+      $('se-th-mytotal').addEventListener('click', () => {
+        seSortAsc = seSortCol === 'myTotal' ? !seSortAsc : false;
+        seSortCol = 'myTotal'; renderSealExchangeTable();
+      });
+    }
+    // Ensure seal item icons are available
+    if (!sbSealItems.length) { try { await fetchSbItems(); } catch(e) {} }
+    // Ticket icon
+    const cachedInfo = cacheGet('se_ticket_info', 12 * 3600000);
+    if (cachedInfo) {
+      $('se-ticket-icon').src = itemIconUrl(cachedInfo.icon_id);
+    } else {
+      try {
+        const d = await apiFetch('/api/wiki/items?id=' + SEAL_TICKET_ID);
+        const icon_id = d?.icon_id || '';
+        cacheSet('se_ticket_info', { icon_id });
+        $('se-ticket-icon').src = itemIconUrl(icon_id);
+      } catch(e) {}
+    }
+    // Prices
+    const cachedPrices = cacheGet('se_prices', TTL_PRICES);
+    if (cachedPrices) {
+      sePrices = cachedPrices.seals || {};
+      seTicketPrice = cachedPrices.ticket ?? null;
+      $('se-ticket-price').innerHTML = seTicketPrice != null ? fmt(seTicketPrice) : '<span style="color:var(--dim3)">no listing</span>';
+      renderSealExchangeTable();
+      $('se-note').textContent = 'Prices from cache — click ↻ to refresh.';
+    } else {
+      await fetchSealExchangePrices(false);
+    }
+  }
+
+  async function fetchSealExchangePrices(force = false) {
+    if (!force) {
+      const c = cacheGet('se_prices', TTL_PRICES);
+      if (c) { sePrices = c.seals||{}; seTicketPrice = c.ticket??null; renderSealExchangeTable(); return; }
+    }
+    $('se-fetch-btn').disabled = true;
+    $('se-note').textContent = 'Fetching prices…';
+    $('se-ticket-price').innerHTML = '<span style="color:var(--dim3)">loading…</span>';
+    sePrices = {}; seTicketPrice = null;
+    // Ticket price
+    try {
+      const r = await marketGet(`/api/market/listings?item=${SEAL_TICKET_ID}&side=sell&limit=1`);
+      if (r && r.ok) { const d = await r.json(); seTicketPrice = d?.listings?.[0]?.price ?? null; }
+    } catch(e) {}
+    $('se-ticket-price').innerHTML = seTicketPrice != null ? fmt(seTicketPrice) : '<span style="color:var(--dim3)">no listing</span>';
+    // Seal prices
+    for (let i = 0; i < SEAL_EXCHANGE_DATA.length; i++) {
+      const s = SEAL_EXCHANGE_DATA[i];
+      if (i > 0) await sleep(500);
+      await rateGate();
+      try {
+        const r = await marketGet(`/api/market/listings?item=${s.id}&side=sell&limit=1`);
+        if (r && r.ok) { const d = await r.json(); sePrices[s.id] = d?.listings?.[0]?.price ?? null; }
+        else sePrices[s.id] = null;
+      } catch(e) { sePrices[s.id] = null; }
+      $('se-note').textContent = `Fetching prices… ${i+1}/${SEAL_EXCHANGE_DATA.length}`;
+      renderSealExchangeTable();
+    }
+    cacheSet('se_prices', { seals: sePrices, ticket: seTicketPrice });
+    $('se-note').textContent = `${Object.values(sePrices).filter(p=>p!=null).length}/${SEAL_EXCHANGE_DATA.length} seals listed — last refreshed just now.`;
+    $('se-fetch-btn').disabled = false;
+  }
+
+  function renderSealExchangeTable() {
+    const ticketQty = parseInt($('se-ticket-qty')?.value) || 0;
+    const myTotalTh = $('se-th-mytotal');
+    if (myTotalTh) myTotalTh.style.display = ticketQty > 0 ? '' : 'none';
+
+    const rows = SEAL_EXCHANGE_DATA.map(s => {
+      const price    = sePrices[s.id] ?? null;
+      const totalVal = price != null ? s.qty * price : null;
+      const myTotal  = totalVal != null && ticketQty > 0 ? totalVal * ticketQty : null;
+      return { ...s, price, totalVal, myTotal };
+    }).sort((a, b) => {
+      const va = a[seSortCol] ?? (seSortAsc ? Infinity : -Infinity);
+      const vb = b[seSortCol] ?? (seSortAsc ? Infinity : -Infinity);
+      return seSortAsc ? va - vb : vb - va;
+    });
+
+    const priced = rows.filter(r => r.totalVal != null);
+    const best   = priced[0];
+    const maxVal = Math.max(...priced.map(r => r.totalVal), 1);
+
+    // Verdict
+    const verdictEl = $('se-verdict'), verdictBody = $('se-verdict-body');
+    if (best && !seSortAsc) {
+      verdictEl.style.display = 'block';
+      verdictBody.innerHTML = `<strong style="color:var(--yellow)">${best.name}</strong> — get ×${best.qty} for <strong>${fmt(best.totalVal)}</strong> total &nbsp;·&nbsp; ${fmt(best.price)} each`;
+      if (ticketQty > 0 && best.myTotal != null)
+        verdictBody.innerHTML += `<br><span style="color:var(--green)">With ${ticketQty} tickets: <strong>${fmt(best.myTotal)}</strong></span>`;
+    } else { verdictEl.style.display = 'none'; }
+
+    // Ticket sell vs best exchange comparison
+    const compareEl = $('se-compare');
+    if (compareEl && seTicketPrice != null && best?.totalVal != null) {
+      compareEl.style.display = 'block';
+      const diff = best.totalVal - seTicketPrice;
+      compareEl.innerHTML = `<strong>Sell ticket:</strong> ${fmt(seTicketPrice)} &nbsp;·&nbsp; <strong>Best exchange (${best.name}):</strong> ${fmt(best.totalVal)} &nbsp;·&nbsp; ` +
+        (diff > 0  ? `<span style="color:var(--green)">▲ Exchange better by ${fmt(diff)}</span>`
+       : diff < 0  ? `<span style="color:var(--red)">▼ Selling better by ${fmt(-diff)}</span>`
+       :             `<span style="color:var(--dim)">Break even</span>`);
+    } else if (compareEl) { compareEl.style.display = 'none'; }
+
+    const qtyClass = { 10:'se-qty-10', 5:'se-qty-5', 1:'se-qty-1' };
+    const tbody = $('se-tbody'); if (!tbody) return;
+    tbody.innerHTML = '';
+    rows.forEach((row, i) => {
+      const isBest = i === 0 && row.totalVal != null && !seSortAsc;
+      const rankClass = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      const barPct = row.totalVal != null ? ((row.totalVal / maxVal) * 100).toFixed(1) : '0';
+      const sealItem = sbSealItems.find(s => s.id === row.id);
+      const iconSrc  = sealItem?.icon_id ? itemIconUrl(sealItem.icon_id) : '';
+      const tr = document.createElement('tr');
+      if (isBest) tr.className = 'se-best';
+      tr.innerHTML = `
+        <td><span class="fo-rank ${rankClass}">${i+1}</span></td>
+        <td><div class="se-seal-name">
+          ${iconSrc ? `<img class="se-seal-icon" src="${iconSrc}" alt="" onerror="this.style.display='none'">` : ''}
+          ${isBest ? '⭐ ' : ''}${row.name}
+        </div></td>
+        <td><span class="se-qty-badge ${qtyClass[row.qty]||'se-qty-1'}">${row.qty}</span></td>
+        <td>${row.totalVal != null ? `<span class="se-total">${fmt(row.totalVal)}</span>` : '<span class="se-na">no listing</span>'}</td>
+        <td>${row.price != null ? `<span class="se-price">${fmt(row.price)}</span>` : '<span class="se-na">—</span>'}</td>
+        ${ticketQty > 0 ? `<td>${row.myTotal != null ? `<span class="se-mytotal">${fmt(row.myTotal)}</span>` : '<span class="se-na">—</span>'}</td>` : ''}
+        <td class="se-bar-wrap"><div class="se-bar"><div class="se-bar-fill" style="width:${barPct}%"></div></div></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ══ DUNGEON ITEM BLACKLIST ADMIN ══ */
+  let _dblAdminWired = false;
+  async function renderDungeonBlacklistAdmin() {
+    const listEl = $('adm-dbl-list'); if (!listEl) return;
+    if (!_dblAdminWired) {
+      _dblAdminWired = true;
+      $('adm-dbl-add-btn').addEventListener('click', async () => {
+        const dungeon  = $('adm-dbl-dungeon').value.trim();
+        const diff     = $('adm-dbl-diff').value;
+        const itemId   = $('adm-dbl-itemid').value.trim();
+        const itemName = $('adm-dbl-itemname').value.trim() || itemId;
+        if (!dungeon || !itemId) { showAdminToast('Need dungeon name + item ID', true); return; }
+        const key = `${dungeon}_${diff}`;
+        const res = await adminApi('POST', '/fo-admin/dungeonblacklist', { key, itemId, itemName });
+        if (res) {
+          if (!serverDungeonItemBlacklist[key]) serverDungeonItemBlacklist[key] = {};
+          serverDungeonItemBlacklist[key][itemId] = itemName;
+          $('adm-dbl-dungeon').value = ''; $('adm-dbl-itemid').value = ''; $('adm-dbl-itemname').value = '';
+          showAdminToast('Rule added — rebuilding…');
+          await renderDungeonBlacklistAdmin();
+          if (cachedDetails.length) { allResults = buildResults(cachedDetails); buildItemIndex(allResults); applyFilters(); }
+        }
+      });
+    }
+    try {
+      const r = await fetch(WORKER_URL + '/fo-admin/dungeonblacklist', { headers: {'Content-Type':'application/json'} });
+      if (r.ok) serverDungeonItemBlacklist = await r.json();
+    } catch(e) {}
+    const entries = Object.entries(serverDungeonItemBlacklist);
+    if (!entries.length) { listEl.innerHTML = '<div style="color:var(--dim3);font-size:11px">No rules yet.</div>'; return; }
+    listEl.innerHTML = '';
+    for (const [key, items] of entries) {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'background:var(--bg2);border:1px solid var(--border2);padding:8px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap';
+      const keyLabel = document.createElement('div');
+      keyLabel.style.cssText = "font-family:'Orbitron',sans-serif;font-size:9px;color:var(--red);letter-spacing:.1em;min-width:180px;padding-top:4px;flex-shrink:0";
+      keyLabel.textContent = key;
+      const chipsDiv = document.createElement('div');
+      chipsDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;flex:1';
+      Object.entries(items).forEach(([id, name]) => {
+        const chip = document.createElement('div');
+        chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#0c0808;border:1px solid var(--red);padding:3px 8px;font-size:11px;color:var(--red)';
+        chip.innerHTML = `<span>${name}</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim3)">${id}</span>`;
+        const rm = document.createElement('button');
+        rm.style.cssText = 'background:none;border:none;color:var(--dim3);cursor:pointer;font-size:12px;padding:0 2px;margin-left:2px';
+        rm.textContent = '✕';
+        rm.addEventListener('click', async () => {
+          const res = await adminApi('DELETE', '/fo-admin/dungeonblacklist', { key, itemId: id });
+          if (res) {
+            if (serverDungeonItemBlacklist[key]) {
+              delete serverDungeonItemBlacklist[key][id];
+              if (!Object.keys(serverDungeonItemBlacklist[key]).length) delete serverDungeonItemBlacklist[key];
+            }
+            showAdminToast('Rule removed');
+            await renderDungeonBlacklistAdmin();
+            if (cachedDetails.length) { allResults = buildResults(cachedDetails); buildItemIndex(allResults); applyFilters(); }
+          }
+        });
+        chip.appendChild(rm); chipsDiv.appendChild(chip);
+      });
+      wrap.appendChild(keyLabel); wrap.appendChild(chipsDiv); listEl.appendChild(wrap);
+    }
   }
 
   /* ── Auto-run on warm cache ── */
