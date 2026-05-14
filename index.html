@@ -565,7 +565,7 @@
   <div id="hdr">
     <div>
       <div id="hdr-title">⟨ FARM OPTIMIZER ⟩</div>
-      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v5.1</div>
+      <div id="hdr-sub">Live Drop Value Calculator · Digital Odyssey · v5.2</div>
     </div>
     <div id="hdr-right">
       <button class="btn" id="btn-run">▶ Run Analysis</button>
@@ -753,6 +753,7 @@
         <button class="btn purple" id="se-fetch-btn">↻ Fetch Prices</button>
       </div>
       <div class="se-compare" id="se-compare" style="display:none"></div>
+      <div id="se-olympian" style="display:none;background:var(--bg2);border:1px solid var(--border);border-left:3px solid #c8a020;padding:12px 14px;margin-bottom:12px"></div>
       <div class="se-verdict" id="se-verdict">
         <div class="se-verdict-title">// BEST DEAL</div>
         <div id="se-verdict-body"></div>
@@ -974,7 +975,7 @@ if ('serviceWorker' in navigator) {
 }
 (function () {
   'use strict';
-  console.log('%c[FarmOpt v5.1] Loaded', 'color:#00e5ff;font-weight:bold');
+  console.log('%c[FarmOpt v5.2] Loaded', 'color:#00e5ff;font-weight:bold');
 
   const CFG_KEY    = 'fo_v43_config';
   const WORKER_URL = 'https://twilight-truth-180c.nisimandroi.workers.dev';
@@ -984,6 +985,9 @@ if ('serviceWorker' in navigator) {
   const ICON_BASE_DUNG = 'https://thedigitalodyssey.com/web_assets/dgs/';
 
   const SEAL_TICKET_ID = 'i1m8n4jz';
+  const OLYMPIAN_TOKEN_ID = 'i1tbze8b';
+  const OLYMPIAN_PER_TRADE = 50;
+  const TICKETS_PER_TRADE  = 3;
   const SEAL_EXCHANGE_DATA = [
     { qty:10, name:'Tsunomon Seal',          id:'i7l7zdx'  },
     { qty:10, name:'Upamon Seal',            id:'i1jbjdij' },
@@ -3263,6 +3267,7 @@ if ('serviceWorker' in navigator) {
   let seInited = false;
   let sePrices = {};
   let seTicketPrice = null;
+  let seOlympianPrice = null;
   let seSortCol = 'totalVal';
   let seSortAsc = false;
 
@@ -3299,6 +3304,7 @@ if ('serviceWorker' in navigator) {
     if (cachedPrices) {
       sePrices = cachedPrices.seals || {};
       seTicketPrice = cachedPrices.ticket ?? null;
+      seOlympianPrice = cachedPrices.olympian ?? null;
       $('se-ticket-price').innerHTML = seTicketPrice != null ? fmt(seTicketPrice) : '<span style="color:var(--dim3)">no listing</span>';
       renderSealExchangeTable();
       $('se-note').textContent = 'Prices from cache — click ↻ to refresh.';
@@ -3322,6 +3328,12 @@ if ('serviceWorker' in navigator) {
       if (r && r.ok) { const d = await r.json(); seTicketPrice = d?.listings?.[0]?.price ?? null; }
     } catch(e) {}
     $('se-ticket-price').innerHTML = seTicketPrice != null ? fmt(seTicketPrice) : '<span style="color:var(--dim3)">no listing</span>';
+    // Olympian Token price
+    await sleep(500); await rateGate();
+    try {
+      const r = await marketGet(`/api/market/listings?item=${OLYMPIAN_TOKEN_ID}&side=sell&limit=1`);
+      if (r && r.ok) { const d = await r.json(); seOlympianPrice = d?.listings?.[0]?.price ?? null; }
+    } catch(e) {}
     // Seal prices
     for (let i = 0; i < SEAL_EXCHANGE_DATA.length; i++) {
       const s = SEAL_EXCHANGE_DATA[i];
@@ -3335,7 +3347,7 @@ if ('serviceWorker' in navigator) {
       $('se-note').textContent = `Fetching prices… ${i+1}/${SEAL_EXCHANGE_DATA.length}`;
       renderSealExchangeTable();
     }
-    cacheSet('se_prices', { seals: sePrices, ticket: seTicketPrice });
+    cacheSet('se_prices', { seals: sePrices, ticket: seTicketPrice, olympian: seOlympianPrice });
     $('se-note').textContent = `${Object.values(sePrices).filter(p=>p!=null).length}/${SEAL_EXCHANGE_DATA.length} seals listed — last refreshed just now.`;
     $('se-fetch-btn').disabled = false;
   }
@@ -3368,6 +3380,44 @@ if ('serviceWorker' in navigator) {
       if (ticketQty > 0 && best.myTotal != null)
         verdictBody.innerHTML += `<br><span style="color:var(--green)">With ${ticketQty} tickets: <strong>${fmt(best.myTotal)}</strong></span>`;
     } else { verdictEl.style.display = 'none'; }
+
+    // Olympian Token trade comparison
+    const olympianEl = $('se-olympian');
+    if (olympianEl) {
+      if (seOlympianPrice != null) {
+        olympianEl.style.display = 'block';
+        const sellTokens    = OLYMPIAN_PER_TRADE * seOlympianPrice;
+        const tradeTickSell = seTicketPrice != null ? TICKETS_PER_TRADE * seTicketPrice : null;
+        const tradeSeal     = best?.totalVal  != null ? TICKETS_PER_TRADE * best.totalVal  : null;
+        const opts = [
+          { key:'tokens',  label:`Sell ${OLYMPIAN_PER_TRADE} tokens`,                              val: sellTokens,    color:'var(--blue2)' },
+          { key:'tickets', label:`Trade → ${TICKETS_PER_TRADE} tickets → sell`,                    val: tradeTickSell, color:'var(--purple)' },
+          { key:'seals',   label:`Trade → tickets → ${best?.name||'best seal'} ×${TICKETS_PER_TRADE}`, val: tradeSeal, color:'var(--yellow)' },
+        ].filter(o => o.val != null);
+        const bestOpt = opts.reduce((a,b) => a.val > b.val ? a : b, opts[0]);
+        let html = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:#c8a020;letter-spacing:.12em">// OLYMPIAN TOKEN TRADE</div>
+          <div style="font-size:11px;color:var(--dim3)">${OLYMPIAN_PER_TRADE} tokens → ${TICKETS_PER_TRADE} tickets</div>
+          <div style="margin-left:auto;font-size:11px;color:var(--dim)">Token price: <span style="font-family:'Orbitron',sans-serif;font-size:12px;color:#c8a020">${fmt(seOlympianPrice)}</span> · 50× = <span style="color:var(--cyan)">${fmt(sellTokens)}</span></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">`;
+        for (const o of opts) {
+          const isBest = o.val === bestOpt.val;
+          const diff   = bestOpt.val - o.val;
+          html += `<div style="flex:1;min-width:160px;background:var(--bg3);border:1px solid ${isBest?o.color:'var(--border)'};${isBest?'border-left:3px solid '+o.color:''}padding:9px 12px">
+            <div style="font-size:10px;color:var(--dim3);margin-bottom:4px">${isBest?'⭐ ':''}${o.label}</div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:${o.color}">${fmt(o.val)}</div>
+            <div style="font-size:9px;margin-top:3px;color:${isBest?'var(--green)':'var(--dim3)'}">
+              ${isBest ? 'BEST OPTION' : diff > 0 ? `−${fmt(diff)} vs best` : ''}
+            </div>
+          </div>`;
+        }
+        html += `</div>`;
+        olympianEl.innerHTML = html;
+      } else {
+        olympianEl.style.display = 'none';
+      }
+    }
 
     // Ticket sell vs best exchange comparison
     const compareEl = $('se-compare');
