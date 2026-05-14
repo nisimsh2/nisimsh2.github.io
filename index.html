@@ -461,6 +461,43 @@
   .sb-no-data { text-align:center; padding:30px 20px; color:var(--dim3); font-size:12px; }
   .sb-price-note { font-size:10px; color:var(--dim3); margin-top:6px; }
   .sb-price-loading { color:var(--dim3); font-style:italic; font-size:11px; }
+
+  /* ══ WORLD BOSS ══ */
+  #wb-list { display:flex; flex-direction:column; gap:16px; }
+  .wb-card { background:var(--bg2); border:1px solid var(--border); border-left:4px solid var(--green); display:grid; grid-template-columns:120px 1fr; gap:0; overflow:hidden; }
+  @media(max-width:600px) { .wb-card { grid-template-columns:1fr; } }
+  .wb-img-wrap { background:var(--bg3); border-right:1px solid var(--border); display:flex; align-items:center; justify-content:center; min-height:120px; }
+  .wb-img { max-width:110px; max-height:110px; object-fit:contain; image-rendering:pixelated; }
+  .wb-body { padding:14px 16px; }
+  .wb-name { font-family:'Orbitron',sans-serif; font-size:14px; font-weight:900; color:var(--green); margin-bottom:3px; }
+  .wb-location { font-size:11px; color:var(--dim); margin-bottom:10px; }
+  .wb-timer-wrap { background:var(--bg3); border:1px solid var(--border); padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .wb-timer { font-family:'Orbitron',sans-serif; font-size:20px; font-weight:900; color:var(--cyan); min-width:140px; }
+  .wb-timer.soon { color:var(--amber); text-shadow:0 0 12px rgba(255,179,71,.4); }
+  .wb-timer.now  { color:var(--red);   text-shadow:0 0 12px rgba(255,77,106,.5); animation:pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+  .wb-timer-lbl  { font-size:10px; color:var(--dim3); letter-spacing:.1em; margin-top:2px; }
+  .wb-notif-row  { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+  .wb-notif-lbl  { font-size:10px; color:var(--dim3); margin-right:4px; }
+  .wb-notif-btn  { font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; letter-spacing:.08em; padding:5px 10px; border:1px solid var(--border); background:transparent; color:var(--dim2); cursor:pointer; transition:all .15s; }
+  .wb-notif-btn.active { border-color:var(--green); color:var(--green); background:rgba(61,214,140,.1); }
+  .wb-drops { display:flex; flex-wrap:wrap; gap:6px; }
+  .wb-drop-chip { display:inline-flex; align-items:center; gap:6px; background:var(--bg3); border:1px solid var(--border); padding:4px 9px; font-size:11px; color:var(--blue); }
+  .wb-drop-chip img { width:18px; height:18px; object-fit:contain; image-rendering:pixelated; }
+  .wb-drop-price { color:var(--yellow); font-family:'JetBrains Mono',monospace; font-size:10px; margin-left:2px; }
+  .wb-total-ev   { font-family:'Orbitron',sans-serif; font-size:13px; color:var(--green); margin-top:8px; }
+  /* Admin boss form */
+  .wb-admin-form { background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--green); padding:16px; margin-bottom:16px; }
+  .wb-admin-title { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--green); letter-spacing:.12em; margin-bottom:12px; }
+  .wb-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  @media(max-width:600px) { .wb-form-grid { grid-template-columns:1fr; } }
+  .wb-form-field { display:flex; flex-direction:column; gap:4px; }
+  .wb-form-label { font-size:10px; color:var(--dim2); letter-spacing:.08em; text-transform:uppercase; }
+  .wb-form-inp { background:var(--bg2); border:1px solid var(--border); color:var(--text); font-family:'Inter',sans-serif; font-size:12px; padding:6px 10px; outline:none; }
+  .wb-form-inp:focus { border-color:var(--green); }
+  .wb-drop-entry { display:grid; grid-template-columns:1fr 80px 80px 80px auto; gap:6px; align-items:center; margin-bottom:6px; }
+  .wb-drop-entry input { background:var(--bg2); border:1px solid var(--border); color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; padding:5px 7px; outline:none; }
+  .wb-drop-entry input:focus { border-color:var(--green); }
 /* ══ SEAL EXCHANGE ══ */
   #seal-exchange-view { display:none; }
   .se-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
@@ -561,6 +598,7 @@
     <button class="main-tab" data-view="drp">DRP RANKINGS</button>
     <button class="main-tab" data-view="listings">MY LISTINGS</button>
     <button class="main-tab" data-view="sealbox" style="color:var(--amber)">📦 SEAL BOX</button>
+    <button class="main-tab" data-view="worldboss" style="color:var(--green)">⚔ WORLD BOSS</button>
     <button class="main-tab" data-view="sealexchange" style="color:var(--purple)">🔁 SEAL EXCHANGE</button>
   </div>
   <div id="sort-tabs">
@@ -820,6 +858,11 @@
       </div>
     </div>
 
+    <!-- ══ WORLD BOSS VIEW ══ -->
+    <div id="worldboss-view" style="display:none">
+      <div id="wb-list"></div>
+    </div>
+
     <div id="admin-view">
       <div class="adm-section" style="margin-bottom:16px;border-left-color:var(--red)">
         <div class="adm-section-head" style="background:rgba(255,77,106,.04)">
@@ -852,6 +895,9 @@
             <button class="btn muted" id="adm-load-btn">↻ Load Data</button>
           </div>
           <div class="adm-hint">This is the <code>ADMIN_TOKEN</code> secret set in your Cloudflare Worker → Settings → Variables.</div>
+      <div class="adm-hint" style="margin-top:8px;border-left:2px solid var(--purple);padding-left:8px;color:var(--purple)">
+        💡 <strong>TODO IDEA:</strong> Fetch all wiki items, filter those with <code>raid_sources</code> field → auto-build World Boss drop lists without manual entry. Endpoint: <code>/api/wiki/items?per_page=1000</code>, check each item for <code>raid_sources.length &gt; 0</code>.
+      </div>
         </div>
       </div>
       <div class="adm-banner" id="adm-banner"><div class="adm-card"><div class="adm-card-lbl">Loading…</div><div class="adm-card-val">—</div></div></div>
@@ -1254,7 +1300,8 @@ if ('serviceWorker' in navigator) {
     drpView.style.display       = view === 'drp'        ? 'block' : 'none';
     listingsView.style.display  = view === 'listings'   ? 'block' : 'none';
     adminView.style.display     = view === 'admin'      ? 'block' : 'none';
-    sealboxView.style.display                      = view === 'sealbox'       ? 'block' : 'none';
+    sealboxView.style.display   = view === 'sealbox'    ? 'block' : 'none';
+    document.getElementById('worldboss-view').style.display = view === 'worldboss' ? 'block' : 'none';
     $('seal-exchange-view').style.display          = view === 'sealexchange'  ? 'block' : 'none';
     sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
@@ -1263,7 +1310,8 @@ if ('serviceWorker' in navigator) {
     if (view === 'blacklist')  renderBlacklistView();
     if (view === 'drp' && !drpLoaded) loadDrpRankings();
     if (view === 'listings' && !listingsLoaded && !isRunning) loadMyListings();
-    if (view === 'sealbox')     initSealBox();
+    if (view === 'sealbox') initSealBox();
+    if (view === 'worldboss') initWorldBoss();
     if (view === 'sealexchange') initSealExchange();
   }
 
@@ -1280,15 +1328,25 @@ if ('serviceWorker' in navigator) {
   function _ex(n, d) { return parseFloat(n.toFixed(d)).toString(); }
   function fmt(n) {
     if (n == null || isNaN(n)) return '—';
-    if (n >= 1000000) return _ex(n/1000000,6) + ' <span style="color:var(--red);font-weight:700">[T]</span>';
-    if (n >= 1000)    return _ex(n/1000,3)    + ' <span style="color:var(--green);font-weight:700">[M]</span>';
-    return Math.round(n) + ' <span style="color:#888;font-weight:700">[B]</span>';
+    n = Math.round(n);
+    const T = Math.floor(n / 1000000), rem1 = n % 1000000;
+    const M = Math.floor(rem1 / 1000),  B   = rem1 % 1000;
+    let parts = [];
+    if (T > 0) parts.push(`${T}<span style="color:var(--red);font-weight:700">T</span>`);
+    if (M > 0) parts.push(`${M}<span style="color:var(--green);font-weight:700">M</span>`);
+    if (B > 0 || parts.length === 0) parts.push(`${B}<span style="color:#888;font-weight:700">B</span>`);
+    return parts.join(' ');
   }
   function fmtRaw(n) {
     if (n == null || isNaN(n)) return '—';
-    if (n >= 1000000) return _ex(n/1000000,6) + '[T]';
-    if (n >= 1000)    return _ex(n/1000,3) + '[M]';
-    return Math.round(n) + '[B]';
+    n = Math.round(n);
+    const T = Math.floor(n / 1000000), rem1 = n % 1000000;
+    const M = Math.floor(rem1 / 1000),  B   = rem1 % 1000;
+    let parts = [];
+    if (T > 0) parts.push(`${T}T`);
+    if (M > 0) parts.push(`${M}M`);
+    if (B > 0 || parts.length === 0) parts.push(`${B}B`);
+    return parts.join(' ');
   }
   function fmtTime(ms) {
     if (!ms || ms <= 0) return null;
@@ -3376,6 +3434,330 @@ if ('serviceWorker' in navigator) {
       });
       wrap.appendChild(keyLabel); wrap.appendChild(chipsDiv); listEl.appendChild(wrap);
     }
+  }
+
+  /* ══ WORLD BOSS ══ */
+  const WB_NOTIF_KEY = 'fo_wb_notif';
+  let wbBosses = [];
+  let wbTimerInterval = null;
+  let wbNotifState = {}; // bossId → { min10, min5, min1 }
+  let wbNotifFired  = {}; // bossId → { min10, min5, min1 } — fired this cycle
+  let wbInited = false;
+  let wbPriceCache = {}; // itemId → price
+
+  function loadWbNotifState() {
+    try { const r = localStorage.getItem(WB_NOTIF_KEY); if (r) wbNotifState = JSON.parse(r); } catch(e) {}
+  }
+  function saveWbNotifState() {
+    try { localStorage.setItem(WB_NOTIF_KEY, JSON.stringify(wbNotifState)); } catch(e) {}
+  }
+  loadWbNotifState();
+
+  async function initWorldBoss() {
+    if (!wbInited) {
+      wbInited = true;
+      await loadWbBosses();
+    }
+    renderWbView();
+    if (!wbTimerInterval) wbTimerInterval = setInterval(wbTick, 1000);
+  }
+
+  async function loadWbBosses() {
+    try {
+      const res = await fetch(WORKER_URL + '/fo-admin/worldbosses', { headers: { 'Content-Type': 'application/json' } });
+      if (res.ok) wbBosses = await res.json();
+    } catch(e) { console.warn('[WB] load failed', e); }
+    // Fetch prices for all drops
+    const allItemIds = [...new Set(wbBosses.flatMap(b => (b.drops||[]).map(d => d.itemId).filter(Boolean)))];
+    for (const id of allItemIds) {
+      if (wbPriceCache[id] !== undefined) continue;
+      try {
+        await sleep(300);
+        const r = await marketGet(`/api/market/listings?item=${id}&side=sell&limit=1`);
+        if (r && r.ok) { const d = await r.json(); wbPriceCache[id] = d?.listings?.[0]?.price ?? null; }
+        else wbPriceCache[id] = null;
+      } catch(e) { wbPriceCache[id] = null; }
+    }
+  }
+
+  function wbGetNextSpawn(boss) {
+    if (!boss.nextSpawn || !boss.spawnInterval) return null;
+    let t = boss.nextSpawn;
+    const now = Date.now();
+    while (t < now - 60000) t += boss.spawnInterval;
+    return t;
+  }
+
+  function wbTick() {
+    if (currentView !== 'worldboss') return;
+    const now = Date.now();
+    for (const boss of wbBosses) {
+      const next = wbGetNextSpawn(boss);
+      if (!next) continue;
+      const rem = next - now;
+      const el = document.getElementById(`wb-timer-${boss.id}`);
+      if (el) {
+        if (rem <= 0) {
+          el.textContent = 'SPAWNED!'; el.className = 'wb-timer now';
+        } else {
+          el.textContent = fmtCountdown(rem);
+          el.className = 'wb-timer' + (rem < 300000 ? ' soon' : '');
+        }
+      }
+      // Notifications
+      if (!wbNotifState[boss.id]) continue;
+      if (!wbNotifFired[boss.id]) wbNotifFired[boss.id] = {};
+      const ns = wbNotifState[boss.id];
+      const ff = wbNotifFired[boss.id];
+      function maybeNotify(key, threshMs, label) {
+        if (!ns[key]) return;
+        if (rem > 0 && rem <= threshMs && !ff[key]) {
+          ff[key] = true;
+          sendWbNotification(boss.name, label);
+        }
+        if (rem > threshMs) ff[key] = false; // reset for next cycle
+      }
+      maybeNotify('min10', 600000, '10 minutes');
+      maybeNotify('min5',  300000, '5 minutes');
+      maybeNotify('min1',   60000, '1 minute');
+    }
+  }
+
+  function fmtCountdown(ms) {
+    if (ms <= 0) return '00:00:00';
+    const totalSec = Math.floor(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return [h, m, s].map(x => String(x).padStart(2,'0')).join(':');
+  }
+
+  async function sendWbNotification(bossName, timeLabel) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') await Notification.requestPermission();
+    if (Notification.permission !== 'granted') return;
+    new Notification(`⚔ ${bossName} spawning in ${timeLabel}!`, {
+      body: 'World Boss alert — Digital Odyssey Farm Optimizer',
+      icon: '/favicon.ico',
+    });
+  }
+
+  function renderWbView() {
+    const con = document.getElementById('wb-list'); if (!con) return;
+    con.innerHTML = '';
+
+    // Admin add form (only for admin)
+    if (isAdmin) {
+      con.appendChild(buildWbAdminForm());
+    }
+
+    if (!wbBosses.length) {
+      con.insertAdjacentHTML('beforeend', '<div style="color:var(--dim3);font-size:12px;padding:20px 0">No world bosses configured yet.</div>');
+      return;
+    }
+
+    for (const boss of wbBosses) {
+      const next = wbGetNextSpawn(boss);
+      const rem  = next ? next - Date.now() : null;
+      if (!wbNotifState[boss.id]) wbNotifState[boss.id] = { min10: true, min5: true, min1: true };
+      const ns = wbNotifState[boss.id];
+
+      // EV calc
+      let totalEv = 0; let allPriced = true;
+      const dropHtml = (boss.drops || []).map(d => {
+        const price = wbPriceCache[d.itemId] ?? null;
+        const avgQty = d.min != null && d.max != null ? (d.min + d.max) / 2 : (d.qty || 1);
+        if (price != null) totalEv += avgQty * price;
+        else allPriced = false;
+        return `<div class="wb-drop-chip">
+          ${d.iconId ? `<img src="${itemIconUrl(d.iconId)}" alt="" onerror="this.style.display='none'">` : ''}
+          <span>${d.name}</span>
+          <span style="color:var(--dim3)">×${d.min != null ? d.min+'-'+d.max : avgQty}</span>
+          ${price != null ? `<span class="wb-drop-price">${fmt(price)}/ea</span>` : '<span style="color:var(--dim3);font-size:10px">no price</span>'}
+        </div>`;
+      }).join('');
+
+      const card = document.createElement('div');
+      card.className = 'wb-card';
+      card.innerHTML = `
+        <div class="wb-img-wrap">
+          ${boss.imageUrl
+            ? `<img class="wb-img" src="${boss.imageUrl}" alt="${boss.name}" onerror="this.style.display='none'">`
+            : `<div style="font-size:32px;opacity:.3">⚔</div>`}
+        </div>
+        <div class="wb-body">
+          <div class="wb-name">${boss.name}</div>
+          <div class="wb-location">📍 ${boss.location || 'Unknown'}</div>
+          <div class="wb-timer-wrap">
+            <div>
+              <div class="wb-timer${rem!=null&&rem<300000?' soon':''}" id="wb-timer-${boss.id}">${rem!=null?fmtCountdown(rem):'—'}</div>
+              <div class="wb-timer-lbl">NEXT SPAWN${next?(' · '+new Date(next).toLocaleTimeString('en-GB',{timeZone:'Asia/Jerusalem',hour:'2-digit',minute:'2-digit'})):''}</div>
+            </div>
+            <div style="font-size:10px;color:var(--dim3)">Interval: ${boss.spawnInterval ? fmtIntervalHuman(boss.spawnInterval) : '?'}</div>
+          </div>
+          <div class="wb-notif-row">
+            <span class="wb-notif-lbl">🔔 NOTIFY:</span>
+            <button class="wb-notif-btn${ns.min10?' active':''}" data-boss="${boss.id}" data-key="min10">10 min</button>
+            <button class="wb-notif-btn${ns.min5?' active':''}"  data-boss="${boss.id}" data-key="min5">5 min</button>
+            <button class="wb-notif-btn${ns.min1?' active':''}"  data-boss="${boss.id}" data-key="min1">1 min</button>
+          </div>
+          <div class="wb-drops">${dropHtml || '<span style="color:var(--dim3);font-size:11px">No drops configured</span>'}</div>
+          ${totalEv > 0 ? `<div class="wb-total-ev">≈ ${fmt(totalEv)} EV${!allPriced?' (partial)':''}</div>` : ''}
+          ${isAdmin ? `<div style="margin-top:8px"><button class="btn red" style="font-size:8px;padding:3px 8px" data-wb-del="${boss.id}">✕ Delete Boss</button></div>` : ''}
+        </div>`;
+      con.appendChild(card);
+    }
+
+    // Wire notification toggles
+    con.querySelectorAll('[data-boss][data-key]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const bid = btn.dataset.boss, key = btn.dataset.key;
+        if (!wbNotifState[bid]) wbNotifState[bid] = { min10:true, min5:true, min1:true };
+        wbNotifState[bid][key] = !wbNotifState[bid][key];
+        saveWbNotifState();
+        btn.classList.toggle('active', wbNotifState[bid][key]);
+        // Request permission if enabling
+        if (wbNotifState[bid][key] && 'Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+      });
+    });
+
+    // Wire delete
+    con.querySelectorAll('[data-wb-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this boss?')) return;
+        await adminApi('DELETE', '/fo-admin/worldbosses', { id: btn.dataset.wbDel });
+        wbBosses = wbBosses.filter(b => b.id !== btn.dataset.wbDel);
+        renderWbView();
+      });
+    });
+  }
+
+  function fmtIntervalHuman(ms) {
+    const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+    if (h && m) return `${h}h ${m}m`; if (h) return `${h}h`; return `${m}m`;
+  }
+
+  let wbDropEntries = [{ itemId:'', name:'', iconId:'', min:'', max:'' }];
+
+  function buildWbAdminForm() {
+    const wrap = document.createElement('div'); wrap.className = 'wb-admin-form';
+    wrap.innerHTML = `
+      <div class="wb-admin-title">// ADD / UPDATE WORLD BOSS</div>
+      <div class="wb-form-grid">
+        <div class="wb-form-field"><label class="wb-form-label">ID (slug, e.g. neptunemon)</label><input class="wb-form-inp" id="wb-id" placeholder="neptunemon"></div>
+        <div class="wb-form-field"><label class="wb-form-label">Name</label><input class="wb-form-inp" id="wb-name" placeholder="Neptunemon"></div>
+        <div class="wb-form-field"><label class="wb-form-label">Location</label><input class="wb-form-inp" id="wb-location" placeholder="Olympos Festival Island"></div>
+        <div class="wb-form-field"><label class="wb-form-label">Spawn Interval (hours)</label><input class="wb-form-inp" id="wb-interval" type="number" min="0.1" step="0.5" placeholder="24"></div>
+        <div class="wb-form-field"><label class="wb-form-label">Next Spawn (ISO or local datetime)</label><input class="wb-form-inp" id="wb-nextspawn" type="datetime-local"></div>
+        <div class="wb-form-field">
+          <label class="wb-form-label">Image URL or upload</label>
+          <input class="wb-form-inp" id="wb-imageurl" placeholder="https://i.imgur.com/...">
+          <input type="file" id="wb-imagefile" accept="image/*" style="margin-top:4px;font-size:11px;color:var(--dim)">
+          <div id="wb-img-preview" style="margin-top:6px;display:none"><img style="max-height:80px;max-width:80px;object-fit:contain;border:1px solid var(--border)" id="wb-img-prev-img"><div style="font-size:9px;color:var(--dim3);margin-top:2px" id="wb-img-prev-note"></div></div>
+        </div>
+      </div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--amber);letter-spacing:.1em;margin:10px 0 6px">// DROPS</div>
+      <div id="wb-drop-entries"></div>
+      <button class="btn muted" id="wb-add-drop-btn" style="font-size:9px;padding:5px 10px;margin-bottom:10px">+ Add Drop</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn green" id="wb-save-btn" style="flex:1">💾 Save Boss</button>
+        <button class="btn muted" id="wb-form-clear-btn">Clear</button>
+      </div>
+      <div id="wb-save-status" style="font-size:11px;margin-top:6px;min-height:14px"></div>`;
+
+    // Image file upload → base64 stored in KV via imageUrl field
+    wrap.querySelector('#wb-imagefile').addEventListener('change', async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target.result;
+        wrap.querySelector('#wb-imageurl').value = dataUrl; // store as data URL
+        const prev = wrap.querySelector('#wb-img-preview');
+        prev.style.display = 'block';
+        wrap.querySelector('#wb-img-prev-img').src = dataUrl;
+        wrap.querySelector('#wb-img-prev-note').textContent = `${(dataUrl.length/1024).toFixed(1)} KB — stored in KV, visible to all`;
+      };
+      reader.readAsDataURL(file);
+    });
+    wrap.querySelector('#wb-imageurl').addEventListener('input', (e) => {
+      const v = e.target.value.trim();
+      if (v && !v.startsWith('data:')) {
+        const prev = wrap.querySelector('#wb-img-preview');
+        prev.style.display = 'block';
+        wrap.querySelector('#wb-img-prev-img').src = v;
+        wrap.querySelector('#wb-img-prev-note').textContent = 'External URL';
+      }
+    });
+
+    const dropCon = wrap.querySelector('#wb-drop-entries');
+    function renderDropEntries() {
+      dropCon.innerHTML = '';
+      wbDropEntries.forEach((d, i) => {
+        const row = document.createElement('div'); row.className = 'wb-drop-entry';
+        row.innerHTML = `
+          <input placeholder="Item name" value="${d.name||''}" data-f="name" data-i="${i}">
+          <input placeholder="Item ID" value="${d.itemId||''}" data-f="itemId" data-i="${i}">
+          <input placeholder="Icon ID" value="${d.iconId||''}" data-f="iconId" data-i="${i}">
+          <input type="number" placeholder="Min" value="${d.min||''}" data-f="min" data-i="${i}">
+          <input type="number" placeholder="Max" value="${d.max||''}" data-f="max" data-i="${i}">
+          <button class="sb-rm-btn" data-rm="${i}">✕</button>`;
+        row.querySelectorAll('[data-f]').forEach(inp => {
+          inp.addEventListener('input', () => { wbDropEntries[parseInt(inp.dataset.i)][inp.dataset.f] = inp.value; });
+        });
+        row.querySelector('[data-rm]').addEventListener('click', () => { wbDropEntries.splice(i, 1); renderDropEntries(); });
+        dropCon.appendChild(row);
+      });
+    }
+    renderDropEntries();
+    wrap.querySelector('#wb-add-drop-btn').addEventListener('click', () => { wbDropEntries.push({ itemId:'', name:'', iconId:'', min:'', max:'' }); renderDropEntries(); });
+    wrap.querySelector('#wb-form-clear-btn').addEventListener('click', () => {
+      ['wb-id','wb-name','wb-location','wb-interval','wb-nextspawn','wb-imageurl'].forEach(id => { const el=wrap.querySelector('#'+id); if(el) el.value=''; });
+      wbDropEntries = [{ itemId:'', name:'', iconId:'', min:'', max:'' }]; renderDropEntries();
+      wrap.querySelector('#wb-img-preview').style.display='none';
+    });
+    wrap.querySelector('#wb-save-btn').addEventListener('click', async () => {
+      const id       = wrap.querySelector('#wb-id').value.trim().replace(/\s+/g,'-').toLowerCase();
+      const name     = wrap.querySelector('#wb-name').value.trim();
+      const location = wrap.querySelector('#wb-location').value.trim();
+      const intHrs   = parseFloat(wrap.querySelector('#wb-interval').value)||0;
+      const nextRaw  = wrap.querySelector('#wb-nextspawn').value;
+      const imageUrl = wrap.querySelector('#wb-imageurl').value.trim();
+      if (!id || !name) { wrap.querySelector('#wb-save-status').innerHTML='<span style="color:var(--red)">ID and Name required.</span>'; return; }
+      const boss = {
+        id, name, location, imageUrl,
+        spawnInterval: intHrs > 0 ? Math.round(intHrs * 3600000) : null,
+        nextSpawn:     nextRaw ? new Date(nextRaw).getTime() : null,
+        drops: wbDropEntries.filter(d => d.name).map(d => ({
+          itemId:  d.itemId||null,
+          name:    d.name,
+          iconId:  d.iconId||null,
+          min:     d.min ? parseInt(d.min) : null,
+          max:     d.max ? parseInt(d.max) : null,
+        })),
+      };
+      wrap.querySelector('#wb-save-status').textContent = 'Saving…';
+      const res = await adminApi('POST', '/fo-admin/worldbosses', boss);
+      if (res) {
+        const idx = wbBosses.findIndex(b => b.id === boss.id);
+        if (idx >= 0) wbBosses[idx] = boss; else wbBosses.push(boss);
+        // Re-fetch prices for new drops
+        for (const d of boss.drops) {
+          if (d.itemId && wbPriceCache[d.itemId] === undefined) {
+            try {
+              const r = await marketGet(`/api/market/listings?item=${d.itemId}&side=sell&limit=1`);
+              if (r && r.ok) { const dd = await r.json(); wbPriceCache[d.itemId] = dd?.listings?.[0]?.price ?? null; }
+            } catch(e) { wbPriceCache[d.itemId] = null; }
+          }
+        }
+        wrap.querySelector('#wb-save-status').innerHTML = '<span style="color:var(--green)">✓ Saved!</span>';
+        renderWbView();
+      } else {
+        wrap.querySelector('#wb-save-status').innerHTML = '<span style="color:var(--red)">✗ Failed.</span>';
+      }
+    });
+    return wrap;
   }
 
   /* ── Auto-run on warm cache ── */
