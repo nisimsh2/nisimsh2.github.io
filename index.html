@@ -1332,9 +1332,9 @@ if ('serviceWorker' in navigator) {
     const T = Math.floor(n / 1000000), rem1 = n % 1000000;
     const M = Math.floor(rem1 / 1000),  B   = rem1 % 1000;
     let parts = [];
-    if (T > 0) parts.push(`${T}<span style="color:var(--red);font-weight:700">T</span>`);
-    if (M > 0) parts.push(`${M}<span style="color:var(--green);font-weight:700">M</span>`);
-    if (B > 0 || parts.length === 0) parts.push(`${B}<span style="color:#888;font-weight:700">B</span>`);
+    if (T > 0) parts.push(`${T} <span style="color:var(--red);font-weight:700">[T]</span>`);
+    if (M > 0) parts.push(`${M} <span style="color:var(--green);font-weight:700">[M]</span>`);
+    if (B > 0 || parts.length === 0) parts.push(`${B} <span style="color:#888;font-weight:700">[B]</span>`);
     return parts.join(' ');
   }
   function fmtRaw(n) {
@@ -1343,9 +1343,9 @@ if ('serviceWorker' in navigator) {
     const T = Math.floor(n / 1000000), rem1 = n % 1000000;
     const M = Math.floor(rem1 / 1000),  B   = rem1 % 1000;
     let parts = [];
-    if (T > 0) parts.push(`${T}T`);
-    if (M > 0) parts.push(`${M}M`);
-    if (B > 0 || parts.length === 0) parts.push(`${B}B`);
+    if (T > 0) parts.push(`${T} [T]`);
+    if (M > 0) parts.push(`${M} [M]`);
+    if (B > 0 || parts.length === 0) parts.push(`${B} [B]`);
     return parts.join(' ');
   }
   function fmtTime(ms) {
@@ -3489,19 +3489,20 @@ if ('serviceWorker' in navigator) {
   }
 
   function wbTick() {
-    if (currentView !== 'worldboss') return;
     const now = Date.now();
     for (const boss of wbBosses) {
       const next = wbGetNextSpawn(boss);
       if (!next) continue;
       const rem = next - now;
-      const el = document.getElementById(`wb-timer-${boss.id}`);
-      if (el) {
-        if (rem <= 0) {
-          el.textContent = 'SPAWNED!'; el.className = 'wb-timer now';
-        } else {
-          el.textContent = fmtCountdown(rem);
-          el.className = 'wb-timer' + (rem < 300000 ? ' soon' : '');
+      if (currentView === 'worldboss') {
+        const el = document.getElementById(`wb-timer-${boss.id}`);
+        if (el) {
+          if (rem <= 0) {
+            el.textContent = 'SPAWNED!'; el.className = 'wb-timer now';
+          } else {
+            el.textContent = fmtCountdown(rem);
+            el.className = 'wb-timer' + (rem < 300000 ? ' soon' : '');
+          }
         }
       }
       // Notifications
@@ -3644,7 +3645,12 @@ if ('serviceWorker' in navigator) {
   function buildWbAdminForm() {
     const wrap = document.createElement('div'); wrap.className = 'wb-admin-form';
     wrap.innerHTML = `
-      <div class="wb-admin-title">// ADD / UPDATE WORLD BOSS</div>
+      <div class="wb-admin-title" id="wb-form-toggle" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+        <span id="wb-form-chevron" style="font-size:10px;color:var(--green);display:inline-block;transform:rotate(-90deg);transition:transform .2s">▼</span>
+        // ADD / UPDATE WORLD BOSS
+        <span style="font-size:9px;color:var(--dim3);margin-left:auto">click to expand</span>
+      </div>
+      <div id="wb-form-body" style="display:none">
       <div class="wb-form-grid">
         <div class="wb-form-field"><label class="wb-form-label">ID (slug, e.g. neptunemon)</label><input class="wb-form-inp" id="wb-id" placeholder="neptunemon"></div>
         <div class="wb-form-field"><label class="wb-form-label">Name</label><input class="wb-form-inp" id="wb-name" placeholder="Neptunemon"></div>
@@ -3665,7 +3671,17 @@ if ('serviceWorker' in navigator) {
         <button class="btn green" id="wb-save-btn" style="flex:1">💾 Save Boss</button>
         <button class="btn muted" id="wb-form-clear-btn">Clear</button>
       </div>
-      <div id="wb-save-status" style="font-size:11px;margin-top:6px;min-height:14px"></div>`;
+      <div id="wb-save-status" style="font-size:11px;margin-top:6px;min-height:14px"></div>
+      </div>`;
+
+    wrap.querySelector('#wb-form-toggle').addEventListener('click', () => {
+      const body = wrap.querySelector('#wb-form-body');
+      const chevron = wrap.querySelector('#wb-form-chevron');
+      const collapsed = body.style.display === 'none';
+      body.style.display = collapsed ? '' : 'none';
+      chevron.style.transform = collapsed ? '' : 'rotate(-90deg)';
+      wrap.querySelector('#wb-form-toggle').querySelector('span:last-child').textContent = collapsed ? 'click to collapse' : 'click to expand';
+    });
 
     // Image file upload → base64 stored in KV via imageUrl field
     wrap.querySelector('#wb-imagefile').addEventListener('change', async (e) => {
