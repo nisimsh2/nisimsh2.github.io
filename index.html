@@ -3537,9 +3537,25 @@ if ('serviceWorker' in navigator) {
     if (!('Notification' in window)) return;
     if (Notification.permission === 'default') await Notification.requestPermission();
     if (Notification.permission !== 'granted') return;
+    const tag = `wb-${bossName}-${timeLabel}`;
+    if ('serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification(`⚔ ${bossName} spawning in ${timeLabel}!`, {
+          body: 'World Boss alert — Digital Odyssey Farm Optimizer',
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          tag,
+          requireInteraction: true,
+          silent: false,
+        });
+        return;
+      } catch(e) { /* fall through to basic */ }
+    }
     new Notification(`⚔ ${bossName} spawning in ${timeLabel}!`, {
       body: 'World Boss alert — Digital Odyssey Farm Optimizer',
       icon: '/favicon.ico',
+      tag,
     });
   }
 
