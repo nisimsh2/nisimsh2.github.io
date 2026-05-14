@@ -2865,7 +2865,7 @@ if ('serviceWorker' in navigator) {
     await adminApi('DELETE', '/fo-admin/usage'); await loadAdminData();
   });
   async function adminApi(method, path, body) {
-    const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+    const token = localStorage.getItem(ADMIN_NS) || adminToken || '';
     if (!token) { showAdminToast('No admin token set', true); return null; }
     try {
       const res = await fetch(WORKER_URL + path, {
@@ -3856,6 +3856,7 @@ if ('serviceWorker' in navigator) {
       };
       wrap.querySelector('#wb-save-status').textContent = 'Saving…';
       const res = await adminApi('POST', '/fo-admin/worldbosses', boss);
+      console.log('[WB save] res:', res, 'token present:', !!(localStorage.getItem('fo_admin_token')||adminToken));
       if (res) {
         const idx = wbBosses.findIndex(b => b.id === boss.id);
         if (idx >= 0) wbBosses[idx] = boss; else wbBosses.push(boss);
