@@ -549,7 +549,7 @@
         <label>Session Cookie (for My Times + Market)</label>
         <textarea id="cfg-cookie" placeholder="session_id=paste_your_cookie_value_here"></textarea>
         <div class="hint">
-          Format: <code>session_id=yourValue</code> — the <code>session_id=</code> prefix is required.<br>
+          Paste raw cookie value OR full <code>session_id=yourValue</code> — prefix auto-added if missing.<br>
           F12 → Application → Cookies → <code>thedigitalodyssey.com</code> → find <code>session_id</code> → copy its Value.<br>
           Stored only in your browser's localStorage, forwarded through your Worker only.
         </div>
@@ -1155,6 +1155,13 @@ if ('serviceWorker' in navigator) {
     if (!tamerName || tamerName.toLowerCase() !== MY_NAME) return;
     if (isAdmin) return;
     isAdmin = true;
+    const savedToken = localStorage.getItem(ADMIN_NS);
+    if (savedToken) {
+      adminToken = savedToken;
+      showAdminToast('⚙ Admin token auto-loaded ✓');
+    } else {
+      showAdminToast('⚠ No admin token cached — set it in Admin panel', true);
+    }
     const tab = document.createElement('button');
     tab.className = 'main-tab admin-tab';
     tab.dataset.view = 'admin';
@@ -1175,7 +1182,11 @@ if ('serviceWorker' in navigator) {
   $('settings-close').addEventListener('click', closeSettings);
   $('settings-cancel').addEventListener('click', closeSettings);
   $('settings-overlay').addEventListener('click', e => { if (e.target === $('settings-overlay')) closeSettings(); });
-  $('settings-save').addEventListener('click', () => { cfg.cookie = $('cfg-cookie').value.trim(); saveCfg(); closeSettings(); hideNotice(); });
+  $('settings-save').addEventListener('click', () => {
+    let raw = $('cfg-cookie').value.trim();
+    if (raw && !raw.includes('session_id=')) raw = 'session_id=' + raw;
+    cfg.cookie = raw; saveCfg(); closeSettings(); hideNotice();
+  });
 
   /* ══ REFRESH DROPDOWN ══ */
   $('btn-refresh').addEventListener('click', e => { e.stopPropagation(); $('ref-dropdown').classList.toggle('open'); });
@@ -1488,6 +1499,29 @@ if ('serviceWorker' in navigator) {
     progressEl.style.display = 'block'; emptyEl.style.display = 'none';
     logEl.innerHTML = ''; setBar(0, 1); ratePausedUntil = 0;
     try {
+      if (cfg.cookie) {
+        log('Checking session cookie…');
+        try {
+          const chk = await fetch(WORKER_URL + '/fo-check', { headers: { 'Content-Type': 'application/json', 'X-Game-Cookie': cfg.cookie } });
+          const chkData = await chk.json();
+          if (!chkData.ok) {
+            if (chkData.reason === 'no_cookie' || chkData.reason === 'invalid_cookie') {
+              log('❌ Cookie invalid or expired — aborting. Open Settings to update.', 'err');
+              showNotice('❌ Session cookie expired or invalid — update it in ⚙ Settings, then re-run.');
+              setTimeout(openSettings, 400);
+              return;
+            } else if (chkData.reason === 'not_allowed') {
+              log(`❌ Tamer "${chkData.tamer}" not on allowlist — aborting.`, 'err');
+              showNotice(`❌ Tamer "${chkData.tamer}" is not on the allowlist. Contact admin.`);
+              return;
+            }
+          } else {
+            log(`Cookie OK — logged in as ${chkData.tamer} ✓`, 'ok');
+          }
+        } catch(chkErr) {
+          log('Pre-check failed (network?) — proceeding anyway.', 'warn');
+        }
+      }
       if (!Object.keys(serverDungeonItemBlacklist).length) {
         try {
           const r = await fetch(WORKER_URL + '/fo-admin/dungeonblacklist', { headers: { 'Content-Type': 'application/json' } });
