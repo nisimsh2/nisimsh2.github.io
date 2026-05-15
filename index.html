@@ -1658,6 +1658,7 @@ if ('serviceWorker' in navigator) {
         allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
         log('All prices done ✓ — fetching speed times for missing dungeons…', 'ok');
         setTimeout(() => fetchSpeedTimes(false), 600);
+        setTimeout(() => cacheMonsterStats(cachedDetails), 3000);
       }
       setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
     } catch(err) {
@@ -3968,7 +3969,36 @@ if ('serviceWorker' in navigator) {
     return wrap;
   }
 
+  /* ══ MONSTER STAT CACHE ══ */
+  async function cacheMonsterStats(details) {
+    let fetched = 0, skipped = 0;
+    for (const detail of details) {
+      for (const diff of (detail.difficulties || [])) {
+        for (const obj of (diff.objectives || [])) {
+          if (!obj.monster_id) continue;
+          const monKey = `monster_${obj.monster_id}_${diff.difficulty}`;
+          if (cacheGet(monKey, TTL_FOREVER)) { skipped++; continue; }
+          await sleep(400); await rateGate();
+          try {
+            const mon = await apiFetch(`/api/wiki/monsters?id=${obj.monster_id}`);
+            if (mon?.id) { cacheSet(monKey, mon); fetched++; }
+          } catch(e) { /* skip */ }
+        }
+      }
+    }
+    console.log(`[MonsterCache] fetched ${fetched}, skipped ${skipped} (already cached)`);
+  }
+
   /* ══ DUNGEON CHANGES ══ */
+  const DC_HISTORY_KEY = 'fo_dc_history'; // localStorage key for change log
+
+  function loadDcHistory() {
+    try { return JSON.parse(localStorage.getItem(DC_HISTORY_KEY) || '[]'); } catch(e) { return []; }
+  }
+  function saveDcHistory(history) {
+    try { localStorage.setItem(DC_HISTORY_KEY, JSON.stringify(history.slice(0, 50))); } catch(e) {} // keep last 50 checks
+  }
+
   let dcInited = false;
   function initDungeonChanges() {
     if (!dcInited) {
@@ -3986,9 +4016,9 @@ if ('serviceWorker' in navigator) {
     if (!cachedDetails.length) {
       $('dc-status').textContent = 'Run Analysis first to populate cache, then check for changes.';
     } else {
-      $('dc-status').textContent = `Cache has ${cachedDetails.length} dungeons. Click Check for Changes to fetch live data and diff.`;
+      $('dc-status').textContent = `Cache has ${cachedDetails.length} dungeons. Click "Check for Changes" to fetch live and diff.`;
     }
-    $('dc-results').innerHTML = '';
+    renderDcHistory(); // show stored history on open
   }
 
   async function checkDungeonChanges() {
@@ -3996,38 +4026,39 @@ if ('serviceWorker' in navigator) {
     if (!cachedDetails.length) { statusEl.textContent = 'No cached dungeon data — Run Analysis first.'; return; }
     $('dc-check-btn').disabled = true;
     resultsEl.innerHTML = '';
-    // Load dungeon list
+
     statusEl.textContent = 'Fetching live dungeon list…';
     let dungeons;
     try { const d = await apiFetch('/api/wiki/dungeons?page=1&per_page=500'); dungeons = d.data || []; }
     catch(e) { statusEl.textContent = 'Failed to fetch dungeon list: ' + e.message; $('dc-check-btn').disabled=false; return; }
 
-    const changes = [];
-    const newDungeons = [];
+    const changes = [], newDungeons = [];
     const cacheMap = {};
     for (const d of cachedDetails) cacheMap[d.id] = d;
 
+    const liveDetails = []; // collect live data for cache update
     statusEl.textContent = `Checking ${dungeons.length} dungeons…`;
     let checked = 0;
     for (const dung of dungeons) {
       checked++;
       if (checked % 5 === 0) statusEl.textContent = `Checking ${checked}/${dungeons.length}…`;
-      if (!cacheMap[dung.id]) { newDungeons.push(dung); continue; }
-      // Fetch live detail
-      await sleep(400);
+      await sleep(400); await rateGate();
       let live;
       try { live = await apiFetch(`/api/wiki/dungeons?id=${dung.id}`); }
       catch(e) { continue; }
-      const cached = cacheMap[dung.id];
-      const diffs = diffDungeon(cached, live);
-      if (diffs.length) changes.push({ id: dung.id, name: dung.name, diffs });
-      // Also check monster stats (HP) for each difficulty's boss
+      liveDetails.push(live);
+      if (!cacheMap[dung.id]) { newDungeons.push({ id:dung.id, name:dung.name }); }
+      else {
+        const diffs = diffDungeon(cacheMap[dung.id], live);
+        if (diffs.length) changes.push({ id:dung.id, name:dung.name, diffs });
+      }
+      // Monster stats diff
       for (const diff of (live.difficulties||[])) {
         for (const obj of (diff.objectives||[])) {
           if (!obj.monster_id) continue;
-          const monKey = 'monster_' + obj.monster_id + '_' + diff.difficulty;
+          const monKey = `monster_${obj.monster_id}_${diff.difficulty}`;
           const cachedMon = cacheGet(monKey, TTL_FOREVER);
-          await sleep(300);
+          await sleep(300); await rateGate();
           let liveMon;
           try { liveMon = await apiFetch(`/api/wiki/monsters?id=${obj.monster_id}`); }
           catch(e) { continue; }
@@ -4036,16 +4067,54 @@ if ('serviceWorker' in navigator) {
             if (monDiffs.length) {
               const existing = changes.find(c => c.id === dung.id);
               if (existing) existing.diffs.push(...monDiffs);
-              else changes.push({ id: dung.id, name: dung.name, diffs: monDiffs });
+              else changes.push({ id:dung.id, name:dung.name, diffs:monDiffs });
             }
           }
-          // Cache monster for future comparisons
-          cacheSet(monKey, liveMon);
+          cacheSet(monKey, liveMon); // always update monster cache
         }
       }
     }
-    statusEl.textContent = `Done — ${changes.length} changed, ${newDungeons.length} new dungeons found.`;
+
+    const checkDate = Date.now();
+    const hasChanges = changes.length > 0 || newDungeons.length > 0;
+
+    // Save to history (always, even if no changes — so you can see "checked, no changes")
+    const history = loadDcHistory();
+    history.unshift({ date: checkDate, changes, newDungeons });
+    saveDcHistory(history);
+
+    // Offer cache update if changes found
+    if (hasChanges) {
+      statusEl.textContent = `Done — ${changes.length} dungeon(s) changed, ${newDungeons.length} new. Update cache with live data?`;
+      // Show update prompt
+      const promptDiv = document.createElement('div');
+      promptDiv.style.cssText = 'background:rgba(0,229,255,.07);border:1px solid var(--cyan);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px';
+      promptDiv.innerHTML = `<span style="color:var(--cyan)">⚡ ${changes.length} change(s) detected. Update local dungeon cache with live data?</span>
+        <button class="btn" id="dc-update-cache-btn">✓ Update Cache</button>
+        <button class="btn muted" id="dc-skip-cache-btn">Skip</button>`;
+      resultsEl.appendChild(promptDiv);
+      $('dc-update-cache-btn').addEventListener('click', () => {
+        // Update dungeon cache with live data
+        for (const live of liveDetails) {
+          cacheSet('dungeon_' + live.id, live);
+          if (live.image) dungeonImageMap[live.name] = live.image;
+        }
+        // Rebuild cachedDetails
+        cachedDetails.length = 0;
+        cachedDetails.push(...liveDetails);
+        allResults = buildResults(cachedDetails);
+        buildItemIndex(allResults);
+        applyFilters();
+        promptDiv.innerHTML = '<span style="color:var(--green)">✓ Cache updated with live dungeon data.</span>';
+        statusEl.textContent = `Cache updated — ${changes.length} change(s) applied.`;
+      });
+      $('dc-skip-cache-btn').addEventListener('click', () => promptDiv.remove());
+    } else {
+      statusEl.textContent = `Done — no changes detected. ${dungeons.length} dungeons checked.`;
+    }
+
     renderDungeonChanges(changes, newDungeons);
+    renderDcHistory(); // refresh history panel below
     $('dc-check-btn').disabled = false;
   }
 
@@ -4091,8 +4160,68 @@ if ('serviceWorker' in navigator) {
     return diffs;
   }
 
+  function renderDcHistory() {
+    const con = $('dc-results');
+    // Don't wipe if active check results are showing — only render history section
+    let histSec = document.getElementById('dc-history-section');
+    if (!histSec) { histSec = document.createElement('div'); histSec.id='dc-history-section'; con.appendChild(histSec); }
+    const history = loadDcHistory();
+    if (!history.length) { histSec.innerHTML = '<div style="color:var(--dim3);font-size:11px;margin-top:12px">No checks run yet.</div>'; return; }
+    histSec.innerHTML = `<div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--dim2);letter-spacing:.12em;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)">// CHANGE HISTORY (${history.length} checks)</div>`;
+    for (const entry of history) {
+      const hasAny = entry.changes?.length || entry.newDungeons?.length;
+      const dateStr = new Date(entry.date).toLocaleString('en-GB', { timeZone:'Asia/Jerusalem', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'background:var(--bg2);border:1px solid var(--border2);margin-bottom:6px;cursor:pointer';
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid transparent';
+      header.innerHTML = `
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim3)">${dateStr}</span>
+        <span style="font-size:11px;${hasAny?'color:var(--amber)':'color:var(--green)'}">${hasAny?`⚠ ${entry.changes?.length||0} changed, ${entry.newDungeons?.length||0} new`:'✓ No changes'}</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--dim3)">▶</span>`;
+      const body = document.createElement('div');
+      body.style.cssText = 'display:none;padding:10px 12px';
+      if (hasAny) {
+        if (entry.newDungeons?.length) body.insertAdjacentHTML('beforeend', `<div style="color:var(--green);font-size:11px;margin-bottom:6px">New: ${entry.newDungeons.map(d=>d.name).join(', ')}</div>`);
+        for (const ch of (entry.changes||[])) {
+          const TYPE_LABELS = { hp_change:'🔴 HP', attack_change:'⚠ ATK', defense_change:'DEF', drop_rate:'📊 Rate', drop_qty:'📦 Drop qty', new_drop:'✨ New drop', new_reward:'✨ New reward', removed_reward:'🚫 Reward removed', reward_qty:'📦 Reward qty', new_difficulty:'✨ New diff' };
+          const TYPE_COLORS = { hp_change:'var(--red)', attack_change:'var(--amber)', drop_rate:'var(--cyan)', new_drop:'var(--green)', new_reward:'var(--green)', removed_reward:'var(--red)', reward_qty:'var(--amber)' };
+          let html = `<div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:4px">${ch.name}</div>`;
+          for (const d of ch.diffs) {
+            const color = TYPE_COLORS[d.type]||'var(--blue)';
+            const label = TYPE_LABELS[d.type]||d.type;
+            let detail = d.old!=null&&d.new!=null ? ` ${d.old} → <span style="color:${color}">${d.new}</span>` : d.qty!=null?` ×${d.qty}`:d.rate!=null?` ${d.rate}`:'';
+            html += `<div style="font-size:10px;color:var(--dim);padding:2px 0 2px 10px">${label} [${d.difficulty||'?'}] <span style="color:var(--text)">${d.item||d.monster||''}</span>${detail}</div>`;
+          }
+          body.insertAdjacentHTML('beforeend', html);
+        }
+      } else { body.innerHTML = '<div style="font-size:11px;color:var(--dim3)">No changes found in this check.</div>'; }
+      header.addEventListener('click', () => {
+        const open = body.style.display !== 'none';
+        body.style.display = open?'none':'block';
+        header.style.borderBottomColor = open?'transparent':'var(--border2)';
+        header.querySelector('span:last-child').textContent = open?'▶':'▼';
+      });
+      wrap.appendChild(header); wrap.appendChild(body); histSec.appendChild(wrap);
+    }
+    // Clear history button
+    const clearBtn = document.createElement('button');
+    clearBtn.className='btn red'; clearBtn.style.cssText='font-size:8px;padding:3px 8px;margin-top:6px';
+    clearBtn.textContent='✕ Clear History';
+    clearBtn.addEventListener('click', () => { if (!confirm('Clear all change history?')) return; localStorage.removeItem(DC_HISTORY_KEY); renderDcHistory(); });
+    histSec.appendChild(clearBtn);
+  }
+
   function renderDungeonChanges(changes, newDungeons) {
-    const con = $('dc-results'); con.innerHTML = '';
+    // Don't clear — we prepend to results above the history section
+    let freshSec = document.getElementById('dc-fresh-section');
+    if (!freshSec) {
+      const con = $('dc-results');
+      freshSec = document.createElement('div'); freshSec.id='dc-fresh-section';
+      con.insertBefore(freshSec, con.firstChild);
+    }
+    freshSec.innerHTML = '';
+    const con = freshSec;
     if (newDungeons.length) {
       const sec = document.createElement('div');
       sec.style.cssText = 'background:rgba(61,214,140,.07);border:1px solid var(--green);border-left:3px solid var(--green);padding:12px 14px;margin-bottom:12px';
@@ -4100,31 +4229,28 @@ if ('serviceWorker' in navigator) {
         newDungeons.map(d => `<div style="font-size:12px;color:var(--text);margin-bottom:4px">+ ${d.name}</div>`).join('');
       con.appendChild(sec);
     }
-    if (!changes.length) {
-      con.insertAdjacentHTML('beforeend', '<div style="color:var(--green);font-size:13px;padding:20px 0">✓ No changes detected in cached dungeons.</div>');
-      return;
-    }
+    if (!changes.length && !newDungeons.length) return; // history section handles "no changes" display
     const TYPE_LABELS = { hp_change:'🔴 HP changed', attack_change:'⚠ ATK changed', defense_change:'DEF changed', drop_rate:'📊 Drop rate changed', drop_qty:'📦 Drop qty changed', new_drop:'✨ New drop', new_reward:'✨ New reward', removed_reward:'🚫 Reward removed', reward_qty:'📦 Reward qty changed', new_difficulty:'✨ New difficulty' };
     const TYPE_COLORS = { hp_change:'var(--red)', attack_change:'var(--amber)', drop_rate:'var(--cyan)', new_drop:'var(--green)', new_reward:'var(--green)', removed_reward:'var(--red)', reward_qty:'var(--amber)', new_difficulty:'var(--green)' };
+    if (newDungeons.length) {
+      const sec = document.createElement('div');
+      sec.style.cssText='background:rgba(61,214,140,.07);border:1px solid var(--green);border-left:3px solid var(--green);padding:12px 14px;margin-bottom:12px';
+      sec.innerHTML=`<div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--green);letter-spacing:.12em;margin-bottom:8px">// NEW DUNGEONS (${newDungeons.length})</div>`+newDungeons.map(d=>`<div style="font-size:12px;color:var(--text);margin-bottom:4px">+ ${d.name}</div>`).join('');
+      con.appendChild(sec);
+    }
     for (const ch of changes) {
       const card = document.createElement('div');
-      card.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--amber);padding:12px 14px;margin-bottom:10px';
-      let html = `<div style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--amber);margin-bottom:8px">${ch.name} <span style="font-size:8px;color:var(--dim3)">(${ch.diffs.length} change${ch.diffs.length>1?'s':''})</span></div>`;
+      card.style.cssText='background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--amber);padding:12px 14px;margin-bottom:10px';
+      let html=`<div style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--amber);margin-bottom:8px">${ch.name} <span style="font-size:8px;color:var(--dim3)">(${ch.diffs.length} change${ch.diffs.length>1?'s':''})</span></div>`;
       for (const d of ch.diffs) {
-        const color = TYPE_COLORS[d.type] || 'var(--blue)';
-        const label = TYPE_LABELS[d.type] || d.type;
-        let detail = '';
-        if (d.old != null && d.new != null) detail = ` <span style="color:var(--dim3)">${d.old}</span> → <span style="color:${color}">${d.new}</span>`;
-        else if (d.qty != null) detail = ` ×${d.qty}`;
-        else if (d.rate != null) detail = ` ${d.rate}`;
-        html += `<div style="font-size:11px;margin-bottom:3px;display:flex;gap:8px;align-items:center">
-          <span style="color:${color};font-size:9px;font-family:'Orbitron',sans-serif;white-space:nowrap">${label}</span>
-          <span style="color:var(--dim3)">[${d.difficulty||'?'}]</span>
-          <span style="color:var(--text)">${d.item||d.monster||''}</span>
-          ${detail}
-        </div>`;
+        const color=TYPE_COLORS[d.type]||'var(--blue)', label=TYPE_LABELS[d.type]||d.type;
+        let detail='';
+        if (d.old!=null&&d.new!=null) detail=` <span style="color:var(--dim3)">${d.old}</span> → <span style="color:${color}">${d.new}</span>`;
+        else if (d.qty!=null) detail=` ×${d.qty}`;
+        else if (d.rate!=null) detail=` ${d.rate}`;
+        html+=`<div style="font-size:11px;margin-bottom:3px;display:flex;gap:8px;align-items:center"><span style="color:${color};font-size:9px;font-family:'Orbitron',sans-serif;white-space:nowrap">${label}</span><span style="color:var(--dim3)">[${d.difficulty||'?'}]</span><span style="color:var(--text)">${d.item||d.monster||''}</span>${detail}</div>`;
       }
-      card.innerHTML = html; con.appendChild(card);
+      card.innerHTML=html; con.appendChild(card);
     }
   }
 
