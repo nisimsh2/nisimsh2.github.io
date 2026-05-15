@@ -1579,6 +1579,8 @@ if ('serviceWorker' in navigator) {
         }
       }
       log(`${details.length} dungeons loaded.`, 'ok'); cachedDetails = details;
+      // Cache monster stats in background (needed for dungeon change detection)
+      cacheMonsterStats(cachedDetails).then(r => log(`Monster cache: ${r.fetched} fetched, ${r.skipped} cached.`, 'ok')).catch(()=>{});
 
       if (cfg.cookie && !resolvedTamerName) {
         try {
@@ -1658,7 +1660,7 @@ if ('serviceWorker' in navigator) {
         allResults = buildResults(cachedDetails); buildItemIndex(allResults); renderCards(allResults); applyFilters();
         log('All prices done ✓ — fetching speed times for missing dungeons…', 'ok');
         setTimeout(() => fetchSpeedTimes(false), 600);
-        setTimeout(() => cacheMonsterStats(cachedDetails), 3000);
+        // (monster caching now runs right after dungeon load)
       }
       setTimeout(() => { progressEl.style.display = 'none'; }, 1000);
     } catch(err) {
@@ -3978,7 +3980,7 @@ if ('serviceWorker' in navigator) {
           if (!obj.monster_id) continue;
           const monKey = `monster_${obj.monster_id}_${diff.difficulty}`;
           if (cacheGet(monKey, TTL_FOREVER)) { skipped++; continue; }
-          await sleep(400); await rateGate();
+          await sleep(400);
           try {
             const mon = await apiFetch(`/api/wiki/monsters?id=${obj.monster_id}`);
             if (mon?.id) { cacheSet(monKey, mon); fetched++; }
@@ -3986,7 +3988,7 @@ if ('serviceWorker' in navigator) {
         }
       }
     }
-    console.log(`[MonsterCache] fetched ${fetched}, skipped ${skipped} (already cached)`);
+    return { fetched, skipped };
   }
 
   /* ══ DUNGEON CHANGES ══ */
