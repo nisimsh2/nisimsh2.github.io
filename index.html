@@ -6,7 +6,7 @@
 <title>⚔ Farm Optimizer · Digital Odyssey</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -16,7 +16,7 @@
     --text:#d4eaf5; --dim:#4a7a99; --dim2:#3a6080; --dim3:#2a5068;
     --dim4:#1e3a50; --blue:#7aafc8; --blue2:#8ac0d8;
   }
-  html,body { height:100%; background:var(--bg0); color:var(--text); font-family:'Inter',sans-serif; overflow:hidden; }
+  html,body { height:100%; background:var(--bg0); color:var(--text); font-family:'Heebo',sans-serif; overflow:hidden; }
   body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
     background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px); }
   #app { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
@@ -46,7 +46,7 @@
     flex-wrap:wrap; align-items:center; background:var(--bg3); flex-shrink:0; }
   .sep { width:1px; height:20px; background:var(--border); margin:0 2px; flex-shrink:0; }
   .pill { font-size:11px; padding:4px 11px; border:1px solid var(--border); background:transparent;
-    color:var(--dim2); cursor:pointer; font-family:'Inter',sans-serif; transition:all .12s; white-space:nowrap; }
+    color:var(--dim2); cursor:pointer; font-family:'Heebo',sans-serif; transition:all .12s; white-space:nowrap; }
   .pill.active { border-color:var(--cyan); color:var(--cyan); background:rgba(0,229,255,.07); }
   .srch { flex:1; min-width:130px; background:var(--bg2); border:1px solid var(--border);
     color:var(--text); font-family:'Inter',sans-serif; font-size:12px; padding:5px 11px; outline:none; }
@@ -600,6 +600,7 @@
     <button class="main-tab" data-view="sealbox" style="color:var(--amber)">📦 SEAL BOX</button>
     <button class="main-tab" data-view="worldboss" style="color:var(--green)">⚔ WORLD BOSS</button>
     <button class="main-tab" data-view="sealexchange" style="color:var(--purple)">🔁 SEAL EXCHANGE</button>
+    <button class="main-tab" data-view="dungeonchanges" style="color:var(--cyan)">🔍 DUNGEON CHANGES</button>
   </div>
   <div id="sort-tabs">
     <button class="sort-tab active" data-sort="ev">EV / Run</button>
@@ -775,6 +776,18 @@
       </div>
     </div>
 
+    <!-- ══ DUNGEON CHANGES VIEW ══ -->
+    <div id="dungeonchanges-view" style="display:none">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+        <div style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--cyan);letter-spacing:.12em">// DUNGEON CHANGES</div>
+        <div style="font-size:11px;color:var(--dim3);flex:1">Compare cached dungeon data vs live API. Detects HP/reward changes.</div>
+        <button class="btn" id="dc-check-btn">🔍 Check for Changes</button>
+        <button class="btn muted" id="dc-refetch-btn">↺ Re-fetch All Dungeons</button>
+      </div>
+      <div id="dc-status" style="font-size:11px;color:var(--dim3);margin-bottom:10px"></div>
+      <div id="dc-results"></div>
+    </div>
+
     <!-- ══ SEAL BOX VIEW ══ -->
     <div id="sealbox-view">
       <div class="sb-layout">
@@ -928,6 +941,7 @@
         <div class="adm-section-head"><div class="adm-section-title">// DANGER ZONE</div></div>
         <div class="adm-section-body" style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn red" id="adm-clear-usage">✕ Clear All Usage Data</button>
+          <button class="btn amber" id="adm-rebuild-seen">↻ Rebuild seen_tamers</button>
         </div>
       </div>
       <div class="adm-section" id="adm-sealdb-section" style="display:none;border-left-color:var(--amber)">
@@ -1317,7 +1331,8 @@ if ('serviceWorker' in navigator) {
     adminView.style.display     = view === 'admin'      ? 'block' : 'none';
     sealboxView.style.display   = view === 'sealbox'    ? 'block' : 'none';
     document.getElementById('worldboss-view').style.display = view === 'worldboss' ? 'block' : 'none';
-    $('seal-exchange-view').style.display          = view === 'sealexchange'  ? 'block' : 'none';
+    $('seal-exchange-view').style.display          = view === 'sealexchange'    ? 'block' : 'none';
+    const dcEl = $('dungeonchanges-view'); if (dcEl) dcEl.style.display = view === 'dungeonchanges' ? 'block' : 'none';
     sortTabs.style.display      = view === 'rankings'   ? 'flex'  : 'none';
     document.querySelectorAll('#toolbar .pill').forEach(p => p.style.display = view === 'rankings' ? '' : 'none');
     searchEl.style.display      = view === 'rankings'   ? '' : 'none';
@@ -1328,6 +1343,7 @@ if ('serviceWorker' in navigator) {
     if (view === 'sealbox') initSealBox();
     if (view === 'worldboss') initWorldBoss();
     if (view === 'sealexchange') initSealExchange();
+    if (view === 'dungeonchanges') initDungeonChanges();
   }
 
   /* ══ HELPERS ══ */
@@ -2860,6 +2876,13 @@ if ('serviceWorker' in navigator) {
     await adminApi('POST', '/fo-admin/allowlist', { name }); $('adm-add-inp').value = ''; await loadAdminData();
   });
   $('adm-add-inp').addEventListener('keydown', e => { if (e.key==='Enter') $('adm-add-btn').click(); });
+  document.addEventListener('click', async e => {
+    if (e.target.id === 'adm-rebuild-seen') {
+      if (!confirm('Scan all usage:* KV keys and rebuild seen_tamers list?')) return;
+      const res = await adminApi('POST', '/fo-admin/rebuild-seen', {});
+      if (res) { showAdminToast('Rebuilt ✓ — reload data'); await loadAdminData(); }
+    }
+  });
   $('adm-clear-usage').addEventListener('click', async () => {
     if (!confirm('Clear ALL usage data? Cannot be undone.')) return;
     await adminApi('DELETE', '/fo-admin/usage'); await loadAdminData();
@@ -2951,9 +2974,18 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ── Admin seal DB (v2) ── */
-  function initAdminSealDb() {
+  async function initAdminSealDb() {
     const section = $('adm-sealdb-section'); if (!section) return;
     section.style.display = 'block';
+    // Load server DB if not already loaded
+    if (!Object.keys(serverSealDb).length) {
+      try {
+        const token = adminToken || localStorage.getItem(ADMIN_NS) || '';
+        const headers = { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer '+token } : {}) };
+        const res = await fetch(WORKER_URL + '/fo-admin/sealdb', { headers });
+        if (res.ok) serverSealDb = await res.json();
+      } catch(e) { console.warn('[Admin] sealdb load', e); }
+    }
     renderAdminSealDbFull();
   }
 
@@ -3542,6 +3574,10 @@ if ('serviceWorker' in navigator) {
       wbInited = true;
       await loadWbBosses();
     }
+    // Request permission immediately when entering world boss tab
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
     renderWbView();
     if (!wbTimerInterval) wbTimerInterval = setInterval(wbTick, 1000);
   }
@@ -3705,7 +3741,10 @@ if ('serviceWorker' in navigator) {
           </div>
           <div class="wb-drops">${dropHtml || '<span style="color:var(--dim3);font-size:11px">No drops configured</span>'}</div>
           ${totalEv > 0 ? `<div class="wb-total-ev">≈ ${fmt(totalEv)} EV${!allPriced?' (partial)':''}</div>` : ''}
-          ${isAdmin ? `<div style="margin-top:8px"><button class="btn red" style="font-size:8px;padding:3px 8px" data-wb-del="${boss.id}">✕ Delete Boss</button></div>` : ''}
+          ${isAdmin ? `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn muted" style="font-size:8px;padding:3px 8px" data-wb-edit="${boss.id}">✏ Edit Boss</button>
+            <button class="btn red" style="font-size:8px;padding:3px 8px" data-wb-del="${boss.id}">✕ Delete Boss</button>
+          </div>` : ''}
         </div>`;
       con.appendChild(card);
     }
@@ -3734,6 +3773,48 @@ if ('serviceWorker' in navigator) {
         renderWbView();
       });
     });
+    // Wire edit — populate form and expand it
+    con.querySelectorAll('[data-wb-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const boss = wbBosses.find(b => b.id === btn.dataset.wbEdit); if (!boss) return;
+        const form = con.querySelector('#wb-form-body');
+        const chevron = con.querySelector('#wb-form-chevron');
+        if (form) { form.style.display = ''; if (chevron) chevron.style.transform = ''; }
+        // Populate fields
+        const set = (id, val) => { const el = con.querySelector('#'+id); if (el && val != null) el.value = val; };
+        set('wb-id', boss.id); set('wb-name', boss.name); set('wb-location', boss.location||'');
+        set('wb-imageurl', boss.imageUrl||'');
+        // Interval → split to h + m
+        if (boss.spawnInterval) {
+          const totalMin = boss.spawnInterval / 60000;
+          const h = Math.floor(totalMin / 60), m = Math.round(totalMin % 60);
+          const hEl = con.querySelector('#wb-interval-h'), mEl = con.querySelector('#wb-interval-m');
+          if (hEl) hEl.value = h; if (mEl) mEl.value = m;
+        }
+        if (boss.nextSpawn) {
+          const d = new Date(boss.nextSpawn);
+          const local = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+          set('wb-nextspawn', local);
+        }
+        // Populate drops
+        wbDropEntries = (boss.drops||[]).map(d => ({...d}));
+        if (!wbDropEntries.length) wbDropEntries = [{ itemId:'', name:'', iconId:'', min:'', max:'' }];
+        const dropCon2 = con.querySelector('#wb-drop-entries');
+        if (dropCon2) con.querySelector('#wb-add-drop-btn')?.click && con.querySelector('#wb-drop-entries') && (() => {
+          // re-render drop entries by triggering the inner renderDropEntries via save btn context
+          // Instead, directly re-render:
+          dropCon2.innerHTML = '';
+          wbDropEntries.forEach((d2, i) => {
+            const row = document.createElement('div'); row.className = 'wb-drop-entry';
+            row.innerHTML = `<input placeholder="Item name" value="${d2.name||''}" data-f="name" data-i="${i}"><input placeholder="Item ID" value="${d2.itemId||''}" data-f="itemId" data-i="${i}"><input placeholder="Icon ID" value="${d2.iconId||''}" data-f="iconId" data-i="${i}"><input type="number" placeholder="Min" value="${d2.min||''}" data-f="min" data-i="${i}"><input type="number" placeholder="Max" value="${d2.max||''}" data-f="max" data-i="${i}"><button class="sb-rm-btn" data-rm="${i}">✕</button>`;
+            row.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener('input', () => { wbDropEntries[parseInt(inp.dataset.i)][inp.dataset.f] = inp.value; }));
+            row.querySelector('[data-rm]').addEventListener('click', () => { wbDropEntries.splice(i,1); row.remove(); });
+            dropCon2.appendChild(row);
+          });
+        })();
+        form?.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+    });
   }
 
   function fmtIntervalHuman(ms) {
@@ -3756,7 +3837,14 @@ if ('serviceWorker' in navigator) {
         <div class="wb-form-field"><label class="wb-form-label">ID (slug, e.g. neptunemon)</label><input class="wb-form-inp" id="wb-id" placeholder="neptunemon"></div>
         <div class="wb-form-field"><label class="wb-form-label">Name</label><input class="wb-form-inp" id="wb-name" placeholder="Neptunemon"></div>
         <div class="wb-form-field"><label class="wb-form-label">Location</label><input class="wb-form-inp" id="wb-location" placeholder="Olympos Festival Island"></div>
-        <div class="wb-form-field"><label class="wb-form-label">Spawn Interval (hours)</label><input class="wb-form-inp" id="wb-interval" type="number" min="0.1" step="0.5" placeholder="24"></div>
+        <div class="wb-form-field"><label class="wb-form-label">Spawn Interval (h + m)</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input class="wb-form-inp" id="wb-interval-h" type="number" min="0" step="1" placeholder="h" style="width:60px">
+            <span style="color:var(--dim3);font-size:11px">h</span>
+            <input class="wb-form-inp" id="wb-interval-m" type="number" min="0" max="59" step="1" placeholder="m" style="width:60px">
+            <span style="color:var(--dim3);font-size:11px">m</span>
+          </div>
+        </div>
         <div class="wb-form-field"><label class="wb-form-label">Next Spawn (ISO or local datetime)</label><input class="wb-form-inp" id="wb-nextspawn" type="datetime-local"></div>
         <div class="wb-form-field">
           <label class="wb-form-label">Image URL or upload</label>
@@ -3830,7 +3918,7 @@ if ('serviceWorker' in navigator) {
     renderDropEntries();
     wrap.querySelector('#wb-add-drop-btn').addEventListener('click', () => { wbDropEntries.push({ itemId:'', name:'', iconId:'', min:'', max:'' }); renderDropEntries(); });
     wrap.querySelector('#wb-form-clear-btn').addEventListener('click', () => {
-      ['wb-id','wb-name','wb-location','wb-interval','wb-nextspawn','wb-imageurl'].forEach(id => { const el=wrap.querySelector('#'+id); if(el) el.value=''; });
+      ['wb-id','wb-name','wb-location','wb-interval-h','wb-interval-m','wb-nextspawn','wb-imageurl'].forEach(id => { const el=wrap.querySelector('#'+id); if(el) el.value=''; });
       wbDropEntries = [{ itemId:'', name:'', iconId:'', min:'', max:'' }]; renderDropEntries();
       wrap.querySelector('#wb-img-preview').style.display='none';
     });
@@ -3838,7 +3926,9 @@ if ('serviceWorker' in navigator) {
       const id       = wrap.querySelector('#wb-id').value.trim().replace(/\s+/g,'-').toLowerCase();
       const name     = wrap.querySelector('#wb-name').value.trim();
       const location = wrap.querySelector('#wb-location').value.trim();
-      const intHrs   = parseFloat(wrap.querySelector('#wb-interval').value)||0;
+      const intH = parseInt(wrap.querySelector('#wb-interval-h')?.value)||0;
+      const intM = parseInt(wrap.querySelector('#wb-interval-m')?.value)||0;
+      const intHrs = intH + intM/60;
       const nextRaw  = wrap.querySelector('#wb-nextspawn').value;
       const imageUrl = wrap.querySelector('#wb-imageurl').value.trim();
       if (!id || !name) { wrap.querySelector('#wb-save-status').innerHTML='<span style="color:var(--red)">ID and Name required.</span>'; return; }
@@ -3876,6 +3966,166 @@ if ('serviceWorker' in navigator) {
       }
     });
     return wrap;
+  }
+
+  /* ══ DUNGEON CHANGES ══ */
+  let dcInited = false;
+  function initDungeonChanges() {
+    if (!dcInited) {
+      dcInited = true;
+      $('dc-check-btn').addEventListener('click', checkDungeonChanges);
+      $('dc-refetch-btn').addEventListener('click', async () => {
+        if (!confirm('Re-fetch ALL dungeons from API and update cache? This may take a few minutes.')) return;
+        cacheClearDungeons();
+        $('dc-status').textContent = 'Cache cleared — re-running analysis…';
+        $('dc-results').innerHTML = '';
+        await runAnalysis('fresh');
+        $('dc-status').textContent = 'Re-fetch complete. Click Check for Changes to compare.';
+      });
+    }
+    if (!cachedDetails.length) {
+      $('dc-status').textContent = 'Run Analysis first to populate cache, then check for changes.';
+    } else {
+      $('dc-status').textContent = `Cache has ${cachedDetails.length} dungeons. Click Check for Changes to fetch live data and diff.`;
+    }
+    $('dc-results').innerHTML = '';
+  }
+
+  async function checkDungeonChanges() {
+    const statusEl = $('dc-status'), resultsEl = $('dc-results');
+    if (!cachedDetails.length) { statusEl.textContent = 'No cached dungeon data — Run Analysis first.'; return; }
+    $('dc-check-btn').disabled = true;
+    resultsEl.innerHTML = '';
+    // Load dungeon list
+    statusEl.textContent = 'Fetching live dungeon list…';
+    let dungeons;
+    try { const d = await apiFetch('/api/wiki/dungeons?page=1&per_page=500'); dungeons = d.data || []; }
+    catch(e) { statusEl.textContent = 'Failed to fetch dungeon list: ' + e.message; $('dc-check-btn').disabled=false; return; }
+
+    const changes = [];
+    const newDungeons = [];
+    const cacheMap = {};
+    for (const d of cachedDetails) cacheMap[d.id] = d;
+
+    statusEl.textContent = `Checking ${dungeons.length} dungeons…`;
+    let checked = 0;
+    for (const dung of dungeons) {
+      checked++;
+      if (checked % 5 === 0) statusEl.textContent = `Checking ${checked}/${dungeons.length}…`;
+      if (!cacheMap[dung.id]) { newDungeons.push(dung); continue; }
+      // Fetch live detail
+      await sleep(400);
+      let live;
+      try { live = await apiFetch(`/api/wiki/dungeons?id=${dung.id}`); }
+      catch(e) { continue; }
+      const cached = cacheMap[dung.id];
+      const diffs = diffDungeon(cached, live);
+      if (diffs.length) changes.push({ id: dung.id, name: dung.name, diffs });
+      // Also check monster stats (HP) for each difficulty's boss
+      for (const diff of (live.difficulties||[])) {
+        for (const obj of (diff.objectives||[])) {
+          if (!obj.monster_id) continue;
+          const monKey = 'monster_' + obj.monster_id + '_' + diff.difficulty;
+          const cachedMon = cacheGet(monKey, TTL_FOREVER);
+          await sleep(300);
+          let liveMon;
+          try { liveMon = await apiFetch(`/api/wiki/monsters?id=${obj.monster_id}`); }
+          catch(e) { continue; }
+          if (cachedMon) {
+            const monDiffs = diffMonster(cachedMon, liveMon, diff.difficulty, obj.monster_name);
+            if (monDiffs.length) {
+              const existing = changes.find(c => c.id === dung.id);
+              if (existing) existing.diffs.push(...monDiffs);
+              else changes.push({ id: dung.id, name: dung.name, diffs: monDiffs });
+            }
+          }
+          // Cache monster for future comparisons
+          cacheSet(monKey, liveMon);
+        }
+      }
+    }
+    statusEl.textContent = `Done — ${changes.length} changed, ${newDungeons.length} new dungeons found.`;
+    renderDungeonChanges(changes, newDungeons);
+    $('dc-check-btn').disabled = false;
+  }
+
+  function diffDungeon(old, live) {
+    const diffs = [];
+    // Check reward changes per difficulty
+    for (const liveDiff of (live.difficulties||[])) {
+      const oldDiff = (old.difficulties||[]).find(d => d.difficulty === liveDiff.difficulty);
+      if (!oldDiff) { diffs.push({ type:'new_difficulty', difficulty:liveDiff.difficulty }); continue; }
+      // Compare rewards
+      for (const liveR of (liveDiff.rewards||[])) {
+        const oldR = (oldDiff.rewards||[]).find(r => r.item_id===liveR.item_id && r.rank===liveR.rank);
+        if (!oldR) { diffs.push({ type:'new_reward', difficulty:liveDiff.difficulty, item:liveR.item_name, rank:liveR.rank, qty:liveR.item_count }); continue; }
+        if (oldR.item_count !== liveR.item_count) diffs.push({ type:'reward_qty', difficulty:liveDiff.difficulty, item:liveR.item_name, rank:liveR.rank, old:oldR.item_count, new:liveR.item_count });
+      }
+      // Check removed rewards
+      for (const oldR of (oldDiff.rewards||[])) {
+        const stillExists = (liveDiff.rewards||[]).find(r => r.item_id===oldR.item_id && r.rank===oldR.rank);
+        if (!stillExists) diffs.push({ type:'removed_reward', difficulty:liveDiff.difficulty, item:oldR.item_name, rank:oldR.rank });
+      }
+      // Compare raid drop rates
+      for (const obj of (liveDiff.objectives||[])) {
+        const oldObj = (oldDiff.objectives||[]).find(o => o.monster_id===obj.monster_id);
+        for (const rk of (obj.raid_rankings||[])) {
+          const oldRk = (oldObj?.raid_rankings||[]).find(r => r.start===rk.start);
+          for (const liveReward of (rk.rewards||[])) {
+            const oldReward = (oldRk?.rewards||[]).find(r => r.item_id===liveReward.item_id);
+            if (!oldReward) { diffs.push({ type:'new_drop', difficulty:liveDiff.difficulty, item:liveReward.item_name, rate:(liveReward.rate_permil/100).toFixed(1)+'%' }); continue; }
+            if (oldReward.rate_permil !== liveReward.rate_permil) diffs.push({ type:'drop_rate', difficulty:liveDiff.difficulty, item:liveReward.item_name, old:(oldReward.rate_permil/100).toFixed(1)+'%', new:(liveReward.rate_permil/100).toFixed(1)+'%' });
+            if (oldReward.min !== liveReward.min || oldReward.max !== liveReward.max) diffs.push({ type:'drop_qty', difficulty:liveDiff.difficulty, item:liveReward.item_name, old:oldReward.min+'-'+oldReward.max, new:liveReward.min+'-'+liveReward.max });
+          }
+        }
+      }
+    }
+    return diffs;
+  }
+
+  function diffMonster(old, live, diffName, monName) {
+    const diffs = [];
+    if (old.hp !== live.hp) diffs.push({ type:'hp_change', difficulty:diffName, monster:monName||live.name, old:old.hp?.toLocaleString(), new:live.hp?.toLocaleString() });
+    if (old.attack !== live.attack) diffs.push({ type:'attack_change', difficulty:diffName, monster:monName||live.name, old:old.attack, new:live.attack });
+    if (old.defense !== live.defense) diffs.push({ type:'defense_change', difficulty:diffName, monster:monName||live.name, old:old.defense, new:live.defense });
+    return diffs;
+  }
+
+  function renderDungeonChanges(changes, newDungeons) {
+    const con = $('dc-results'); con.innerHTML = '';
+    if (newDungeons.length) {
+      const sec = document.createElement('div');
+      sec.style.cssText = 'background:rgba(61,214,140,.07);border:1px solid var(--green);border-left:3px solid var(--green);padding:12px 14px;margin-bottom:12px';
+      sec.innerHTML = `<div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--green);letter-spacing:.12em;margin-bottom:8px">// NEW DUNGEONS (${newDungeons.length})</div>` +
+        newDungeons.map(d => `<div style="font-size:12px;color:var(--text);margin-bottom:4px">+ ${d.name}</div>`).join('');
+      con.appendChild(sec);
+    }
+    if (!changes.length) {
+      con.insertAdjacentHTML('beforeend', '<div style="color:var(--green);font-size:13px;padding:20px 0">✓ No changes detected in cached dungeons.</div>');
+      return;
+    }
+    const TYPE_LABELS = { hp_change:'🔴 HP changed', attack_change:'⚠ ATK changed', defense_change:'DEF changed', drop_rate:'📊 Drop rate changed', drop_qty:'📦 Drop qty changed', new_drop:'✨ New drop', new_reward:'✨ New reward', removed_reward:'🚫 Reward removed', reward_qty:'📦 Reward qty changed', new_difficulty:'✨ New difficulty' };
+    const TYPE_COLORS = { hp_change:'var(--red)', attack_change:'var(--amber)', drop_rate:'var(--cyan)', new_drop:'var(--green)', new_reward:'var(--green)', removed_reward:'var(--red)', reward_qty:'var(--amber)', new_difficulty:'var(--green)' };
+    for (const ch of changes) {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--amber);padding:12px 14px;margin-bottom:10px';
+      let html = `<div style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--amber);margin-bottom:8px">${ch.name} <span style="font-size:8px;color:var(--dim3)">(${ch.diffs.length} change${ch.diffs.length>1?'s':''})</span></div>`;
+      for (const d of ch.diffs) {
+        const color = TYPE_COLORS[d.type] || 'var(--blue)';
+        const label = TYPE_LABELS[d.type] || d.type;
+        let detail = '';
+        if (d.old != null && d.new != null) detail = ` <span style="color:var(--dim3)">${d.old}</span> → <span style="color:${color}">${d.new}</span>`;
+        else if (d.qty != null) detail = ` ×${d.qty}`;
+        else if (d.rate != null) detail = ` ${d.rate}`;
+        html += `<div style="font-size:11px;margin-bottom:3px;display:flex;gap:8px;align-items:center">
+          <span style="color:${color};font-size:9px;font-family:'Orbitron',sans-serif;white-space:nowrap">${label}</span>
+          <span style="color:var(--dim3)">[${d.difficulty||'?'}]</span>
+          <span style="color:var(--text)">${d.item||d.monster||''}</span>
+          ${detail}
+        </div>`;
+      }
+      card.innerHTML = html; con.appendChild(card);
+    }
   }
 
   /* ── Auto-run on warm cache ── */
