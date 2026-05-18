@@ -1537,6 +1537,10 @@ if ('serviceWorker' in navigator) {
             }
           } else {
             log(`Cookie OK — logged in as ${chkData.tamer} ✓`, 'ok');
+            if (chkData.rankingsReset) {
+              showNotice(`⚠️ Weekly rankings reset — no dungeon records yet this week. Identified via cached identity (<strong>${chkData.tamer}</strong>). Continuing normally.`);
+              setTimeout(hideNotice, 7000);
+            }
           }
         } catch(chkErr) {
           log('Pre-check failed (network?) — proceeding anyway.', 'warn');
